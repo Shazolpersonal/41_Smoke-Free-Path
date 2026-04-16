@@ -19,6 +19,7 @@ import Card from '@/components/Card';
 import SkeletonScreen from '@/components/SkeletonScreen';
 import Typography from '@/components/Typography';
 import { getStepContent } from '@/services/ContentService';
+import { loadAppState } from '@/services/StorageService';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -28,10 +29,17 @@ export default function HomeScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 500);
-  }, []);
+    try {
+      const appState = await loadAppState();
+      if (appState) {
+        dispatch({ type: 'HYDRATE', payload: appState });
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [dispatch]);
 
   const stats = useProgressStats();
 

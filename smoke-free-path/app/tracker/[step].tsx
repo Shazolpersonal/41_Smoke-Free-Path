@@ -28,8 +28,15 @@ export default function StepPlanScreen() {
 
   useEffect(() => {
     if (planState.isActive && !isStepAccessible(stepNum, planState)) {
-       Alert.alert('ধাপটি লক করা আছে', 'এই ধাপটি এখনও আপনার জন্য আনলক হয়নি।');
-       router.replace('/(tabs)/tracker');
+       Alert.alert(
+         'ধাপটি লক করা আছে',
+         'এই ধাপটি এখনও আপনার জন্য আনলক হয়নি।',
+         [{
+           text: 'ঠিক আছে',
+           onPress: () => router.replace('/(tabs)/tracker')
+         }],
+         { cancelable: false }
+       );
     }
   }, [stepNum, planState, router]);
 

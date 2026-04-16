@@ -33,11 +33,12 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 import type { TriggerType } from '@/types';
+import { loadAppState } from '@/services/StorageService';
 
 export default function ProgressScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { planState, stepProgress, triggerLogs } = state;
 
   const completedCount = planState.completedSteps.length;
@@ -81,10 +82,17 @@ export default function ProgressScreen() {
     setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 500);
-  }, []);
+    try {
+      const appState = await loadAppState();
+      if (appState) {
+        dispatch({ type: 'HYDRATE', payload: appState });
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [dispatch]);
 
   const phaseMessage = useMemo(
     () => getPhaseMessage(planState.currentStep || 1),
