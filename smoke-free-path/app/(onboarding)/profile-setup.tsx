@@ -37,7 +37,7 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
   return (
     <View
       style={[styles.progressContainer, { marginBottom: theme.spacing.md }]}
-      accessibilityLabel={`ধাপ ${currentStep} এর মধ্যে ${totalSteps}`}
+      accessibilityLabel={`ধাপ ${currentStep - 1} এর মধ্যে ${totalSteps - 1}`}
     >
       {Array.from({ length: totalSteps }, (_, i) => (
         <View
