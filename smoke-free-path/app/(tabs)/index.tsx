@@ -49,7 +49,7 @@ export default function HomeScreen() {
   }
 
   function handleActivatePlan() {
-    router.push('/(onboarding)/quit-date');
+    router.push('/(onboarding)/profile-setup');
   }
 
   if (!hydrated) {

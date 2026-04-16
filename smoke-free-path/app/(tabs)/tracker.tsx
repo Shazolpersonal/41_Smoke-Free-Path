@@ -31,7 +31,7 @@ export default function TrackerScreen() {
     if (userProfile && planState.activatedAt) {
       dispatch({ type: 'ACTIVATE_PLAN_WITH_DATE', payload: planState.activatedAt });
     } else {
-      router.push('/(onboarding)/quit-date');
+      router.push('/(onboarding)/profile-setup');
     }
   }
 
