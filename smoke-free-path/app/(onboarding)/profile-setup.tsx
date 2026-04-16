@@ -68,11 +68,11 @@ export default function ProfileSetupScreen() {
       newErrors.name = 'নাম প্রয়োজন';
     }
 
-    const cigs = parseInt(form.cigarettesPerDay, 10);
+        const cigs = parseInt(form.cigarettesPerDay, 10);
     if (!form.cigarettesPerDay.trim()) {
       newErrors.cigarettesPerDay = 'দৈনিক সিগারেট সংখ্যা প্রয়োজন';
-    } else if (isNaN(cigs) || cigs <= 0) {
-      newErrors.cigarettesPerDay = 'সংখ্যাটি ধনাত্মক হতে হবে';
+    } else if (isNaN(cigs) || cigs < 1) {
+      newErrors.cigarettesPerDay = 'দৈনিক সিগারেট সংখ্যা কমপক্ষে ১ হতে হবে';
     } else if (cigs > MAX_CIGARETTES_PER_DAY) {
       newErrors.cigarettesPerDay = `দৈনিক সিগারেট সংখ্যা ${MAX_CIGARETTES_PER_DAY}-এর বেশি হতে পারে না`;
     }

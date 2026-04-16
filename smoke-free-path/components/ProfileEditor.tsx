@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
 import { FormInput } from './FormElements';
 import type { UserProfile, PlanState } from '@/types';
+import { MAX_CIGARETTES_PER_DAY } from '@/constants/calculations';
 
 function formatDate(isoString: string | null): string {
   if (!isoString) return '—';
@@ -40,9 +41,9 @@ export default function ProfileEditor({ profile, planState, onSave }: ProfileEdi
       Alert.alert('ত্রুটি', 'নাম খালি রাখা যাবে না।');
       return;
     }
-    const cigs = parseInt(editCigsPerDay, 10);
-    if (isNaN(cigs) || cigs <= 0) {
-      Alert.alert('ত্রুটি', 'দৈনিক সিগারেট সংখ্যা সঠিকভাবে দিন।');
+        const cigs = parseInt(editCigsPerDay, 10);
+    if (isNaN(cigs) || cigs < 1 || cigs > MAX_CIGARETTES_PER_DAY) {
+      Alert.alert('ত্রুটি', `দৈনিক সিগারেট সংখ্যা ১ থেকে ${MAX_CIGARETTES_PER_DAY} এর মধ্যে হতে হবে।`);
       return;
     }
     const years = parseInt(editSmokingYears, 10);

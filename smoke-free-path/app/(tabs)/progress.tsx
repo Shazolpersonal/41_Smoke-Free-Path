@@ -166,7 +166,7 @@ export default function ProgressScreen() {
           </Animated.View>
         )}
 
-        {planState.isActive && stats.smokeFreeDays === 0 && planState.activatedAt && new Date(planState.activatedAt).getTime() > Date.now() && (
+        {planState.isActive && planState.activatedAt && new Date(planState.activatedAt).getTime() > Date.now() && (
           <View style={[styles.futureDateCard, { backgroundColor: theme.colors.accentLight, borderLeftColor: theme.colors.accent }]}>
             <Typography variant="subheading" style={[styles.futureDateText, { color: theme.colors.accent }]}>
               {'আপনার যাত্রা '}
@@ -176,7 +176,7 @@ export default function ProgressScreen() {
           </View>
         )}
 
-        {planState.isActive && stats.smokeFreeDays > 0 && (
+        {planState.isActive && (!planState.activatedAt || new Date(planState.activatedAt).getTime() <= Date.now()) && (
           <Animated.View entering={FadeInDown.delay(200).duration(600).springify()} style={styles.statsRow}>
             <View
               style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
@@ -256,6 +256,51 @@ export default function ProgressScreen() {
               <Typography variant="body" color="textSecondary">{collapsed.milestones ? '▶' : '▼'}</Typography>
             </TouchableOpacity>
             {!collapsed.milestones && <MilestoneList milestones={achievedMilestonesRecord} />}
+          </Animated.View>
+        )}
+
+        {/* Craving Insights */}
+        {state.cravingSessions.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(550).duration(600).springify()}>
+            <Card style={[styles.chartCard, { marginBottom: theme.spacing.md }]}>
+              <Typography variant="subheading" style={{ fontWeight: '700', marginBottom: theme.spacing.md }}>সাম্প্রতিক আকাঙ্ক্ষা (Craving Insights)</Typography>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <Typography variant="body" color="textSecondary">সর্বশেষ</Typography>
+                  <Typography variant="heading" color="primary">
+                    {(() => {
+                      const sessions = state.cravingSessions.filter(s => s.endTime);
+                      if (sessions.length === 0) return '—';
+                      const last = sessions[sessions.length - 1];
+                      const diff = new Date(last.endTime!).getTime() - new Date(last.startTime).getTime();
+                      const mins = Math.floor(diff / 60000);
+                      const secs = Math.floor((diff % 60000) / 1000);
+                      return `${mins}:${secs.toString().padStart(2, '0')}`;
+                    })()}
+                  </Typography>
+                  <Typography variant="small" color="textSecondary">মিনিট</Typography>
+                </View>
+
+                <View style={{ width: 1, backgroundColor: theme.colors.border, marginHorizontal: theme.spacing.md }} />
+
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <Typography variant="body" color="textSecondary">গড় সময়কাল</Typography>
+                  <Typography variant="heading" color="primary">
+                    {(() => {
+                      const sessions = state.cravingSessions.filter(s => s.endTime);
+                      if (sessions.length === 0) return '—';
+                      const totalMs = sessions.reduce((sum, s) => sum + (new Date(s.endTime!).getTime() - new Date(s.startTime).getTime()), 0);
+                      const avgMs = totalMs / sessions.length;
+                      const mins = Math.floor(avgMs / 60000);
+                      const secs = Math.floor((avgMs % 60000) / 1000);
+                      return `${mins}:${secs.toString().padStart(2, '0')}`;
+                    })()}
+                  </Typography>
+                  <Typography variant="small" color="textSecondary">মিনিট</Typography>
+                </View>
+              </View>
+            </Card>
           </Animated.View>
         )}
 

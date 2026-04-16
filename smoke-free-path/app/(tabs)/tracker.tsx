@@ -51,7 +51,7 @@ export default function TrackerScreen() {
     }
   }
 
-  if (!planState.isActive) {
+  if (!planState.isActive || (planState.activatedAt && new Date(planState.activatedAt).getTime() > Date.now())) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
         <ScreenHeader title="৪১-ধাপের ট্র্যাকার" />
