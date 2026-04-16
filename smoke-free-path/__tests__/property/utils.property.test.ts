@@ -140,10 +140,23 @@ test('Property 6: isStepAccessible Step Unlock Logic', () => {
         } else if (step > 1 && !planState.completedSteps.includes(step - 1)) {
           expect(result).toBe(false);
         } else {
-          const d = planState.lastCompletedAt ? new Date(planState.lastCompletedAt) : null;
-          const today = new Date();
-          const isToday = d && d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
-          expect(result).toBe(!isToday);
+          let maxStepByActivation = Infinity;
+          if (planState.activatedAt) {
+            const actDate = new Date(planState.activatedAt);
+            const nowD = new Date();
+            const actDateOnly = Date.UTC(actDate.getFullYear(), actDate.getMonth(), actDate.getDate());
+            const nowDateOnly = Date.UTC(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+            const diffDays = Math.floor((nowDateOnly - actDateOnly) / 86_400_000);
+            maxStepByActivation = diffDays + 1;
+          }
+          if (step > maxStepByActivation) {
+            expect(result).toBe(false);
+          } else {
+            const d = planState.lastCompletedAt ? new Date(planState.lastCompletedAt) : null;
+            const today = new Date();
+            const isToday = d && d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+            expect(result).toBe(!isToday);
+          }
         }
       }
     ),
