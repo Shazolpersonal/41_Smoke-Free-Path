@@ -146,7 +146,7 @@ export default function HomeScreen() {
           )}
 
           {/* Savings row when active and has progress */}
-          {planState.isActive && stats && (stats.smokeFreeDays > 0) && (
+          {planState.isActive && stats && (stats.totalSmokeFreeDays > 0) && (
             <Animated.View entering={FadeInDown.delay(200).duration(500)}>
               <View style={[styles.savingsRow, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: 12, borderWidth: 1 }]}>
                 <View style={[styles.savingsBadge, { flex: 1, alignItems: 'center' }]}>
