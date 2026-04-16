@@ -389,7 +389,7 @@ export function AppProvider({ children }: AppProviderProps) {
       });
   }, []);
 
-  // Persist state with debounce (300ms) to avoid excessive AsyncStorage writes
+  // Persist state with debounce (1500ms) to avoid excessive AsyncStorage writes
   const saveFailureCountRef = useRef(0);
   useEffect(() => {
     if (state === INITIAL_APP_STATE) return;
@@ -411,7 +411,7 @@ export function AppProvider({ children }: AppProviderProps) {
           saveFailureCountRef.current = 0; // reset to avoid repeated alerts
         }
       }
-    }, 300);
+    }, 1500);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };

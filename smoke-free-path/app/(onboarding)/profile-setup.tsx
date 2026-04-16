@@ -143,7 +143,7 @@ export default function ProfileSetupScreen() {
           <StepProgress currentStep={2} totalSteps={3} />
           
           <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
-            <Typography variant="small" color="primary" style={{ fontWeight: '600', marginBottom: theme.spacing.xs }}>ধাপ ১ / ২</Typography>
+            <Typography variant="small" color="primary" style={{ fontWeight: '600', marginBottom: theme.spacing.xs }}>ধাপ ২ / ৩</Typography>
             <Typography variant="display" color="primaryDark" style={{ marginBottom: theme.spacing.xs }}>আপনার পরিচয়</Typography>
             <Typography variant="body" color="textSecondary">আপনার সম্পর্কে কিছু তথ্য দিন</Typography>
           </View>
