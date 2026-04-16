@@ -10,6 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAppContext } from '@/context/AppContext';
+
 import { saveOnboardingStep } from '@/services/StorageService';
 import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
@@ -53,11 +55,13 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
 export default function ProfileSetupScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { state } = useAppContext();
+  const { userProfile } = state;
   const [form, setForm] = useState<FormData>({
-    name: '',
-    cigarettesPerDay: '',
-    smokingYears: '',
-    cigarettePricePerPack: String(DEFAULT_CIGARETTE_PRICE_PER_PACK),
+    name: userProfile?.name ?? '',
+    cigarettesPerDay: userProfile?.cigarettesPerDay?.toString() ?? '',
+    smokingYears: userProfile?.smokingYears?.toString() ?? '',
+    cigarettePricePerPack: userProfile?.cigarettePricePerPack?.toString() ?? String(DEFAULT_CIGARETTE_PRICE_PER_PACK),
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
