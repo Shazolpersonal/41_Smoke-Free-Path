@@ -6,8 +6,11 @@ import type { ProgressStats } from '@/types';
 
 const ZERO_STATS: ProgressStats = {
   smokeFreeDays: 0,
-  savedCigarettes: 0,
-  savedMoney: 0,
+  totalSmokeFreeDays: 0,
+  streakSavedCigarettes: 0,
+  streakSavedMoney: 0,
+  totalSavedCigarettes: 0,
+  totalSavedMoney: 0,
 };
 
 /**
@@ -19,7 +22,7 @@ const ZERO_STATS: ProgressStats = {
  */
 export function useProgressStats(): ProgressStats {
   const { state } = useAppContext();
-  const { userProfile, planState } = state;
+  const { userProfile, planState, slipUps } = state;
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -29,6 +32,6 @@ export function useProgressStats(): ProgressStats {
 
   return useMemo(() => {
     if (!userProfile || !planState.activatedAt) return ZERO_STATS;
-    return computeProgressStats(userProfile, planState);
-  }, [userProfile, planState, tick]);
+    return computeProgressStats(userProfile, planState, slipUps);
+  }, [userProfile, planState, slipUps, tick]);
 }

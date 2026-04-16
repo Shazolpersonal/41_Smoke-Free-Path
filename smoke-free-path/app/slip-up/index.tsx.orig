@@ -7,7 +7,6 @@ import {
   Animated,
   AccessibilityInfo,
   Alert,
-  TextInput,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -29,7 +28,6 @@ export default function SlipUpScreen() {
   const { theme } = useTheme();
 
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType | null>(null);
-  const [cigarettesSmoked, setCigarettesSmoked] = useState<string>('1');
 
   const slideAnim = useRef(new Animated.Value(60)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -54,22 +52,12 @@ export default function SlipUpScreen() {
   const currentTrackerStep = state.planState.currentStep;
 
   const handleDecision = (decision: SlipUpDecision) => {
-    // Convert Bengali digits to English
-    const engDigits = cigarettesSmoked.replace(/[০-৯]/g, (d) => String(d.charCodeAt(0) - 2534));
-    let smokedCount = parseInt(engDigits, 10);
-    if (isNaN(smokedCount) || smokedCount < 1) {
-      smokedCount = 1;
-    }
-    if (smokedCount > 100) {
-      smokedCount = 100;
-    }
     const slipUp = {
       id: `su_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
       reportedAt: new Date().toISOString(),
       triggerId: selectedTrigger,
       decision,
       trackerStep: currentTrackerStep,
-      cigarettesSmoked: smokedCount,
     };
 
     dispatch({ type: 'RECORD_SLIP_UP', payload: slipUp });
@@ -123,20 +111,6 @@ export default function SlipUpScreen() {
         </View>
 
         <Card style={styles.card}>
-          <Typography variant="subheading" color="text" style={{ marginBottom: 4 }}>কতগুলো সিগারেট খেয়েছেন?</Typography>
-          <TextInput
-            style={[styles.input, { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface }]}
-            keyboardType="number-pad"
-            value={cigarettesSmoked}
-            onChangeText={setCigarettesSmoked}
-            placeholder="১"
-            placeholderTextColor={theme.colors.textSecondary}
-            maxLength={3}
-          />
-          <Typography variant="small" color="textSecondary" style={{ marginTop: 8 }}>আপনার মোট সাশ্রয় থেকে এটি বাদ দেওয়া হবে।</Typography>
-        </Card>
-
-        <Card style={styles.card}>
           <Typography variant="subheading" color="text" style={{ marginBottom: 4 }}>কোন ট্রিগার কারণ ছিল? (ঐচ্ছিক)</Typography>
           <Typography variant="body" color="textSecondary" style={{ marginBottom: 12 }}>এটি জানলে ভবিষ্যতে আরও ভালো প্রস্তুতি নিতে পারবেন।</Typography>
           <TriggerSelector selected={selectedTrigger} onSelect={setSelectedTrigger} />
@@ -151,7 +125,7 @@ export default function SlipUpScreen() {
             activeOpacity={0.85}
           >
             <Typography variant="subheading" color="onPrimary" style={{ marginBottom: 4 }}>বর্তমান ধাপ থেকে চালিয়ে যান</Typography>
-            <Typography variant="small" color="onPrimary" style={{ lineHeight: 17, opacity: 0.87 }}>আপনার স্ট্রিক রিসেট হবে, কিন্তু মোট সাশ্রয়ের হিসাব থেকে শুধু এই সিগারেটগুলো বাদ যাবে এবং প্ল্যানের ধাপ অপরিবর্তিত থাকবে</Typography>
+            <Typography variant="small" color="onPrimary" style={{ lineHeight: 17, opacity: 0.87 }}>আপনার ধূমপানমুক্ত দিনের গণনা এবং সাশ্রয়ের হিসাব আবার শূন্য থেকে শুরু হবে, কিন্তু প্ল্যানের ধাপ অপরিবর্তিত থাকবে</Typography>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -207,14 +181,6 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 14,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    marginTop: 8,
-    fontFamily: 'HindSiliguri-Regular',
   },
   decisionBtn: {
     borderRadius: 12,

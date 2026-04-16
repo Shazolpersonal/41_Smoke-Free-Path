@@ -1267,7 +1267,7 @@ describe('Property 6: ErrorBoundary Catches All Errors', () => {
 
 // Feature: smoke-free-path-upgrade, Property 15: useProgressStats Computation Correctness
 // For any UserProfile and PlanState with a valid activatedAt date, the computed stats
-// SHALL satisfy the exact arithmetic formulas for smokeFreeDays, savedCigarettes, and savedMoney.
+// SHALL satisfy the exact arithmetic formulas for smokeFreeDays, totalSavedCigarettes, and totalSavedMoney.
 // Validates: Requirements 23.2
 
 import { computeProgressStats, MILESTONE_STEPS } from '../../utils/trackerUtils';
@@ -1311,7 +1311,7 @@ describe('Property 15: useProgressStats Computation Correctness', () => {
     fc.assert(
       fc.property(userProfileArb15, planStateWithActivatedAtArb15, (profile, planState) => {
         const before = Date.now();
-        const result = computeProgressStats(profile, planState);
+        const result = computeProgressStats(profile, planState, []);
         const after = Date.now();
 
         const activatedMs = new Date(planState.activatedAt!).getTime();
@@ -1329,23 +1329,23 @@ describe('Property 15: useProgressStats Computation Correctness', () => {
     );
   });
 
-  it('savedCigarettes equals smokeFreeDays * cigarettesPerDay', () => {
+  it('totalSavedCigarettes equals smokeFreeDays * cigarettesPerDay', () => {
     fc.assert(
       fc.property(userProfileArb15, planStateWithActivatedAtArb15, (profile, planState) => {
-        const result = computeProgressStats(profile, planState);
-        expect(result.savedCigarettes).toBe(result.smokeFreeDays * profile.cigarettesPerDay);
+        const result = computeProgressStats(profile, planState, []);
+        expect(result.totalSavedCigarettes).toBe(result.smokeFreeDays * profile.cigarettesPerDay);
       }),
       { numRuns: 100 }
     );
   });
 
-  it('savedMoney equals (savedCigarettes / cigarettesPerPack) * cigarettePricePerPack', () => {
+  it('totalSavedMoney equals (totalSavedCigarettes / cigarettesPerPack) * cigarettePricePerPack', () => {
     fc.assert(
       fc.property(userProfileArb15, planStateWithActivatedAtArb15, (profile, planState) => {
-        const result = computeProgressStats(profile, planState);
+        const result = computeProgressStats(profile, planState, []);
         const expected =
-          (result.savedCigarettes / profile.cigarettesPerPack) * profile.cigarettePricePerPack;
-        expect(result.savedMoney).toBeCloseTo(expected, 10);
+          (result.totalSavedCigarettes / profile.cigarettesPerPack) * profile.cigarettePricePerPack;
+        expect(result.totalSavedMoney).toBeCloseTo(expected, 10);
       }),
       { numRuns: 100 }
     );
@@ -1362,10 +1362,10 @@ describe('Property 15: useProgressStats Computation Correctness', () => {
           lastCompletedAt: null,
           totalResets: 0,
         };
-        const result = computeProgressStats(profile, planState);
+        const result = computeProgressStats(profile, planState, []);
         expect(result.smokeFreeDays).toBe(0);
-        expect(result.savedCigarettes).toBe(0);
-        expect(result.savedMoney).toBe(0);
+        expect(result.totalSavedCigarettes).toBe(0);
+        expect(result.totalSavedMoney).toBe(0);
       }),
       { numRuns: 50 }
     );
@@ -1374,10 +1374,10 @@ describe('Property 15: useProgressStats Computation Correctness', () => {
   it('smokeFreeDays is non-negative for any past activatedAt', () => {
     fc.assert(
       fc.property(userProfileArb15, planStateWithActivatedAtArb15, (profile, planState) => {
-        const result = computeProgressStats(profile, planState);
+        const result = computeProgressStats(profile, planState, []);
         expect(result.smokeFreeDays).toBeGreaterThanOrEqual(0);
-        expect(result.savedCigarettes).toBeGreaterThanOrEqual(0);
-        expect(result.savedMoney).toBeGreaterThanOrEqual(0);
+        expect(result.totalSavedCigarettes).toBeGreaterThanOrEqual(0);
+        expect(result.totalSavedMoney).toBeGreaterThanOrEqual(0);
       }),
       { numRuns: 100 }
     );

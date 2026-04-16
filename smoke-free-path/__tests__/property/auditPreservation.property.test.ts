@@ -73,7 +73,7 @@ describe('2.1 Money Calculation Preservation Tests', () => {
           const originalPrice = profile.cigarettePricePerPack;
           
           // Compute stats (this should NOT modify the profile)
-          const stats = computeProgressStats(profile, planState);
+          const stats = computeProgressStats(profile, planState, []);
           
           // Assert: cigarettePricePerPack is NOT overwritten
           expect(profile.cigarettePricePerPack).toBe(originalPrice);
@@ -83,19 +83,19 @@ describe('2.1 Money Calculation Preservation Tests', () => {
           const expectedSavedMoney = (expectedSavedCigarettes / profile.cigarettesPerPack) * originalPrice;
           
           // Allow for rounding differences
-          expect(stats.savedMoney).toBeCloseTo(expectedSavedMoney, 2);
+          expect(stats.totalSavedMoney).toBeCloseTo(expectedSavedMoney, 2);
         }
       ),
       { numRuns: 100 }
     );
   });
 
-  test('Preservation: savedMoney displays as ৳X integer format in UI', () => {
+  test('Preservation: totalSavedMoney displays as ৳X integer format in UI', () => {
     /**
      * **Validates: Requirements 3.2**
      * 
-     * Observe: savedMoney displays as ৳X integer format in UI
-     * Property: For all savedMoney calculations, the display format remains ৳X integer
+     * Observe: totalSavedMoney displays as ৳X integer format in UI
+     * Property: For all totalSavedMoney calculations, the display format remains ৳X integer
      * 
      * Note: The actual rounding happens in trackerUtils.ts (to 2 decimals),
      * then UI components round to integer. This test verifies the calculation
@@ -108,20 +108,20 @@ describe('2.1 Money Calculation Preservation Tests', () => {
           fc.tuple(fc.constant(activatedAt), planStateArb(activatedAt))
         ),
         (profile, [activatedAt, planState]) => {
-          const stats = computeProgressStats(profile, planState);
+          const stats = computeProgressStats(profile, planState, []);
           
-          // Assert: savedMoney is a number
-          expect(typeof stats.savedMoney).toBe('number');
+          // Assert: totalSavedMoney is a number
+          expect(typeof stats.totalSavedMoney).toBe('number');
           
-          // Assert: savedMoney is non-negative
-          expect(stats.savedMoney).toBeGreaterThanOrEqual(0);
+          // Assert: totalSavedMoney is non-negative
+          expect(stats.totalSavedMoney).toBeGreaterThanOrEqual(0);
           
-          // Assert: savedMoney can be displayed as integer (Math.round works)
-          const displayValue = Math.round(stats.savedMoney);
+          // Assert: totalSavedMoney can be displayed as integer (Math.round works)
+          const displayValue = Math.round(stats.totalSavedMoney);
           expect(displayValue).toBeGreaterThanOrEqual(0);
           
-          // Assert: savedMoney is finite (not NaN or Infinity)
-          expect(Number.isFinite(stats.savedMoney)).toBe(true);
+          // Assert: totalSavedMoney is finite (not NaN or Infinity)
+          expect(Number.isFinite(stats.totalSavedMoney)).toBe(true);
         }
       ),
       { numRuns: 100 }
@@ -268,7 +268,7 @@ describe('2.3 Edge Case Preservation Tests', () => {
         ),
         (profile, [activatedAt, planState]) => {
           const before = Date.now();
-          const stats = computeProgressStats(profile, planState);
+          const stats = computeProgressStats(profile, planState, []);
           const after = Date.now();
 
           // Calculate expected smokeFreeDays using the formula
@@ -283,8 +283,8 @@ describe('2.3 Edge Case Preservation Tests', () => {
           // Assert: smokeFreeDays is non-negative
           expect(stats.smokeFreeDays).toBeGreaterThanOrEqual(0);
 
-          // Assert: savedCigarettes = smokeFreeDays * cigarettesPerDay
-          expect(stats.savedCigarettes).toBe(stats.smokeFreeDays * profile.cigarettesPerDay);
+          // Assert: totalSavedCigarettes = smokeFreeDays * cigarettesPerDay
+          expect(stats.totalSavedCigarettes).toBe(stats.smokeFreeDays * profile.cigarettesPerDay);
         }
       ),
       { numRuns: 100 }
@@ -405,15 +405,15 @@ test('Property 2: Preservation - Existing Functionality', () => {
       ),
       (profile, [activatedAt, planState]) => {
         // Test money calculation preservation
-        const stats = computeProgressStats(profile, planState);
+        const stats = computeProgressStats(profile, planState, []);
         
         // Assert: cigarettePricePerPack is NOT overwritten
         expect(profile.cigarettePricePerPack).toBeGreaterThanOrEqual(100);
         expect(profile.cigarettePricePerPack).toBeLessThanOrEqual(1000);
         
-        // Assert: savedMoney is a valid number
-        expect(Number.isFinite(stats.savedMoney)).toBe(true);
-        expect(stats.savedMoney).toBeGreaterThanOrEqual(0);
+        // Assert: totalSavedMoney is a valid number
+        expect(Number.isFinite(stats.totalSavedMoney)).toBe(true);
+        expect(stats.totalSavedMoney).toBeGreaterThanOrEqual(0);
         
         // Assert: smokeFreeDays calculation is correct
         const MS_PER_DAY = 86_400_000;
@@ -423,8 +423,8 @@ test('Property 2: Preservation - Existing Functionality', () => {
         // Allow for ±1 day due to timing
         expect(Math.abs(stats.smokeFreeDays - expectedSmokeFreeDays)).toBeLessThanOrEqual(1);
         
-        // Assert: savedCigarettes = smokeFreeDays * cigarettesPerDay
-        expect(stats.savedCigarettes).toBe(stats.smokeFreeDays * profile.cigarettesPerDay);
+        // Assert: totalSavedCigarettes = smokeFreeDays * cigarettesPerDay
+        expect(stats.totalSavedCigarettes).toBe(stats.smokeFreeDays * profile.cigarettesPerDay);
         
         // Test milestone detection preservation
         const completedSteps = planState.completedSteps;

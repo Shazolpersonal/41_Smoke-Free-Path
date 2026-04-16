@@ -150,12 +150,12 @@ export default function HomeScreen() {
             <Animated.View entering={FadeInDown.delay(200).duration(500)}>
               <View style={[styles.savingsRow, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.md, flexDirection: 'row', alignItems: 'center', borderRadius: 12, borderWidth: 1 }]}>
                 <View style={[styles.savingsBadge, { flex: 1, alignItems: 'center' }]}>
-                  <Typography variant="heading" color="primaryDark">{stats.savedCigarettes}</Typography>
+                  <Typography variant="heading" color="primaryDark">{stats.totalSavedCigarettes}</Typography>
                   <Typography variant="small" color="primary" style={{ marginTop: theme.spacing.xs }}>বাঁচানো সিগারেট</Typography>
                 </View>
                 <View style={[styles.savingsDivider, { backgroundColor: theme.colors.border, marginHorizontal: theme.spacing.md, width: 1, height: 36 }]} />
                 <View style={[styles.savingsBadge, { flex: 1, alignItems: 'center' }]}>
-                  <Typography variant="heading" color="primaryDark">৳{Math.round(stats.savedMoney)}</Typography>
+                  <Typography variant="heading" color="primaryDark">৳{Math.round(stats.totalSavedMoney)}</Typography>
                   <Typography variant="small" color="primary" style={{ marginTop: theme.spacing.xs }}>সাশ্রয়কৃত অর্থ</Typography>
                 </View>
               </View>
