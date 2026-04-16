@@ -35,6 +35,7 @@ export default function StepPlanScreen() {
 
   const checkmarkScale = useRef(new Animated.Value(0)).current;
   const checkmarkOpacity = useRef(new Animated.Value(0)).current;
+  const isCompleting = useRef(false);
 
   const progress = stepProgress[stepNum];
   const completedItems = progress?.completedItems ?? [];
@@ -80,13 +81,15 @@ export default function StepPlanScreen() {
   }, [checkmarkScale, checkmarkOpacity]);
 
   const handleCompleteStep = useCallback(() => {
+    if (isStepComplete || isCompleting.current) return;
+    isCompleting.current = true;
     animateCheckmark();
     dispatch({ type: 'COMPLETE_STEP', payload: stepNum });
     AccessibilityInfo.announceForAccessibility('ধাপ সম্পূর্ণ হয়েছে!');
     try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     Alert.alert('মাশাআল্লাহ!', 'ধাপ সম্পূর্ণ হয়েছে ✓');
     // মাইলস্টোন ডিটেকশন MilestoneDetector-এ কেন্দ্রীভূত
-  }, [dispatch, stepNum]);
+  }, [dispatch, stepNum, isStepComplete, animateCheckmark]);
 
   const handlePrevStep = useCallback(() => {
     router.replace(`/tracker/${stepNum - 1}`);
