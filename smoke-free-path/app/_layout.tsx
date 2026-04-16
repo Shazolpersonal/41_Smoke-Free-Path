@@ -10,7 +10,6 @@ import { scheduleReEngagementNotification } from '@/services/NotificationService
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider, useTheme } from '../theme';
 import { ToastProvider } from '@/context/ToastContext';
-import MilestoneDetector from '@/components/MilestoneDetector';
 
 SplashScreen.preventAutoHideAsync();
 I18nManager.forceRTL(false);
@@ -73,7 +72,6 @@ function RootLayoutInner() {
   return (
     <>
       <NavigationGuard />
-      <MilestoneDetector />
       <Stack
         screenOptions={{
           animation: reduceMotion ? 'none' : 'ios_from_right',

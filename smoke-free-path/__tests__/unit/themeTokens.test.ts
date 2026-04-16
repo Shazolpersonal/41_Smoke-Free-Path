@@ -48,10 +48,10 @@ describe('Theme Token Completeness', () => {
 
 describe('New Semantic Token Values — lightTheme', () => {
   it('has correct warning color', () => {
-    expect(lightTheme.colors.warning).toBe('#F9A825');
+    expect(lightTheme.colors.warning).toBe('#F59E0B');
   });
   it('has correct info color', () => {
-    expect(lightTheme.colors.info).toBe('#E3F2FD');
+    expect(lightTheme.colors.info).toBe('#3B82F6');
   });
   it('has correct surfaceElevated color', () => {
     expect(lightTheme.colors.surfaceElevated).toBe('#FFFFFF');
@@ -60,30 +60,30 @@ describe('New Semantic Token Values — lightTheme', () => {
     expect(lightTheme.colors.onPrimary).toBe('#FFFFFF');
   });
   it('has correct chipBackground color', () => {
-    expect(lightTheme.colors.chipBackground).toBe('#F5F5F5');
+    expect(lightTheme.colors.chipBackground).toBe('#F1F5F9');
   });
   it('has correct chipBorder color', () => {
-    expect(lightTheme.colors.chipBorder).toBe('#2E7D32');
+    expect(lightTheme.colors.chipBorder).toBe('#10B981');
   });
 });
 
 describe('New Semantic Token Values — darkTheme', () => {
   it('has correct warning color', () => {
-    expect(darkTheme.colors.warning).toBe('#FFB300');
+    expect(darkTheme.colors.warning).toBe('#F59E0B');
   });
   it('has correct info color', () => {
-    expect(darkTheme.colors.info).toBe('#1A2A3A');
+    expect(darkTheme.colors.info).toBe('#3B82F6');
   });
   it('has correct surfaceElevated color', () => {
-    expect(darkTheme.colors.surfaceElevated).toBe('#2A2A2A');
+    expect(darkTheme.colors.surfaceElevated).toBe('#1E293B');
   });
   it('has correct onPrimary color', () => {
     expect(darkTheme.colors.onPrimary).toBe('#FFFFFF');
   });
   it('has correct chipBackground color', () => {
-    expect(darkTheme.colors.chipBackground).toBe('#2C2C2C');
+    expect(darkTheme.colors.chipBackground).toBe('#334155');
   });
   it('has correct chipBorder color', () => {
-    expect(darkTheme.colors.chipBorder).toBe('#4CAF50');
+    expect(darkTheme.colors.chipBorder).toBe('#10B981');
   });
 });

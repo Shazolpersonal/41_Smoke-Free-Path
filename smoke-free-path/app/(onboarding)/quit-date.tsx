@@ -181,7 +181,7 @@ export default function QuitDateScreen() {
         </TouchableOpacity>
         <StepProgress currentStep={3} totalSteps={3} />
         <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
-          <Typography variant="small" style={[styles.stepIndicator, { color: theme.colors.primary, marginBottom: theme.spacing.xs }]}>ধাপ ২ / ২</Typography>
+          <Typography variant="small" style={[styles.stepIndicator, { color: theme.colors.primary, marginBottom: theme.spacing.xs }]}>ধাপ ৩ / ৩</Typography>
           <Typography variant="display" style={[styles.title, { color: theme.colors.primaryDark, marginBottom: theme.spacing.xs }]}>যাত্রা শুরু করুন</Typography>
           <Typography variant="body" style={[styles.subtitle, { color: theme.colors.textSecondary }]}>আপনার ধূমপান ত্যাগের তারিখ নির্বাচন করুন</Typography>
         </View>

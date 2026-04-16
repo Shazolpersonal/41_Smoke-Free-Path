@@ -4,6 +4,7 @@ import { AccessibilityInfo, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import FloatingCravingButton from '@/components/FloatingCravingButton';
+import MilestoneDetector from '@/components/MilestoneDetector';
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -110,6 +111,7 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
+      <MilestoneDetector />
       <FloatingCravingButton />
     </View>
   );

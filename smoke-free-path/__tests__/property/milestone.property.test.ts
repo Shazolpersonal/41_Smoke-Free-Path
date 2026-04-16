@@ -4,6 +4,7 @@
 // Validates: Requirements 17.2, 17.3
 
 import * as fc from 'fast-check';
+
 import { composeShareMessage } from '@/app/milestone/[id]';
 import type { Milestone } from '@/types';
 
