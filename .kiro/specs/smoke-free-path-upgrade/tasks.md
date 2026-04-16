@@ -1,0 +1,471 @@
+# ইমপ্লিমেন্টেশন প্ল্যান: ধোঁয়া-মুক্ত পথ — Comprehensive Upgrade
+
+## ওভারভিউ
+
+এই task list টি requirements ও design document অনুযায়ী ধোঁয়া-মুক্ত পথ অ্যাপের comprehensive upgrade implement করার জন্য। Foundation layer থেকে শুরু করে UI layer পর্যন্ত dependency chain মেনে incremental steps-এ কাজ করা হবে।
+
+## Tasks
+
+- [x] 1. নতুন Dependencies Install করুন
+  - `smoke-free-path` directory-তে নিচের packages install করুন:
+    - `expo install expo-haptics expo-sharing expo-file-system`
+    - `npx expo install @react-native-community/datetimepicker`
+  - `package.json`-এ নতুন dependencies যোগ হয়েছে কিনা verify করুন
+  - _Requirements: 17.1, 18.1, 13.3_
+
+
+- [x] 2. Foundation Layer — Constants ও Types
+  - [x] 2.1 `constants/index.ts` তৈরি করুন
+    - `TOTAL_STEPS = 41` export করুন
+    - `TRIGGER_LABELS: Record<TriggerType, string>` তৈরি করুন (stress, social, boredom, environmental, habitual → বাংলা label)
+    - `MILESTONE_BADGES: Record<number, string>` তৈরি করুন (1, 3, 7, 14, 21, 30, 41 → emoji)
+    - _Requirements: 22.1, 22.3_
+  - [x] 2.2 `types/index.ts` fix করুন
+    - `CravingSession.triggerId` type `string | null` থেকে `TriggerType | null`-এ পরিবর্তন করুন
+    - `SlipUp.triggerId` type `string | null` থেকে `TriggerType | null`-এ পরিবর্তন করুন
+    - _Requirements: 2.1, 2.2_
+  - [x] 2.3 `theme.ts` তৈরি করুন (project root-এ)
+    - `ThemeColors`, `Theme` interface define করুন
+    - `lightTheme` object তৈরি করুন (primary: `#2E7D32`, background: `#f5f5f5`, surface: `#ffffff`, error: `#C62828` সহ সব required tokens)
+    - `darkTheme` object তৈরি করুন (background: `#121212`, surface: `#1E1E1E` সহ)
+    - `ThemeContext` ও `ThemeProvider` তৈরি করুন (`useColorScheme()` দিয়ে system theme detect করুন, AsyncStorage-এ manual override persist করুন)
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 21.1, 21.2_
+
+
+- [x] 3. Service Layer Fix
+  - [x] 3.1 `services/NotificationService.ts` fix করুন
+    - `console.warn` ও `console.error` global override সরিয়ে দিন
+    - `LogBox.ignoreLogs(['expo-notifications'])` দিয়ে replace করুন
+    - _Requirements: 4.1, 4.2, 4.3_
+  - [x] 3.2 `services/ContentService.ts` lazy loading implement করুন
+    - Module-level cache variables তৈরি করুন (`_stepPlans`, `_islamicContent`, `_duas`, `_milestones`, `_healthTimeline` — সব `null` দিয়ে initialize)
+    - প্রতিটি public function-এ cache check করুন, null হলে `require()` দিয়ে load করুন
+    - `require()` failure-এ empty array return করুন এবং `console.error` দিয়ে log করুন
+    - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.5_
+  - [x] 3.3 Property test: ContentService cache idempotence
+    - **Property 18: ContentService Cache Idempotence**
+    - **Validates: Requirements 24.2, 24.3, 24.4, 24.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 3.4 `services/StorageService.ts` update করুন
+    - `clearOldTriggerLogs()` function-এ `cravingSessions` cleanup যোগ করুন (90 দিনের পুরনো sessions filter করুন)
+    - `milestones` ও `stepProgress` অপরিবর্তিত রাখুন
+    - _Requirements: 27.2, 27.3, 27.5_
+  - [x] 3.5 Property test: Data cleanup preserves critical data
+    - **Property 19: Data Cleanup Preserves Critical Data**
+    - **Validates: Requirements 27.2, 27.3, 27.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+
+- [x] 4. State Management Layer — AppContext Fix
+  - [x] 4.1 Hydration fix implement করুন (Promise-based)
+    - 800ms fallback timer সরিয়ে দিন
+    - `loadAppState()` Promise chain-এ `.then()`, `.catch()`, `.finally()` ব্যবহার করুন
+    - `.finally()` block-এ `setHydrated(true)` call করুন (exactly once)
+    - `hydrated` state AppContext value-এ expose করুন
+    - _Requirements: 3.1, 3.2, 3.3, 3.4_
+  - [x] 4.2 Property test: Hydration completes exactly once
+    - **Property 3: Hydration Completes Exactly Once**
+    - **Validates: Requirements 3.1, 3.3, 3.4, 3.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 4.3 `UPDATE_LAST_OPENED` dispatch যোগ করুন
+    - Hydration complete হওয়ার পর `.then()` block-এ `UPDATE_LAST_OPENED` dispatch করুন current ISO datetime দিয়ে
+    - _Requirements: 3.5_
+  - [x] 4.4 AppState lifecycle (background flush) implement করুন
+    - `stateRef` তৈরি করুন latest state track করতে (stale closure এড়াতে)
+    - `AppState.addEventListener('change', ...)` subscribe করুন
+    - `background`/`inactive` transition-এ pending debounce timer cancel করুন এবং `saveAppState(stateRef.current)` call করুন
+    - `active` transition-এ `UPDATE_LAST_OPENED` dispatch করুন এবং `scheduleReEngagementNotification()` call করুন
+    - `active` transition-এ `clearOldTriggerLogs()` call করুন এবং state পরিবর্তন হলে `HYDRATE` dispatch করুন
+    - Cleanup-এ `subscription.remove()` call করুন
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 15.1, 15.2, 15.3, 15.4, 15.5_
+  - [x] 4.5 Property test: Background flush saves current state
+    - **Property 4: Background Flush Saves Current State**
+    - **Validates: Requirements 6.2, 6.3, 15.2**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 4.6 Property test: Foreground event dispatches UPDATE_LAST_OPENED
+    - **Property 5: Foreground Event Dispatches UPDATE_LAST_OPENED**
+    - **Validates: Requirements 6.4, 15.3, 15.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 4.7 `completedSteps` deduplication implement করুন
+    - `COMPLETE_STEP` case-এ `alreadyCompleted` check যোগ করুন (idempotent)
+    - `COMPLETE_STEP` case-এ `Array.from(new Set([...completedSteps, step]))` ব্যবহার করুন
+    - `HYDRATE` case-এ `Array.from(new Set(migrated.planState.completedSteps))` ব্যবহার করুন
+    - _Requirements: 7.1, 7.2, 7.3_
+  - [x] 4.8 Property test: completedSteps deduplication invariant
+    - **Property 2: completedSteps Deduplication Invariant**
+    - **Validates: Requirements 7.1, 7.2, 7.3**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 4.9 Reset-after-plan fix (BUG-M3) implement করুন
+    - Plan activation logic-এ `planState.totalResets > 0 && !planState.isActive` check যোগ করুন
+    - এই condition-এ `ACTIVATE_PLAN` dispatch না করে quit-date screen-এ navigate করুন
+    - `ACTIVATE_PLAN_WITH_DATE` action handle করুন user-selected date দিয়ে
+    - _Requirements: 5.1, 5.2, 5.3_
+
+
+- [x] 5. Checkpoint — Foundation ও State Layer
+  - সব tests pass করছে কিনা verify করুন: `cd smoke-free-path && npx jest --testPathPattern="upgrade" --run`
+  - TypeScript compile হচ্ছে কিনা check করুন: `npx tsc --noEmit`
+  - প্রশ্ন থাকলে user-কে জিজ্ঞেস করুন।
+
+- [x] 6. নতুন Components তৈরি করুন
+  - [x] 6.1 `components/ErrorBoundary.tsx` তৈরি করুন
+    - React class component হিসেবে implement করুন
+    - `getDerivedStateFromError()` ও `componentDidCatch()` implement করুন
+    - Error state-এ Bengali UI দেখান ("কিছু একটা ভুল হয়েছে")
+    - "পুনরায় চেষ্টা করুন" button দিয়ে `setState({ hasError: false })` call করুন
+    - `console.error` দিয়ে error log করুন
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
+  - [x] 6.2 Property test: ErrorBoundary catches all errors
+    - **Property 6: ErrorBoundary Catches All Errors**
+    - **Validates: Requirements 9.2, 9.4, 9.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 6.3 `components/SkeletonScreen.tsx` তৈরি করুন
+    - `Animated.Value` দিয়ে opacity 0.3 থেকে 0.7-এ loop করুন
+    - `lines` ও `cardHeight` props support করুন
+    - `useEffect`-এ `Animated.loop` চালু করুন, cleanup-এ stop করুন
+    - _Requirements: 10.1, 10.2, 10.3, 10.4_
+  - [x] 6.4 `components/Card.tsx` তৈরি করুন
+    - Shared card component — duplicate card styles replace করবে
+    - `theme.ts` tokens ব্যবহার করুন
+    - _Requirements: 21.3_
+  - [x] 6.5 `components/ScreenHeader.tsx` তৈরি করুন
+    - Shared green header component — duplicate header styles replace করবে
+    - `theme.ts` tokens ব্যবহার করুন
+    - _Requirements: 21.4_
+  - [x] 6.6 `components/ProgressCalendar.tsx` তৈরি করুন
+    - `progress.tsx` থেকে calendar view extract করুন
+    - `useTheme()` hook ব্যবহার করুন
+    - _Requirements: 25.1_
+  - [x] 6.7 `components/HealthTimeline.tsx` তৈরি করুন
+    - `progress.tsx` থেকে health timeline view extract করুন
+    - `useTheme()` hook ব্যবহার করুন
+    - _Requirements: 25.2_
+  - [x] 6.8 `components/MilestoneList.tsx` তৈরি করুন
+    - `progress.tsx` থেকে milestone list extract করুন
+    - `useMilestones()` hook ব্যবহার করুন
+    - _Requirements: 25.3_
+
+
+- [x] 7. Custom Hooks তৈরি করুন
+  - [x] 7.1 `hooks/useTheme.ts` তৈরি করুন
+    - `ThemeContext` থেকে current theme return করুন
+    - Manual override toggle function expose করুন
+    - AsyncStorage-এ preference persist করুন
+    - _Requirements: 14.5, 14.6, 14.7_
+  - [x] 7.2 `hooks/useProgressStats.ts` তৈরি করুন
+    - `useAppContext()` থেকে `userProfile` ও `planState` নিন
+    - `useMemo` দিয়ে `smokeFreeDays`, `savedCigarettes`, `savedMoney` compute করুন
+    - `activatedAt` না থাকলে zero values return করুন
+    - _Requirements: 23.1, 23.2_
+  - [x] 7.3 Property test: useProgressStats computation correctness
+    - **Property 15: useProgressStats Computation Correctness**
+    - **Validates: Requirements 23.2**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 7.4 `hooks/useMilestones.ts` তৈরি করুন
+    - `MILESTONE_STEPS` array (1, 3, 7, 14, 21, 30, 41) iterate করুন
+    - প্রতিটি step-এর জন্য `achievedAt` ও `content` return করুন
+    - `useMemo` দিয়ে memoize করুন
+    - _Requirements: 23.1, 23.3_
+  - [x] 7.5 Property test: useMilestones achievement status
+    - **Property 16: useMilestones Achievement Status**
+    - **Validates: Requirements 23.3**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 7.6 `hooks/useWeeklySummary.ts` তৈরি করুন
+    - `triggerLogs` থেকে last 7 days-এর logs filter করুন
+    - সর্বোচ্চ count-এর `TriggerType` ও count return করুন
+    - `useMemo` দিয়ে memoize করুন
+    - _Requirements: 23.1, 23.4_
+  - [x] 7.7 Property test: useWeeklySummary correctness
+    - **Property 17: useWeeklySummary Correctness**
+    - **Validates: Requirements 23.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+
+- [x] 8. Font Fix — Amiri
+  - [x] 8.1 Amiri font download ও setup করুন
+    - `Amiri-Regular.ttf` ফাইলটি `smoke-free-path/assets/fonts/` directory-তে রাখুন
+    - `app.json`-এ `expo-font` plugin configuration যোগ করুন: `{ "expo-font": { "fonts": ["./assets/fonts/Amiri-Regular.ttf"] } }`
+    - _Requirements: 1.1, 1.2_
+  - [x] 8.2 `app/_layout.tsx`-এ `useFonts` fix করুন
+    - `useFonts({ 'Amiri': require('../assets/fonts/Amiri-Regular.ttf') })` ব্যবহার করুন
+    - Font loading না হওয়া পর্যন্ত splash screen visible রাখুন (`SplashScreen.preventAutoHideAsync()`)
+    - Font load হলে `SplashScreen.hideAsync()` call করুন
+    - _Requirements: 1.1, 1.4_
+
+- [x] 9. UI Layer — Bug Fixes
+  - [x] 9.1 `app/_layout.tsx` update করুন
+    - `ErrorBoundary` দিয়ে পুরো app wrap করুন
+    - `hydrated` state থেকে NavigationGuard-এ loading indicator দেখান
+    - `useRef`-related exhaustive dependency warnings fix করুন
+    - _Requirements: 9.1, 3.1, 8.5_
+  - [x] 9.2 `app/(onboarding)/quit-date.tsx` — Native DateTimePicker implement করুন
+    - HTML `<input type="date">` সরিয়ে `@react-native-community/datetimepicker` ব্যবহার করুন
+    - iOS-এ inline picker, Android-এ modal picker (show/hide state দিয়ে)
+    - 30 দিনের বেশি পুরনো তারিখ reject করুন
+    - Invalid date-এ Bengali validation error দেখান
+    - Selected date Bengali format-এ (DD/MM/YYYY) display করুন
+    - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5_
+  - [x] 9.3 Property test: Date validation logic
+    - **Property 12: Date Validation Logic**
+    - **Validates: Requirements 17.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 9.4 `app/tracker/[step].tsx` — Cross-platform toast ও haptics
+    - `ToastAndroid` সরিয়ে cross-platform toast solution implement করুন (iOS, Android, Web সব platform-এ কাজ করবে)
+    - Step complete-এ `Haptics.notificationAsync(NotificationFeedbackType.Success)` call করুন
+    - Checklist item toggle-এ `Haptics.impactAsync(ImpactFeedbackStyle.Light)` call করুন
+    - Haptic call-এ try-catch ব্যবহার করুন
+    - _Requirements: 8.6, 18.2, 18.4, 18.5_
+  - [x] 9.5 Property test: Haptic feedback on key actions
+    - **Property 13: Haptic Feedback on Key Actions**
+    - **Validates: Requirements 18.2, 18.3, 18.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 9.6 `app/craving/index.tsx` — triggerId fix
+    - `triggerId` assignment-এ `TriggerType` value সরাসরি store করুন (string cast ছাড়া)
+    - TypeScript error ছাড়া compile হচ্ছে কিনা verify করুন
+    - _Requirements: 2.3, 2.5_
+  - [x] 9.7 Property test: triggerId type preservation
+    - **Property 1: triggerId Type Preservation**
+    - **Validates: Requirements 2.3, 2.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 9.8 `app/slip-up/index.tsx` — triggerId fix
+    - `triggerId` assignment-এ `TriggerType` value সরাসরি store করুন
+    - TypeScript error ছাড়া compile হচ্ছে কিনা verify করুন
+    - _Requirements: 2.4, 2.5_
+  - [x] 9.9 `components/CravingTimer.tsx` — DimensionValue fix
+    - `width: \`${percent}%\` as any` সরিয়ে `width: \`${percent}%\` as DimensionValue` ব্যবহার করুন
+    - _Requirements: 8.1, 28.1, 28.2_
+  - [x] 9.10 `app/(tabs)/progress.tsx` — DimensionValue fix
+    - সব `as any` type assertion সরিয়ে `DimensionValue` ব্যবহার করুন
+    - _Requirements: 8.1, 28.1, 28.2_
+  - [x] 9.11 `components/MilestoneAnimation.tsx` — exhaustive deps fix
+    - `useRef`-related exhaustive dependency warnings fix করুন
+    - `eslint-disable` comments সরিয়ে proper dependency arrays ব্যবহার করুন
+    - _Requirements: 8.5_
+  - [x] 9.12 Swap file delete ও .gitignore update
+    - `smoke-free-path/.android.os.Handler.swp` ফাইলটি delete করুন
+    - `smoke-free-path/.gitignore`-এ `*.swp` যোগ করুন
+    - _Requirements: 8.7, 8.8_
+
+
+- [x] 10. Checkpoint — Components ও Bug Fixes
+  - সব tests pass করছে কিনা verify করুন: `cd smoke-free-path && npx jest --testPathPattern="upgrade" --run`
+  - TypeScript compile হচ্ছে কিনা check করুন: `npx tsc --noEmit`
+  - প্রশ্ন থাকলে user-কে জিজ্ঞেস করুন।
+
+- [x] 11. UI Layer — নতুন Features
+  - [x] 11.1 `app/(tabs)/progress.tsx` decompose করুন
+    - `ProgressCalendar`, `HealthTimeline`, `MilestoneList` components import করুন
+    - `useProgressStats()`, `useMilestones()`, `useWeeklySummary()` hooks ব্যবহার করুন
+    - Trigger log list-এ `FlatList` ব্যবহার করুন (`keyExtractor`, `initialNumToRender={10}`)
+    - File 200 লাইনের নিচে নামিয়ে আনুন
+    - `TRIGGER_LABELS` duplicate সরিয়ে `constants/index.ts` থেকে import করুন
+    - _Requirements: 22.2, 23.5, 25.1, 25.2, 25.3, 25.4, 25.5, 26.3, 26.4, 26.5_
+  - [x] 11.2 `app/(tabs)/dua.tsx` — Search ও FlatList
+    - Search input field যোগ করুন (screen-এর উপরে)
+    - `useMemo` দিয়ে `banglaTranslation`, `banglaTransliteration`, `source` field-এ filter করুন
+    - Empty query-তে সব items দেখান
+    - No results-এ "কোনো ফলাফল পাওয়া যায়নি" message দেখান
+    - `ScrollView` সরিয়ে `FlatList` ব্যবহার করুন (`keyExtractor`, `initialNumToRender={10}`)
+    - Fade-in animation যোগ করুন list items-এ
+    - _Requirements: 16.1, 16.2, 16.5, 16.6, 20.1, 26.1, 26.4, 26.5_
+  - [x] 11.3 Property test: Search filter correctness
+    - **Property 11: Search Filter Correctness**
+    - **Validates: Requirements 16.2, 16.4, 16.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 11.4 Property test: FlatList keyExtractor returns item ID
+    - **Property 20: FlatList keyExtractor Returns Item ID**
+    - **Validates: Requirements 26.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 11.5 `app/(tabs)/library.tsx` — Search ও FlatList
+    - Search input field যোগ করুন
+    - `useMemo` দিয়ে `banglaTranslation`, `source` field-এ filter করুন
+    - No results-এ "কোনো ফলাফল পাওয়া যায়নি" message দেখান
+    - `ScrollView` সরিয়ে `FlatList` ব্যবহার করুন
+    - Fade-in animation যোগ করুন list items-এ
+    - _Requirements: 16.3, 16.4, 16.5, 16.6, 20.1, 26.2, 26.4, 26.5_
+  - [x] 11.6 `app/(tabs)/settings.tsx` — Dark mode toggle ও Data Export
+    - Dark mode toggle switch যোগ করুন (system/light/dark)
+    - `useTheme()` hook ব্যবহার করুন, preference AsyncStorage-এ persist করুন
+    - "ডাটা এক্সপোর্ট করুন" button যোগ করুন
+    - Export function implement করুন: JSON তৈরি → `expo-file-system` দিয়ে temp file → `expo-sharing` দিয়ে share
+    - File name: `dhoa-mukt-path-backup-{YYYY-MM-DD}.json`
+    - Export fail হলে Bengali error Alert দেখান
+    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.6, 14.5, 14.6, 14.7_
+  - [x] 11.7 Property test: Data export contains all required fields
+    - **Property 8: Data Export Contains All Required Fields**
+    - **Validates: Requirements 13.2, 13.4**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 11.8 `app/milestone/[id].tsx` — Share button যোগ করুন
+    - "শেয়ার করুন" button যোগ করুন
+    - React Native `Share` API ব্যবহার করুন
+    - Share message-এ milestone `titleBangla` ও `achievementBadge` include করুন
+    - Share cancel/fail gracefully handle করুন
+    - Milestone achievement-এ `Haptics.notificationAsync(NotificationFeedbackType.Success)` call করুন
+    - _Requirements: 18.3, 19.1, 19.2, 19.3, 19.4, 19.5_
+  - [x] 11.9 Property test: Milestone share message completeness
+    - **Property 14: Milestone Share Message Completeness**
+    - **Validates: Requirements 19.2, 19.3**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 11.10 Theme system সব screens-এ apply করুন
+    - সব screen file-এ hardcoded color values (`#2E7D32`, `#f5f5f5`, etc.) সরিয়ে `theme.ts` tokens ব্যবহার করুন
+    - `useTheme()` hook import করুন প্রতিটি screen-এ
+    - _Requirements: 21.5_
+  - [x] 11.11 Property test: Theme token completeness
+    - **Property 9: Theme Token Completeness**
+    - **Validates: Requirements 14.3, 14.4, 21.2**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+  - [x] 11.12 Property test: Theme preference persistence round-trip
+    - **Property 10: Theme Preference Persistence Round-Trip**
+    - **Validates: Requirements 14.6**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+
+- [x] 12. Accessibility Labels যোগ করুন
+  - সব interactive elements-এ `accessibilityLabel` props যোগ করুন (buttons, touchable areas, icons)
+  - Buttons ও form inputs-এ `accessibilityRole` props যোগ করুন
+  - Non-obvious elements-এ `accessibilityHint` props যোগ করুন
+  - Step complete হলে `AccessibilityInfo.announceForAccessibility()` call করুন Bengali message দিয়ে
+  - Grouped content cards-এ `accessible={true}` যোগ করুন
+  - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.6_
+
+- [x] 13. Animations যোগ করুন
+  - `dua.tsx`, `library.tsx`, `progress.tsx`-এ list items-এ fade-in animation যোগ করুন
+  - `craving/index`, `slip-up/index`, `trigger-log/index` modal screens-এ slide-up animation যোগ করুন
+  - Checklist item complete হলে checkmark-এ scale animation যোগ করুন
+  - `Animated` API ব্যবহার করুন
+  - System "Reduce Motion" setting check করুন এবং non-essential animations disable করুন
+  - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5_
+
+- [x] 14. StorageService Error Handling verify করুন
+  - `loadAppState()` ও `saveAppState()` সব AsyncStorage calls try-catch-এ wrapped আছে কিনা verify করুন
+  - Consecutive failure count track করুন এবং ৩টি failure-এ Bengali warning দেখান
+  - _Requirements: 11.1, 11.2, 11.3, 11.4_
+  - [x] 14.1 Property test: StorageService error resilience
+    - **Property 7: StorageService Error Resilience**
+    - **Validates: Requirements 11.1, 11.2**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+- [x] 15. Dead Code Cleanup
+  - [x] 15.1 `components/ProgressStats.tsx` integrate বা delete করুন
+    - Progress screen-এ integrate করা হয়েছে কিনা check করুন
+    - Integrate না হলে delete করুন — unused dead code রাখা যাবে না
+    - _Requirements: 8.2_
+  - [x] 15.2 `TRIGGER_LABELS` duplicate সরিয়ে দিন
+    - `progress.tsx` ও `trigger-log/index.tsx` থেকে local `TRIGGER_LABELS` definitions সরিয়ে দিন
+    - `constants/index.ts` থেকে import করুন
+    - _Requirements: 8.3, 22.2_
+
+- [x] 16. TypeScript Verification
+  - `cd smoke-free-path && npx tsc --noEmit` চালান
+  - সব type errors fix করুন
+  - কোনো `as any` cast নেই কিনা verify করুন
+  - _Requirements: 28.1, 28.2, 28.3, 28.4_
+
+- [x] 17. Final Checkpoint — সব Tests Pass
+  - সব property tests চালান: `cd smoke-free-path && npx jest --testPathPattern="upgrade" --run`
+  - সব existing tests pass করছে কিনা verify করুন: `cd smoke-free-path && npx jest --run`
+  - TypeScript compile হচ্ছে কিনা final check করুন: `npx tsc --noEmit`
+  - প্রশ্ন থাকলে user-কে জিজ্ঞেস করুন।
+
+- [x] 18. Critical Bug Fix — Milestone Trigger (BUG-C1)
+  - [x] 18.1 `app/tracker/[step].tsx`-এ milestone trigger implement করুন
+    - `handleCompleteStep()` function-এ `COMPLETE_STEP` dispatch করার পর `detectMilestone()` call করুন
+    - Milestone detect হলে `ACHIEVE_MILESTONE` dispatch করুন current ISO datetime দিয়ে
+    - তারপর `router.push('/milestone/{steps}')` দিয়ে milestone screen-এ navigate করুন
+    - Milestone ইতিমধ্যে achieved থাকলে navigate করবেন না
+    - _Requirements: 29.1, 29.2, 29.3, 29.4, 29.5_
+  - [x] 18.2 Property test: Milestone trigger on step completion
+    - **Property 20: Milestone Trigger on Step Completion**
+    - **Validates: Requirements 29.1, 29.4, 29.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+- [x] 19. Critical Bug Fix — Tracker Quit Date (BUG-C3)
+  - [x] 19.1 `app/(tabs)/tracker.tsx`-এ plan activation fix করুন
+    - "প্ল্যান শুরু করুন" button-এ `ACTIVATE_PLAN` dispatch সরিয়ে দিন
+    - `userProfile` ও `planState.activatedAt` check করুন
+    - Valid `activatedAt` থাকলে `ACTIVATE_PLAN_WITH_DATE` dispatch করুন সেই date দিয়ে
+    - `activatedAt` না থাকলে quit-date onboarding screen-এ navigate করুন
+    - `ACTIVATE_PLAN` action কখনো `tracker.tsx` থেকে dispatch হবে না
+    - _Requirements: 31.1, 31.2, 31.3, 31.4_
+
+- [x] 20. Bug Fix — Settings Price/Pack Edit (BUG-M2)
+  - [x] 20.1 `app/(tabs)/settings.tsx`-এ profile edit section update করুন
+    - Edit mode-এ `cigarettePricePerPack` ও `cigarettesPerPack` fields যোগ করুন
+    - Labels: "প্রতি প্যাকের মূল্য (টাকা)" ও "প্যাকে সিগারেট সংখ্যা"
+    - Save-এ validate করুন: price positive number, pack size 1–100 integer
+    - Validation fail হলে Bengali error message দেখান
+    - Valid হলে `SET_USER_PROFILE` dispatch করুন updated values দিয়ে
+    - _Requirements: 32.1, 32.2, 32.3, 32.4, 32.5, 32.6_
+
+- [x] 21. Bug Fix — Craving ID Collision Prevention (BUG-M3)
+  - [x] 21.1 `app/craving/index.tsx`-এ collision-resistant ID implement করুন
+    - `id: \`cs_${Date.now()}\`` সরিয়ে `Date.now()` + random component ব্যবহার করুন
+    - Pattern: `` `cs_${Date.now()}_${Math.random().toString(36).slice(2, 9)}` ``
+    - TriggerLog ID-তেও একই pattern apply করুন
+    - _Requirements: 33.1, 33.2, 33.3, 33.4_
+  - [x] 21.2 Property test: Collision-resistant ID uniqueness
+    - **Property 21: Collision-Resistant ID Uniqueness**
+    - **Validates: Requirements 33.3, 33.5**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+- [x] 22. Bug Fix — Future Quit Date Handling (BUG-M4)
+  - [x] 22.1 `utils/trackerUtils.ts`-এ `computeProgressStats()` fix করুন
+    - `diff` negative হলে `Math.max(0, diff)` ব্যবহার করুন
+    - Future date-এ zero values return করুন (negative values কখনো নয়)
+    - _Requirements: 34.1, 34.4_
+  - [x] 22.2 `app/(tabs)/progress.tsx`-এ future date message যোগ করুন
+    - `smokeFreeDays === 0` ও `activatedAt` future date হলে Bengali message দেখান
+    - Message: "আপনার যাত্রা {date}-এ শুরু হবে"
+    - _Requirements: 34.2_
+  - [x] 22.3 `app/(tabs)/tracker.tsx`-এ upcoming quit date display করুন
+    - `activatedAt` future date হলে countdown in days দেখান
+    - _Requirements: 34.3_
+
+- [x] 23. New Feature — Data Import (Backup Restore)
+  - [x] 23.1 `app/(tabs)/settings.tsx`-এ import button যোগ করুন
+    - "ডাটা ইম্পোর্ট করুন" button যোগ করুন export button-এর পাশে
+    - `expo-document-picker` দিয়ে JSON file select করুন
+    - Selected file validate করুন: `userProfile`, `planState`, `stepProgress`, `milestones`, `bookmarks` fields আছে কিনা
+    - Valid হলে Bengali confirmation dialog দেখান (backup date সহ)
+    - User confirm করলে `HYDRATE` dispatch করুন imported data দিয়ে
+    - Invalid file হলে Bengali error: "ফাইলটি সঠিক ব্যাকআপ ফাইল নয়।"
+    - Import fail হলে current state অপরিবর্তিত রাখুন
+    - _Requirements: 35.1, 35.2, 35.3, 35.4, 35.5, 35.6, 35.7_
+  - [x] 23.2 Property test: Import validation rejects incomplete data
+    - **Property 22: Import Validation Rejects Incomplete Data**
+    - **Validates: Requirements 35.3, 35.6, 35.7**
+    - `__tests__/property/upgrade.property.test.ts`-এ লিখুন
+
+- [x] 24. New Feature — Ramadan Tips Display
+  - [x] 24.1 `app/tracker/[step].tsx`-এ Ramadan tip card যোগ করুন
+    - `plan.ramadanTip` non-null হলে distinct card render করুন
+    - Card-এ 🌙 icon ও distinct background color (`#EDE7F6` light, `#2C2C3E` dark)
+    - Checklist-এর পরে, tips section-এর আগে position করুন
+    - `ramadanTip` null/undefined হলে card render করবেন না
+    - _Requirements: 36.1, 36.2, 36.3, 36.4_
+
+- [x] 25. New Feature — moneySavedContext ও nextMilestoneMotivation Display
+  - [x] 25.1 `app/tracker/[step].tsx`-এ moneySavedContext card যোগ করুন
+    - `plan.moneySavedContext` non-null হলে 💰 icon সহ card render করুন
+    - null/undefined হলে card render করবেন না
+    - _Requirements: 37.1, 37.3_
+  - [x] 25.2 `app/(tabs)/progress.tsx`-এ nextMilestoneMotivation banner যোগ করুন
+    - Next unachieved milestone-এর `nextMilestoneMotivation` fetch করুন
+    - Current completed count milestone থেকে ৩ ধাপের মধ্যে হলে banner দেখান
+    - null/undefined হলে banner render করবেন না
+    - _Requirements: 37.2, 37.4, 37.5_
+
+- [x] 26. Final Checkpoint — সব Tests Pass
+  - সব property tests চালান: `cd smoke-free-path && npx jest --testPathPattern="upgrade" --run`
+  - সব existing tests pass করছে কিনা verify করুন: `cd smoke-free-path && npx jest --run`
+  - TypeScript compile হচ্ছে কিনা final check করুন: `cd smoke-free-path && npx tsc --noEmit`
+  - প্রশ্ন থাকলে user-কে জিজ্ঞেস করুন।
+
+## Notes
+
+- প্রতিটি task specific requirements reference করে traceability-র জন্য
+- Property tests `__tests__/property/upgrade.property.test.ts`-এ থাকবে
+- Checkpoints incremental validation নিশ্চিত করে
+- `*` চিহ্নিত sub-tasks optional — MVP-র জন্য skip করা যাবে
+- Implementation language: TypeScript (React Native / Expo SDK 54)
+- Test command: `cd smoke-free-path && npx jest --testPathPattern="upgrade" --run`

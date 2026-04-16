@@ -1,0 +1,596 @@
+# 🔍 ধোঁয়া-মুক্ত পথ — সম্পূর্ণ UI/UX অডিট রিপোর্ট
+
+> **প্রোজেক্ট:** Smoke-Free Path (ধোঁয়া-মুক্ত পথ)  
+> **বর্তমান গ্রেড:** C-grade  
+> **লক্ষ্য গ্রেড:** A-grade  
+> **অডিট তারিখ:** এপ্রিল ২০২৬  
+> **বিশ্লেষিত ফাইল সংখ্যা:** ৪০+
+
+---
+
+## সূচিপত্র
+1. [বর্তমান অবস্থার মূল্যায়ন](#১-বর্তমান-অবস্থার-মূল্যায়ন)
+2. [বাগ ও এররস](#২-বাগ-ও-এররস)
+3. [উন্নতির সুযোগ](#৩-উন্নতির-সুযোগ)
+4. [অগ্রাধিকার তালিকা](#৪-অগ্রাধিকার-তালিকা)
+5. [A-grade মানের রেফারেন্স](#৫-a-grade-মানের-রেফারেন্স)
+
+---
+
+## ১. বর্তমান অবস্থার মূল্যায়ন
+
+### ১.১ সামগ্রিক আর্কিটেকচার মূল্যায়ন
+
+| মাপদণ্ড | বর্তমান স্কোর | A-grade লক্ষ্য |
+|---------|:---:|:---:|
+| Visual Hierarchy | C | A |
+| Typography System | C- | A |
+| Color Consistency | C+ | A |
+| Spacing/Layout | C | A |
+| Animation/Motion | D+ | A |
+| Dark Mode Support | B- | A |
+| Accessibility (a11y) | C+ | A |
+| Responsive Design | C | A |
+| Component Reusability | B | A |
+| UX Flow Clarity | C+ | A |
+
+---
+
+### ১.২ পেজ-ভিত্তিক বিশ্লেষণ
+
+---
+
+#### 🏠 হোম স্ক্রিন — [app/(tabs)/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/index.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- **`stepCardStep` (line 279-282):** `color: '#1B5E20'` hardcoded — Dark Mode-এ invisible হবে। `theme.colors.primaryDark` ব্যবহার করা উচিত
+- **`savingsValue` (line 365-368):** `color: '#1B5E20'` hardcoded — Dark Mode incompatible
+- **`savingsLabel` (line 369-372):** `color: '#388E3C'` hardcoded
+- **`savingsDivider` (line 374-378):** `backgroundColor: '#A5D6A7'` hardcoded
+- **`savingsRow` (line 350-359):** `borderColor: '#C8E6C9'` hardcoded — Dark Mode-এ contrast issue
+
+**Typography সমস্যা:**
+- System default ফন্ট ব্যবহৃত হচ্ছে — বাংলা টেক্সটের জন্য custom Bengali font (যেমন Noto Sans Bengali, Hind Siliguri) নেই
+- Font weight hierarchy অস্পষ্ট — heading আর body-র মধ্যে পার্থক্য যথেষ্ট নয়
+
+**Spacing সমস্যা:**
+- `scrollContent` padding শুধুমাত্র `16px` — বড় স্ক্রিনে অপর্যাপ্ত
+- Quick links section-এর আগে মাত্র `12px` gap — section-গুলোর মধ্যে clear visual separation দরকার
+
+**UX Flow সমস্যা:**
+- Plan inactive থাকলে শুধু একটি "যাত্রা শুরু করুন" বাটন — ব্যবহারকারী কী হবে তা বুঝতে পারে না (empty state weak)
+- "আমার এখন ক্র্যাভিং হচ্ছে" বাটনটি scroll করে নামলেই দেখা যায় — এটি critical action, above-the-fold বা floating রাখা উচিত
+
+---
+
+#### 📅 ট্র্যাকার স্ক্রিন — [app/(tabs)/tracker.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/tracker.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- `countdownBanner` (line 207-222): `backgroundColor: '#E3F2FD'`, `color: '#1565C0'` hardcoded — Dark Mode-এ দৃশ্যমান হবে না
+- Grid layout-এ step cards খুব ছোট (48×56px) — ছোট স্ক্রিনে touch target insufficient (minimum 44×44 best practice, কিন্তু functional context-এ 48px ঠিক আছে)
+- Legend items-এর label sizes খুব ছোট (12px)
+
+**UX Flow সমস্যা:**
+- ৪১টি step একসাথে grid-এ দেখানো overwhelming — grouping/phase-based collapsing নেই
+- Inactive state-এ meaningful illustration বা progress visualization নেই
+- Step complete হলে কোনো visual celebration/animation নেই
+
+---
+
+#### 📊 অগ্রগতি স্ক্রিন — [app/(tabs)/progress.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- `futureDateCard` (line 367-376): `backgroundColor: '#E3F2FD'` hardcoded — Dark Mode incompatible
+- `motivationBanner` (line 377-390): `backgroundColor: '#FFF8E1'`, `color: '#E65100'` hardcoded
+- `notStartedText` (line 365): `color: '#F57F17'` hardcoded
+- Progress bar খুব পাতলা (10px height) — visual impact কম
+
+**Typography সমস্যা:**
+- Stats value font `20px` — Screen-এ enough prominence পায় না
+- Section titles সব একই size (16px) — hierarchy অনুভব হয় না
+
+**UX Flow সমস্যা:**
+- অনেক section একই page-এ — information overload 
+- Health Timeline ও Trigger Chart-এর মধ্যে কোনো visual separator নেই
+- Trigger log ও Slip-up বাটন দুটো page-এর একদম নিচে — discoverability কম
+
+---
+
+#### 🤲 দোয়া স্ক্রিন — [app/(tabs)/dua.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/dua.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- ১১টি category tab একসাথে — horizontal scroll-এ পরের গুলো দেখা যায় না, discoverability কম
+- Active tab ও inactive tab-এর visual contrast অপর্যাপ্ত — শুধুমাত্র background color difference
+
+**UX Flow সমস্যা:**
+- Modal-এ শুধু close বাটন — swipe-to-dismiss বা bottom sheet UX নেই
+- Search-এ কোনো search icon নেই — user বুঝতে পারে না এটা search field
+- Category "সকালের আজকার" default selected কিন্তু contextually time-based auto-selection নেই
+
+---
+
+#### 📚 লাইব্রেরি স্ক্রিন — [app/(tabs)/library.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/library.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- Empty bookmarks state-এ generic text — illustration বা CTA নেই
+- Related content section header `14px` — barely noticeable
+
+**UX Flow সমস্যা:**
+- "সম্পর্কিত কন্টেন্ট" section footer-এ থাকায় missed হয়
+- Content type filter নেই (আয়াত/হাদিস/দোয়া/জিকির filter)
+- No loading indicator while content is being prepared
+
+---
+
+#### ⚙️ সেটিংস স্ক্রিন — [app/(tabs)/settings.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/settings.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- সেটিংস page-এ section headers-এ icon নেই — visually bland
+- "সংরক্ষণ করুন" বাটন page-এর মাঝে — easily missed
+
+**UX Flow সমস্যা:**
+- Notification settings ও Profile editor একই page-এ without clear grouping — confusing
+- Save বাটন 2 বার আছে (settings-এর জন্য line 79 ও ProfileEditor-এর ভেতরে) — user confusion
+- প্ল্যান রিসেট বাটন too close to other action buttons — accidental tap risk
+- Theme selection segmented control খুব ছোট — accessibility concern
+
+---
+
+#### 🌿 Onboarding Flow — welcome.tsx, profile-setup.tsx, quit-date.tsx
+
+**Visual Hierarchy সমস্যা:**
+- [welcome.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(onboarding)/welcome.tsx): পুরো page `#E8F5E9` background — Dark Mode support এ নেই একেবারে
+- [profile-setup.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(onboarding)/profile-setup.tsx): Same `#E8F5E9` hardcoded background — Dark Mode unsupported
+- [quit-date.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(onboarding)/quit-date.tsx): Same issue
+- Step indicator "ধাপ ১ / ২" খুব সাধারণ — visual progress bar নেই
+
+**UX Flow সমস্যা:**
+- Back navigation নেই onboarding-এ — user stuck হলে কোনো উপায় নেই
+- Welcome screen-এ skip option নেই experienced users-এর জন্য
+- Validation error messages শুধু text — visual shake বা highlight animation নেই
+- Keyboard avoid behavior `'height'` on Android — sub-optimal, should be `'padding'` সবসময়
+
+---
+
+#### 🚨 ক্র্যাভিং স্ক্রিন — [craving/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/craving/index.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- Strategy tabs hardcoded colors (`#2E7D32`, `#fff`) — Dark Mode incompatible
+- Intensity buttons hardcoded `backgroundColor: '#fff'` — Dark Mode-এ bright flash
+- `duaLinkBtn` (line 420): `backgroundColor: '#6A1B9A'` — suddenly purple in a green-themed app — inconsistent
+
+**UX Flow সমস্যা:**
+- Timer auto-start হয় না — user confusion "শুরু করুন কি?" 
+- ৫-মিনিটের timer linear progress bar — visually unengaging, circular animated timer হলে better
+- Intensity 1-10 scale বাটনগুলো `flexWrap` — 10টা বাটন 2-row তে break হতে পারে inconsistently
+- Outcome modal auto-trigger after timer — user might not be ready
+
+---
+
+#### 😔 স্লিপ-আপ স্ক্রিন — [slip-up/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/slip-up/index.tsx)
+
+**UX Flow সমস্যা:**
+- "প্ল্যান রিসেট করুন" বাটন confirmation dialog ছাড়া dispatch করে — dangerous action
+- Motivational message hardcoded single text — variety নেই
+- No success confirmation after recording slip-up (directly redirects)
+
+---
+
+#### 📝 ট্রিগার লগ স্ক্রিন — [trigger-log/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/trigger-log/index.tsx)
+
+**Visual Hierarchy সমস্যা:**
+- `alertCard` (line 214-222): hardcoded `backgroundColor: '#FFF3E0'` — Dark Mode incompatible
+- `submitBtnDisabled` (line 236): `backgroundColor: '#a5d6a7'` hardcoded
+
+**UX Flow সমস্যা:**
+- Submit বাটন `disabled` state visual কিন্তু `disabled` prop নেই — user তবুও tap করতে পারে (visual-only disable, functionally active)
+- Success screen-এ only "ফিরে যান" বাটন — "আরেকটি লগ করুন" option নেই
+
+---
+
+### ১.৩ কম্পোনেন্ট-ভিত্তিক বিশ্লেষণ
+
+---
+
+#### IslamicCard — [components/IslamicCard.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/IslamicCard.tsx)
+
+- **Bookmark বাটন:** `onBookmark` undefined হলেও `TouchableOpacity` render হয় — তাতে tap করলে কিছু হয় না, confusing
+- **Accessibility:** Card-level `accessibilityLabel` নেই — screen reader user কন্টেন্ট বুঝতে পারে না
+- **Type badge colors** hardcoded single palette — Dark Mode-এ যেকোনো `dua` type-এ (#6A1B9A) খুব dark হতে পারে
+
+#### TriggerSelector — [components/TriggerSelector.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/TriggerSelector.tsx)
+
+- **Hardcoded colors:** `borderColor: '#2E7D32'`, `backgroundColor: '#fff'` — Dark Mode-এ bright white chips
+- **Deselection:** একবার select করলে deselect করার উপায় নেই — re-tap deselect করে না
+- **Accessibility:** `accessibilityRole` ও `accessibilityState` নেই
+
+#### CravingTimer — [components/CravingTimer.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/CravingTimer.tsx)
+
+- Timer circle static (no animated ring) — visually boring
+- `btnSecondary` (line 160): hardcoded `backgroundColor: '#F9A825'` — Dark Mode-এ theme-consistent নয়
+- "বাতিল করুন" বাটন — confirmation ছাড়াই action trigger হয়
+
+#### StepCard — [components/StepCard.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/StepCard.tsx)
+
+- `STATUS_CONFIG` (line 12-27): সব colors hardcoded — theme-aware নয়
+- Locked step (`'future'`): `backgroundColor: '#e0e0e0'`, `textColor: '#9e9e9e'` — Dark Mode-এ visible হবে না
+- Card size (48×56) fixed — responsive নয়, বিভিন্ন device-এ UI break হতে পারে
+- `accessibilityLabel` নেই — screen reader users `step 1, complete` type info পায় না
+
+#### ProgressCalendar — [components/ProgressCalendar.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/ProgressCalendar.tsx)
+
+- Cell size ৩৬×৩৬ — ছোট device-এ touch target (44px minimum) পূরণ হয় না
+- Current step-এ hardcoded `backgroundColor: '#F9A825'`, `borderColor: '#E65100'`
+
+#### HealthTimeline — [components/HealthTimeline.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/HealthTimeline.tsx)
+
+- Timeline dots only — connecting line নেই, timeline visualization incomplete
+- Achieved ও unachieved entries-র মধ্যে opacity difference নেই — all look similar
+
+#### Tab Bar — [app/(tabs)/_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/_layout.tsx)
+
+- ৬টি tab — best practice সর্বোচ্চ ৫টি recommended (HIG/Material Design)
+- Emoji icons instead of proper vector icons — platform inconsistency, rendering varies
+- Tab labels `11px` — barely readable
+- `paddingBottom: 4` — iOS-এ home indicator overlap হতে পারে
+
+---
+
+## ২. বাগ ও এররস
+
+### ২.১ Visual Bugs (UI Glitches)
+
+| # | বাগ | ফাইল | লাইন | Priority |
+|---|------|------|:----:|:--------:|
+| B01 | **Dark Mode Color Crash:** Onboarding সব screen (`welcome.tsx`, `profile-setup.tsx`, `quit-date.tsx`) hardcoded light theme — Dark Mode-এ পুরো white/light green background থাকে | `app/(onboarding)/*.tsx` | — | 🔴 High |
+| B02 | **হোম স্ক্রিন savings row:** Dark Mode-এ `#1B5E20` text, `#C8E6C9` border, `#A5D6A7` divider invisible | `app/(tabs)/index.tsx` | 350-379 | 🔴 High |
+| B03 | **StepCard locked state:** `#e0e0e0` bg ও `#9e9e9e` text Dark Mode-এ contrast 1.1:1 — WCAG fail | `components/StepCard.tsx` | 12-28 | 🔴 High |
+| B04 | **TriggerSelector chips:** `backgroundColor: '#fff'` Dark Mode-এ bright white flash | `components/TriggerSelector.tsx` | 52 | 🟡 Medium |
+| B05 | **Intensity buttons:** `backgroundColor: '#fff'` Dark Mode-এ white circles on dark background | `app/craving/index.tsx` | 374 | 🟡 Medium |
+| B06 | **Countdown banner:** `#E3F2FD` bg, `#1565C0` text hardcoded — Dark Mode incompatible | `app/(tabs)/tracker.tsx` | 207-222 | 🟡 Medium |
+| B07 | **Future date card:** `#E3F2FD` bg hardcoded | `app/(tabs)/progress.tsx` | 367-376 | 🟡 Medium |
+| B08 | **Motivation banner:** `#FFF8E1` bg, `#E65100` text hardcoded | `app/(tabs)/progress.tsx` | 377-390 | 🟡 Medium |
+| B09 | **Alert card:** `#FFF3E0` bg hardcoded | `app/trigger-log/index.tsx` | 214-222 | 🟡 Medium |
+| B10 | **IslamicSection special cards:** `insightCard`, `reflectionCard`, `ramadanCard`, `familyCard` সব hardcoded colors | `components/IslamicSection.tsx` | 140-258 | 🟡 Medium |
+
+### ২.২ UX-Related Logical Errors
+
+| # | সমস্যা | ফাইল | Priority |
+|---|--------|------|:--------:|
+| L01 | **Bookmark button renders even when `onBookmark` is undefined** — `TouchableOpacity` tap করলে কিছু হয় না | `components/IslamicCard.tsx` L68-70 | 🟡 Medium |
+| L02 | **Submit button visually disabled but functionally active** — `submitBtnDisabled` style applied কিন্তু `disabled={!selectedTrigger}` prop নেই | `app/trigger-log/index.tsx` L171-173 | 🔴 High |
+| L03 | **TriggerSelector no deselect** — user trigger select করলে deselect করতে পারে না | `components/TriggerSelector.tsx` L28 | 🟡 Medium |
+| L04 | **Slip-up "continue" button no confirmation** — directly dispatches without asking | `app/slip-up/index.tsx` L119-126 | 🟡 Medium |
+| L05 | **Notification time input raw text** — user ভুল format দিতে পারে; time picker UI নেই | `components/NotificationSettings.tsx` L72-97 | 🟡 Medium |
+| L06 | **Onboarding no back navigation** — profile-setup ও quit-date-এ back button নেই | `app/(onboarding)/*.tsx` | 🟡 Medium |
+| L07 | **ErrorBoundary uses `useTheme` inside ThemeProvider** — কিন্তু ErrorBoundary ThemeProvider-এর বাইরে wrapped — crash হলে theme পাওয়া যাবে না | `app/_layout.tsx` L89-95 | 🔴 High |
+
+### ২.৩ Responsiveness / Cross-Device সমস্যা
+
+| # | সমস্যা | ফাইল | Priority |
+|---|--------|------|:--------:|
+| R01 | **StepCard fixed 48×56px** — ছোট screen-এ 7 columns overflow হতে পারে | `components/StepCard.tsx` L58-59 | 🟡 Medium |
+| R02 | **ProgressCalendar cell 36×36 fixed** — screen width vary করলে cell সঠিক fit হয় না | `components/ProgressCalendar.tsx` L107-109 | 🟡 Medium |
+| R03 | **Intensity buttons 10টি fixed 40px width** — narrow screens-এ awkward wrap | `app/craving/index.tsx` L366-375 | 🟡 Medium |
+| R04 | **Tab bar 6 tabs** — landscape mode-এ labels cut হতে পারে | `app/(tabs)/_layout.tsx` | 🟢 Low |
+| R05 | **ScrollView nested in tab** — keyboard overlap issue possible on small devices | `app/(tabs)/settings.tsx` | 🟢 Low |
+
+---
+
+## ৩. উন্নতির সুযোগ
+
+### ৩.১ নতুনভাবে ডিজাইন করতে হবে (Redesign Needed)
+
+#### 🔄 ১. Tab Bar — Proper Icon System
+**বর্তমান:** Emoji icons (🏠📅📊🤲📚⚙️)
+**সমস্যা:** Platform-dependent rendering, inconsistent sizing, ৬টি tab overcrowded
+**সমাধান:**
+- `@expo/vector-icons` (Ionicons/MaterialIcons) ব্যবহার করুন
+- "দোয়া" ও "লাইব্রেরি" tab merge করুন (5-tab limit)
+- Active tab indicator animated line/dot যোগ করুন
+- **ফাইল:** [app/(tabs)/_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/_layout.tsx)
+
+#### 🔄 ২. Onboarding Flow — Complete Dark Mode + Visual Overhaul
+**বর্তমান:** Static light-green screens, no animations, no progress indicator
+**সমাধান:**
+- Theme-aware colors সব screen-এ 
+- Animated page transitions (shared element)
+- Step progress bar (dot indicator)
+- Lottie/SVG illustration (emoji-র পরিবর্তে)
+- **ফাইল:** `app/(onboarding)/welcome.tsx`, `profile-setup.tsx`, `quit-date.tsx`
+
+#### 🔄 ৩. CravingTimer — Circular Animated Timer
+**বর্তমান:** Static circle + linear progress bar
+**সমাধান:**
+- `react-native-svg` দিয়ে animated circular progress ring
+- Breathing animation sync (inhale-hold-exhale visual guide)
+- Haptic feedback per second (last 10 seconds)
+- **ফাইল:** [components/CravingTimer.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/CravingTimer.tsx)
+
+#### 🔄 ৪. ProgressCalendar & StepCard — Responsive Grid
+**বর্তমান:** Fixed dimensions, hardcoded colors
+**সমাধান:**
+- `useWindowDimensions` দিয়ে responsive cell size
+- Theme-aware status colors
+- Completion animation (check mark scale-in)
+- **ফাইল:** [components/ProgressCalendar.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/ProgressCalendar.tsx), [components/StepCard.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/StepCard.tsx)
+
+#### 🔄 ৫. HealthTimeline — Connected Visual Timeline
+**বর্তমান:** Disconnected dots
+**সমাধান:**
+- Vertical connecting line (achieved = green, pending = grey)
+- Achieved entries-এ subtle glow effect
+- Icon per milestone instead of emoji
+- **ফাইল:** [components/HealthTimeline.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/HealthTimeline.tsx)
+
+---
+
+### ৩.২ সম্পূর্ণ নতুন ফিচার যোগ করা প্রয়োজন
+
+#### ✨ ১. Splash Screen Design
+**কেন:** বর্তমানে কোনো custom splash screen নেই — generic Expo splash
+**কী করতে হবে:**
+- `app.json`-এ splash image configure করুন
+- Animated splash screen (logo + tagline fade-in)
+- **Best Practice:** Apps like "Muslim Pro", "Quran.com" use branded splash
+
+#### ✨ ২. Floating Craving Button (FAB)
+**কেন:** ক্র্যাভিং বাটন scroll করে পেতে হয় — critical emergency action
+**কী করতে হবে:**
+- Floating Action Button (bottom-right corner)
+- Pulsating animation (attention-grabbing)
+- সব main tab screen-এ visible
+- **ফাইল:** নতুন `components/FloatingCravingButton.tsx`
+
+#### ✨ ৩. Skeleton Loading Screens
+**কেন:** Content load হওয়ার সময় blank screen দেখা যায়
+**কী করতে হবে:**
+- `components/SkeletonScreen.tsx` already exists কিন্তু কোথাও ব্যবহৃত হয় না!
+- হোম, লাইব্রেরি, দোয়া screen-এ implement করুন
+- **ফাইল:** [components/SkeletonScreen.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/SkeletonScreen.tsx) — বিদ্যমান কিন্তু unused
+
+#### ✨ ৪. Haptic-Enhanced Interactions
+**কেন:** শুধুমাত্র step complete করলে haptic আছে — অন্যান্য interaction-এ নেই
+**কী করতে হবে:**
+- Bookmark toggle: light impact
+- Tab switch: selection impact
+- Timer start/stop: medium impact
+- Error states: error notification
+
+#### ✨ ৫. Toast/Snackbar Notifications
+**কেন:** বর্তমানে সব feedback `Alert.alert()` দিয়ে — disruptive
+**কী করতে হবে:**
+- In-app toast/snackbar component
+- Success, error, info variants
+- Auto-dismiss with gesture
+- **ফাইল:** নতুন `components/Toast.tsx`
+
+#### ✨ ৬. Empty State Illustrations  
+**কেন:** Empty states শুধু text — emotionally flat
+**কী করতে হবে:**
+- Each empty state (library bookmarks, trigger chart, inactive tracker) needs SVG illustration
+- Motivational micro-copy
+- Clear CTA button
+
+#### ✨ ৭. Pull-to-Refresh Gesture
+**কেন:** Long-running sessions-এ data stale মনে হতে পারে
+**কী করতে হবে:**
+- Home ও Progress screen-এ RefreshControl
+
+#### ✨ ৮. Animated Page Transitions
+**কেন:** Screen transitions default — bland
+**কী করতে হবে:**
+- Shared element transitions (step card → step detail)
+- Modal slide-up for craving/slip-up
+- Tab switch cross-fade
+
+---
+
+### ৩.৩ Accessibility (a11y) উন্নতি
+
+| # | সমস্যা | ফাইল | সমাধান |
+|---|--------|------|--------|
+| A01 | StepCard-এ `accessibilityLabel` নেই | `components/StepCard.tsx` | `accessibilityLabel={`ধাপ ${step}, ${status}`}` যোগ করুন |
+| A02 | Tab bar emoji icons screen reader-এ meaningless | `app/(tabs)/_layout.tsx` | Proper `accessibilityLabel` per tab |
+| A03 | Color-only status indication (StepCard, ProgressCalendar) | Multiple | Icon + color combination ব্যবহার করুন |
+| A04 | IslamicCard Arabic text font selection | `components/IslamicCard.tsx` | `accessibilityLanguage="ar"` যোগ করুন |
+| A05 | Timer progress no screen reader update | `components/CravingTimer.tsx` | `AccessibilityInfo.announceForAccessibility()` per minute |
+| A06 | Contrast ratio WCAG AA fail | `StepCard` future state | Minimum 4.5:1 contrast ratio নিশ্চিত করুন |
+| A07 | Touch targets < 44px | `ProgressCalendar` cells | Minimum 44×44px maintain করুন |
+| A08 | No `accessibilityRole="header"` on section titles | Multiple screens | যোগ করুন |
+| A09 | Form inputs missing `accessibilityHint` | `profile-setup.tsx` | যেমন: "আপনার পুরো নাম লিখুন" |
+| A10 | `ReduceMotion` check only Craving/SlipUp/TriggerLog-এ — অন্যান্য animation unchecked | `library.tsx`, `dua.tsx` AnimatedItems | সব animated components-এ check যোগ করুন |
+
+---
+
+### ৩.৪ Performance উন্নতি
+
+| # | সমস্যা | ফাইল | সমাধান |
+|---|--------|------|--------|
+| P01 | `IslamicCard` re-render on parent state change | `components/IslamicCard.tsx` | ✅ Already `React.memo` — Good |
+| P02 | `ProgressCalendar` 41 cells no virtualization | `components/ProgressCalendar.tsx` | `useMemo` per cell status |
+| P03 | `getStepContent` called on every home render | `app/(tabs)/index.tsx` | ✅ Already memoized — Good |
+| P04 | Library FlatList re-renders on bookmark toggle | `app/(tabs)/library.tsx` | `useCallback` for `handleBookmark` |
+| P05 | Progress screen many `useMemo` hooks — complex computations | `app/(tabs)/progress.tsx` | Split into smaller sub-components |
+| P06 | No image caching (if images added later) | — | `expo-image` ব্যহবার পরিকল্পনা করুন |
+
+---
+
+## ৪. অগ্রাধিকার তালিকা (Prioritized Action Plan)
+
+### 🔴 Phase 1: Critical Fixes (High Priority) — Quick Wins
+
+> **আনুমানিক সময়:** ২-৩ দিন  
+> **প্রভাব:** সবচেয়ে বেশি visual ও functional উন্নতি
+
+| # | কাজ | ফাইল(গুলো) | প্রভাব |
+|---|------|-----------|--------|
+| H01 | **সকল hardcoded color → theme token** — সব `#1B5E20`, `#C8E6C9`, `#E3F2FD`, `#FFF8E1`, `#FFF3E0`, `#E8F5E9` ইত্যাদি theme-aware করুন | ২০+ ফাইল | 🌟🌟🌟🌟🌟 |
+| H02 | **Onboarding screens Dark Mode support** — `welcome.tsx`, `profile-setup.tsx`, `quit-date.tsx`-এ theme integration | `app/(onboarding)/*.tsx` | 🌟🌟🌟🌟🌟 |
+| H03 | **Theme system expand** — `theme.tsx`-এ নতুন semantic colors যোগ: `warning`, `info`, `surfaceElevated`, `onPrimary`, `chipBackground`, `chipBorder` | `theme.tsx` | 🌟🌟🌟🌟🌟 |
+| H04 | **Submit button aria fix** — `disabled` prop যোগ করুন trigger log submit-এ | `app/trigger-log/index.tsx` | 🌟🌟🌟🌟 |
+| H05 | **ErrorBoundary ThemeProvider crash fix** — ErrorBoundary-কে ThemeProvider-এর ভেতরে রাখুন, অথবা ErrorBoundary-তে fallback static colors ব্যবহার করুন | `app/_layout.tsx` | 🌟🌟🌟🌟 |
+| H06 | **Bookmark button conditional render** — `onBookmark` undefined হলে বাটন hide করুন | `components/IslamicCard.tsx` | 🌟🌟🌟 |
+
+---
+
+### 🟡 Phase 2: UX Enhancement (Medium Priority)
+
+> **আনুমানিক সময়:** ৪-৫ দিন  
+> **প্রভাব:** User experience এর মৌলিক উন্নতি
+
+| # | কাজ | ফাইল(গুলো) | প্রভাব |
+|---|------|-----------|--------|
+| M01 | **Tab bar icon upgrade** — Emoji → `@expo/vector-icons` + ৬ tabs → ৫ tabs (দোয়া+লাইব্রেরি merge) | `app/(tabs)/_layout.tsx` | 🌟🌟🌟🌟🌟 |
+| M02 | **Floating craving button** — সকল main screen-এ accessible FAB | নতুন component | 🌟🌟🌟🌟🌟 |
+| M03 | **Onboarding progress bar** — Step indicator visual progress | `app/(onboarding)/*.tsx` | 🌟🌟🌟🌟 |
+| M04 | **TriggerSelector deselect support** — re-tap to deselect, accessibility props | `components/TriggerSelector.tsx` | 🌟🌟🌟 |
+| M05 | **Toast notifications** — `Alert.alert()` → in-app toast | নতুন component | 🌟🌟🌟🌟 |
+| M06 | **Notification time picker** — raw text input → proper time picker | `components/NotificationSettings.tsx` | 🌟🌟🌟 |
+| M07 | **Onboarding back navigation** — Back button যোগ করুন | `app/(onboarding)/*.tsx` | 🌟🌟🌟 |
+| M08 | **Responsive StepCard/Calendar** — `useWindowDimensions` দিয়ে dynamic sizing | `components/StepCard.tsx`, `ProgressCalendar.tsx` | 🌟🌟🌟 |
+| M09 | **HealthTimeline visual upgrade** — Connecting line, achieved glow | `components/HealthTimeline.tsx` | 🌟🌟🌟 |
+| M10 | **Empty state illustrations** — SVG illustrations + CTA | Multiple screens | 🌟🌟🌟🌟 |
+
+---
+
+### 🟢 Phase 3: Polish & Delight (Low Priority)
+
+> **আনুমানিক সময়:** ৩-৪ দিন  
+> **প্রভাব:** "Wow factor" ও professional finish
+
+| # | কাজ | ফাইল(গুলো) | প্রভাব |
+|---|------|-----------|--------|
+| L01 | **Animated page transitions** — shared element, cross-fade | Stack/Tab config | 🌟🌟🌟🌟 |
+| L02 | **Custom Bengali font** — Google Fonts: "Noto Sans Bengali" বা "Hind Siliguri" | `app/_layout.tsx`, `theme.tsx` | 🌟🌟🌟🌟 |
+| L03 | **Circular craving timer** — SVG animated ring | `components/CravingTimer.tsx` | 🌟🌟🌟🌟 |
+| L04 | **Micro-animations** — Card press scale, bookmark heart flip, step completion confetti | Multiple | 🌟🌟🌟🌟🌟 |
+| L05 | **Pull-to-refresh** — Home ও Progress screen | `app/(tabs)/index.tsx`, `progress.tsx` | 🌟🌟 |
+| L06 | **Splash screen** — Custom branded splash | `app.json`, assets | 🌟🌟🌟 |
+| L07 | **Skeleton loading** — Implement existing SkeletonScreen | Multiple screens | 🌟🌟🌟 |
+| L08 | **Haptic feedback expansion** — সব interactive elements-এ | Multiple | 🌟🌟 |
+| L09 | **Section collapsible cards** — Progress screen information grouping | `app/(tabs)/progress.tsx` | 🌟🌟🌟 |
+| L10 | **Dua contextual auto-select** — সময় অনুযায়ী সকালের/সন্ধ্যার আজকার auto-select | `app/(tabs)/dua.tsx` | 🌟🌟🌟 |
+
+---
+
+### ⚡ Quick Wins (দ্রুত বড় প্রভাব)
+
+এই পরিবর্তনগুলো **১-২ ঘণ্টায়** করা সম্ভব এবং **তাৎক্ষণিক বড় প্রভাব** ফেলবে:
+
+| # | Quick Win | সময় | প্রভাব |
+|---|-----------|:----:|:------:|
+| Q01 | `theme.tsx`-এ ১০+ নতুন semantic color token যোগ করুন | ৩০ মিনিট | 🌟🌟🌟🌟🌟 |
+| Q02 | Onboarding ৩ screen-এ `theme.colors.background` ও `theme.colors.text` ব্যবহার | ৪৫ মিনিট | 🌟🌟🌟🌟🌟 |
+| Q03 | `StepCard` ও `TriggerSelector`-এ theme colors implement | ৩০ মিনিট | 🌟🌟🌟🌟 |
+| Q04 | `IslamicCard` bookmark conditional render | ১৫ মিনিট | 🌟🌟🌟 |
+| Q05 | Trigger log submit `disabled` prop fix | ১০ মিনিট | 🌟🌟🌟🌟 |
+| Q06 | হোম screen savings row theme-aware colors | ২০ মিনিট | 🌟🌟🌟🌟 |
+| Q07 | `IslamicSection` special cards theme-aware | ৪৫ মিনিট | 🌟🌟🌟🌟 |
+
+---
+
+## ৫. A-grade মানের রেফারেন্স
+
+### প্রতিটি সমস্যার বিপরীতে Industry Best Practice
+
+---
+
+#### 🎨 Color System ও Dark Mode
+
+| সমস্যা | Best Practice | উদাহরণ App |
+|--------|--------------|------------|
+| Hardcoded colors | **Material Design 3 Dynamic Color System** — সকল color semantic token হিসেবে define করুন (`surface`, `onSurface`, `primary`, `onPrimary`, etc.) | Google Keep, Todoist |
+| Dark Mode support partial | **Apple HIG:** "Every screen should work in both Light and Dark Mode" — `useColorScheme()` + theme context | Apple Health, Muslim Pro |
+| Color-only status indication | **WCAG 2.1 SC 1.4.1:** "Color is not used as the only visual means" — icon + color + text label | Duolingo (✓ checkmark + green) |
+
+#### 📝 Typography
+
+| সমস্যা | Best Practice | উদাহরণ App |
+|--------|--------------|------------|
+| System default fonts | **Google Fonts integration** — Bengali: "Noto Sans Bengali" (body), "Hind Siliguri" (display) | BBC Bangla, Prothom Alo |
+| Flat font hierarchy | **Type Scale System** — 5+ distinct sizes with clear hierarchy: Display (28+), Heading (22-24), Title (18-20), Body (14-16), Caption (11-12) | Material Design 3 |
+
+#### 🧭 Navigation ও UX Flow
+
+| সমস্যা | Best Practice | উদাহরণ App |
+|--------|--------------|------------|
+| ৬ tabs overcrowded | **Material Design:** "Bottom nav should have 3-5 destinations" — merge similar tabs | Instagram (5 tabs), WhatsApp (4 tabs) |
+| Emoji tab icons | **Vector icon library** — consistent, scalable, customizable | Expo's `@expo/vector-icons` |
+| No floating critical action | **FAB (Floating Action Button)** — persistent, accessible emergency action | Google Maps (directions FAB) |
+| `Alert.alert()` for all feedback | **In-app Snackbar/Toast** — non-disruptive, auto-dismissable | YouTube (snackbar), Twitter/X (toast) |
+
+#### 🎭 Animation ও Motion
+
+| সমস্যা | Best Practice | উদাহরণ App |
+|--------|--------------|------------|
+| Static timer | **Animated circular progress** — `react-native-svg` Circle + animated stroke-dashoffset | Headspace (breathing animation) |
+| No transition animations | **Shared Element Transitions** — `react-native-reanimated` | Apple Music (card expand) |
+| No micro-interactions | **Spring animations on touch** — scale(0.95) press, opacity transitions | Airbnb (heart animation) |
+| Milestone static emoji confetti | **Lottie animations** — rich, performant celebration animations | Duolingo (lesson complete) |
+
+#### ♿ Accessibility
+
+| সমস্যা | Best Practice | উদাহরণ App |
+|--------|--------------|------------|
+| Missing `accessibilityLabel` | **Every interactive element needs a label** — descriptive, concise | Apple Guidelines |
+| Touch targets < 44px | **WCAG 2.5.5:** Minimum 44×44px touch target | Material Design (48dp minimum) |
+| No `accessibilityRole` | **Proper roles:** `button`, `link`, `header`, `search`, `tab` | React Native docs |
+| ReduceMotion partial | **Universal reduce-motion check** — wrap all animations in `ReduceMotion` guard | iOS Settings example |
+
+#### 📐 Layout ও Spacing
+
+| সমস্যা | Best Practice | উদাহরণ App |
+|--------|--------------|------------|
+| Fixed component sizes | **Responsive dimensions** — `useWindowDimensions()` + percentage-based sizing | Any modern RN app |
+| Inconsistent padding | **8-point grid system** — all spacing multiples of 4/8: xs=4, sm=8, md=16, lg=24, xl=32 | ✅ Already defined in `theme.tsx` but underutilized |
+| Information overload (Progress) | **Progressive disclosure** — collapsible sections, "Show more" patterns | Apple Health (daily/weekly/monthly tabs) |
+
+---
+
+### 🏗️ Implementation Checklist Summary
+
+```
+Phase 1 (Critical) — ২-৩ দিন
+├── H01: Hardcoded colors → theme tokens (20+ files)
+├── H02: Onboarding Dark Mode (3 files)
+├── H03: Theme system expansion (1 file)
+├── H04: Submit button disabled fix (1 file)
+├── H05: ErrorBoundary placement fix (1 file)
+└── H06: Bookmark conditional render (1 file)
+
+Phase 2 (UX Enhancement) — ৪-৫ দিন
+├── M01: Tab bar icon system (1 file)
+├── M02: Floating craving FAB (new + 1 file)
+├── M03: Onboarding progress bar (3 files)
+├── M04: TriggerSelector upgrade (1 file)
+├── M05: Toast component (new)
+├── M06: Time picker UI (1 file)
+├── M07: Onboarding back nav (3 files)
+├── M08: Responsive grid (2 files)
+├── M09: HealthTimeline upgrade (1 file)
+└── M10: Empty state design (5+ files)
+
+Phase 3 (Polish) — ৩-৪ দিন
+├── L01: Page transitions
+├── L02: Custom Bengali font
+├── L03: Circular timer
+├── L04: Micro-animations
+├── L05: Pull-to-refresh
+├── L06: Splash screen
+├── L07: Skeleton loading
+├── L08: Haptic expansion
+├── L09: Collapsible sections
+└── L10: Contextual dua auto-select
+```
+
+---
+
+> [!IMPORTANT]
+> **সবচেয়ে বেশি প্রভাব ফেলবে এই ৩টি কাজ:**
+> 1. **Theme token system পূর্ণ করুন** (H01+H03) — সমস্ত Dark Mode সমস্যা একসাথে সমাধান
+> 2. **Tab bar icon ও structure upgrade** (M01) — প্রথম impression dramatically উন্নত
+> 3. **Floating craving button** (M02) — Critical UX improvement, user retention বৃদ্ধি
+
+> [!TIP]
+> Quick Wins (Q01-Q07) দিয়ে শুরু করুন — **মোট ৩ ঘণ্টায়** app C-grade থেকে B+ grade-এ উন্নীত হবে। তারপর Phase-গুলো ক্রমানুসারে সম্পন্ন করলে A-grade অর্জনযোগ্য।

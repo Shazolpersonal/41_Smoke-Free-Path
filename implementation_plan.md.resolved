@@ -1,0 +1,754 @@
+# 🔍 সম্পূর্ণ কোডবেস লজিক ও ক্যালকুলেশন অডিট রিপোর্ট
+
+বিসমিল্লাহ। নিম্নে "Smoke-free-path" প্রজেক্টের সম্পূর্ণ লজিক, ক্যালকুলেশন, এবং state management স্তরের বিশ্লেষণ উপস্থাপন করা হলো।
+
+---
+
+## 🏆 সামগ্রিক মূল্যায়ন
+
+### বর্তমান গ্রেড: **B-** (আগে C ছিল, পূর্ববর্তী রিফ্যাক্টরিং উন্নতি এনেছে)
+
+**বর্তমান অবস্থার ভালো দিক:**
+- Reducer pattern সুগঠিত এবং idempotent guard সঠিকভাবে আছে
+- State migration logic সুচিন্তিত
+- 1-step-per-calendar-day rule সঠিকভাবে কাজ করে
+- Streak calculation timezone-safe (local date comparison ব্যবহার করে)
+- Milestone detection deduplicate করে (Set ব্যবহার)
+- Debounced state persistence with failure alerting
+
+**A-grade পেতে যে সমস্যাগুলো সমাধান অপরিহার্য — অগ্রাধিকার তালিকা:**
+
+> [!IMPORTANT]
+> নিচের ১৬টি সমস্যা চিহ্নিত করা হয়েছে। এর মধ্যে **৩টি Critical**, **৫টি High**, **৫টি Medium**, এবং **৩টি Low** গুরুত্বের।
+
+---
+
+## 🐛 সমস্যা ১: ডুয়াল মাইলস্টোন ডিটেকশন — ডাবল ফায়ার হতে পারে
+
+📁 **ফাইল:** [tracker/[step].tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/tracker/%5Bstep%5D.tsx#L82-L95) + [MilestoneDetector.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/MilestoneDetector.tsx)
+📍 **লাইন নম্বর:** `tracker/[step].tsx:82-95`, `MilestoneDetector.tsx:32-43`
+⚠️ **সমস্যার ধরন:** লজিক
+🔴 **গুরুত্ব:** Critical
+
+📝 **সমস্যার বিবরণ:**
+মাইলস্টোন ডিটেকশন দুই জায়গায় হচ্ছে — `handleCompleteStep` ফাংশনে (tracker screen) এবং `MilestoneDetector` কম্পোনেন্টে (root layout)। যখন ব্যবহারকারী একটি ধাপ সম্পূর্ণ করেন:
+1. `handleCompleteStep` → `detectMilestone()` → `ACHIEVE_MILESTONE` dispatch + `router.push('/milestone/...')`
+2. `MilestoneDetector` → `useEffect` on `completedSteps` → `detectMilestone()` → `ACHIEVE_MILESTONE` dispatch + `router.push('/milestone/...')`
+
+**Race condition:** `MilestoneDetector`-এর check সম্ভবত `ACHIEVE_MILESTONE` dispatch-এর আগে trigger হয় (কারণ `completedSteps` change হলেই effect চলে), তাই **দুবার** milestone screen navigate হতে পারে। যদিও `ACHIEVE_MILESTONE` reducer idempotent, navigation দুবার হওয়া UX-ভাঙা সমস্যা।
+
+✅ **প্রস্তাবিত সমাধান:**
+`tracker/[step].tsx` থেকে মাইলস্টোন লজিক সম্পূর্ণ সরিয়ে ফেলুন — শুধু `MilestoneDetector`-কেই একমাত্র উৎস রাখুন:
+
+```tsx
+// tracker/[step].tsx — handleCompleteStep থেকে milestone logic সরান
+const handleCompleteStep = useCallback(() => {
+  animateCheckmark();
+  dispatch({ type: 'COMPLETE_STEP', payload: stepNum });
+  AccessibilityInfo.announceForAccessibility('ধাপ সম্পূর্ণ হয়েছে!');
+  try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+  Alert.alert('মাশাআল্লাহ!', 'ধাপ সম্পূর্ণ হয়েছে ✓');
+  // মাইলস্টোন ডিটেকশন MilestoneDetector-এ কেন্দ্রীভূত
+}, [dispatch, stepNum]);
+```
+
+---
+
+## 🐛 সমস্যা ২: `computeProgressStats` — Savings ক্যালকুলেশনে Floating Point সমস্যা
+
+📁 **ফাইল:** [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts#L63-L77)
+📍 **লাইন নম্বর:** 73-74
+⚠️ **সমস্যার ধরন:** গাণিতিক
+🔴 **গুরুত্ব:** High
+
+📝 **সমস্যার বিবরণ:**
+```ts
+const savedCigarettes = smokeFreeDays * profile.cigarettesPerDay;
+const savedMoney = (savedCigarettes / profile.cigarettesPerPack) * profile.cigarettePricePerPack;
+```
+- যদি `cigarettesPerPack` শূন্য (0) হয়, **division by zero** হবে → `Infinity` দেখাবে
+- যদি `cigarettesPerPack` negative হয়, ভুল মান হবে
+- Floating point: যেমন `(7 * 10 / 20) * 15 = 52.5` — ঠিক আছে, কিন্তু `(7 * 3 / 7) * 15.5 = 46.5` এ `Math.round()` ব্যবহার শুধু display-তে হচ্ছে, internal values floating হতে পারে
+
+✅ **প্রস্তাবিত সমাধান:**
+
+```ts
+export function computeProgressStats(profile: UserProfile, planState: PlanState): ProgressStats {
+  const activatedAt = planState.activatedAt;
+  if (!activatedAt) return { smokeFreeDays: 0, savedCigarettes: 0, savedMoney: 0 };
+  
+  const streakBaseDate = planState.lastSlipUpAt || activatedAt;
+  const streakDiff = Math.max(0, Date.now() - new Date(streakBaseDate).getTime());
+  const smokeFreeDays = Math.floor(streakDiff / 86_400_000);
+  
+  // Guard against invalid profile values
+  const cigsPerDay = Math.max(0, profile.cigarettesPerDay);
+  const cigsPerPack = Math.max(1, profile.cigarettesPerPack); // never 0
+  const pricePerPack = Math.max(0, profile.cigarettePricePerPack);
+  
+  const savedCigarettes = smokeFreeDays * cigsPerDay;
+  const savedMoney = (savedCigarettes / cigsPerPack) * pricePerPack;
+  
+  return { smokeFreeDays, savedCigarettes, savedMoney: Math.round(savedMoney * 100) / 100 };
+}
+```
+
+---
+
+## 🐛 সমস্যা ৩: Slip-Up "Continue" → UX-এ ভুল তথ্য দেখানো হচ্ছে
+
+📁 **ফাইল:** [slip-up/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/slip-up/index.tsx#L127-L128)
+📍 **লাইন নম্বর:** 127-128
+⚠️ **সমস্যার ধরন:** UX-বিরোধী আচরণ
+🔴 **গুরুত্ব:** Critical
+
+📝 **সমস্যার বিবরণ:**
+```tsx
+<Typography ...>
+  আপনার ধূমপানমুক্ত দিনের গণনা আবার শূন্য থেকে শুরু হবে, কিন্তু প্ল্যানের ধাপ এবং সাশ্রয় অপরিবর্তিত থাকবে
+</Typography>
+```
+বলা হচ্ছে "সাশ্রয় অপরিবর্তিত থাকবে" — কিন্তু `computeProgressStats` ফাংশনে savings গণনা `lastSlipUpAt` থেকে শুরু হয় (`streakBaseDate = planState.lastSlipUpAt || activatedAt`)। অর্থাৎ slip-up করলে **সাশ্রয়ও শূন্য হয়ে যায়**। ব্যবহারকারীকে যা বলা হচ্ছে তা **বাস্তবতার সাথে মেলে না**।
+
+✅ **প্রস্তাবিত সমাধান:**
+দুটি বিকল্প:
+**বিকল্প ক (সহজ — UX টেক্সট সংশোধন):**
+```tsx
+<Typography variant="small" color="onPrimary" style={{ lineHeight: 17, opacity: 0.87 }}>
+  আপনার ধূমপানমুক্ত দিনের গণনা এবং সাশ্রয়ের হিসাব আবার শূন্য থেকে শুরু হবে, কিন্তু প্ল্যানের ধাপ অপরিবর্তিত থাকবে
+</Typography>
+```
+
+**বিকল্প খ (উন্নত — savings আলাদাভাবে গণনা):**
+Total savings (plan start থেকে) এবং streak-based savings আলাদা করুন। তবে বিকল্প ক সহজ এবং সৎ।
+
+---
+
+## 🐛 সমস্যা ৪: `useProgressStats` — Stale Data (does not re-render on time changes)
+
+📁 **ফাইল:** [useProgressStats.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/hooks/useProgressStats.ts#L22-L25)
+📍 **লাইন নম্বর:** 22-25
+⚠️ **সমস্যার ধরন:** React Native নির্দিষ্ট সমস্যা
+🔴 **গুরুত্ব:** High
+
+📝 **সমস্যার বিবরণ:**
+```ts
+return useMemo(() => {
+  if (!userProfile || !planState.activatedAt) return ZERO_STATS;
+  return computeProgressStats(userProfile, planState);
+}, [userProfile, planState]);
+```
+`computeProgressStats` ভিতরে `Date.now()` ব্যবহার করে, কিন্তু `useMemo` শুধু `userProfile` বা `planState` পরিবর্তন হলে re-evaluate করে। ব্যবহারকারী যদি অ্যাপ খোলা রেখে দেন, তাহলে **smokeFreeDays, savedCigarettes, savedMoney কখনো আপডেট হবে না** — UI-তে পুরনো মান দেখাবে।
+
+✅ **প্রস্তাবিত সমাধান:**
+Home screen এবং Progress screen-এ `refreshing` pull-to-refresh ইতিমধ্যে আছে, কিন্তু stats re-compute হয় না। একটি `refreshKey` state ব্যবহার করুন বা `useMemo` dep-এ `refreshing` অ্যাড করুন:
+
+```ts
+// app/(tabs)/index.tsx — stats useMemo-তে refreshing dependency যোগ করুন
+const stats = useMemo(() => {
+  if (!userProfile) return null;
+  return computeProgressStats(userProfile, planState);
+  // refreshing change হলেও re-compute হবে
+}, [userProfile, planState, refreshing]);
+```
+
+এবং `useProgressStats` হুক-এ একটি `useEffect` with interval (প্রতি ৬০ সেকেন্ডে refresh) অথবা AppState 'active' event-এ refresh করুন:
+
+```ts
+export function useProgressStats(): ProgressStats {
+  const { state } = useAppContext();
+  const { userProfile, planState } = state;
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return useMemo(() => {
+    if (!userProfile || !planState.activatedAt) return ZERO_STATS;
+    return computeProgressStats(userProfile, planState);
+  }, [userProfile, planState, tick]);
+}
+```
+
+---
+
+## 🐛 সমস্যা ৫: Onboarding Profile — `parseInt` দিয়ে Upper Bound Validation নেই
+
+📁 **ফাইল:** [profile-setup.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/%28onboarding%29/profile-setup.tsx#L60-L83)
+📍 **লাইন নম্বর:** 60-83
+⚠️ **সমস্যার ধরন:** Edge Case অনুপস্থিত
+🔴 **গুরুত্ব:** High
+
+📝 **সমস্যার বিবরণ:**
+```ts
+const cigs = parseInt(form.cigarettesPerDay, 10);
+if (isNaN(cigs) || cigs <= 0) { ... }
+
+const years = parseInt(form.smokingYears, 10);
+if (isNaN(years) || years <= 0) { ... }
+```
+ব্যবহারকারী **অযৌক্তিক উচ্চ মান** দিতে পারেন: যেমন `cigarettesPerDay = 99999` বা `smokingYears = 500`। এতে savings calculation বিভ্রান্তিকর মান দেখাবে (যেমন "৳১,০০,০০০ সাশ্রয়")।
+
+এছাড়া, `parseInt` দিয়ে দশমিক সংখ্যা (যেমন "10.5") truncate হয়ে "10" হয়ে যায় — এটি সঠিক আচরণ, কিন্তু ব্যবহারকারীর জানা নেই।
+
+✅ **প্রস্তাবিত সমাধান:**
+
+```ts
+const cigs = parseInt(form.cigarettesPerDay, 10);
+if (isNaN(cigs) || cigs <= 0) {
+  newErrors.cigarettesPerDay = 'সংখ্যাটি ধনাত্মক হতে হবে';
+} else if (cigs > 200) {
+  newErrors.cigarettesPerDay = 'দৈনিক সিগারেট সংখ্যা ২০০-এর বেশি হতে পারে না';
+}
+
+const years = parseInt(form.smokingYears, 10);
+if (isNaN(years) || years <= 0) {
+  newErrors.smokingYears = 'সংখ্যাটি ধনাত্মক হতে হবে';
+} else if (years > 80) {
+  newErrors.smokingYears = 'ধূমপানের বছর ৮০-এর বেশি হতে পারে না';
+}
+```
+
+---
+
+## 🐛 সমস্যা ৬: Quit Date — ভবিষ্যতের তারিখে Upper Bound সমস্যাজনক
+
+📁 **ফাইল:** [quit-date.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/%28onboarding%29/quit-date.tsx#L29-L35)
+📍 **লাইন নম্বর:** 29-35, 178, 201
+⚠️ **সমস্যার ধরন:** Edge Case / UX-বিরোধী
+🔴 **গুরুত্ব:** Medium
+
+📝 **সমস্যার বিবরণ:**
+```ts
+function isDateValid(date: Date): boolean {
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - MAX_PAST_DAYS);
+  cutoff.setHours(0, 0, 0, 0);
+  return date >= cutoff;
+}
+```
+`isDateValid` শুধু past date check করে — **future date-এর কোনো upper limit নেই।** DateTimePicker-এ `maximumDate` আছে (1 বছর পর্যন্ত), কিন্তু `isDateValid` function-এ এই check নেই। ব্যবহারকারী programmatically বা web fallback দিয়ে অনেক ভবিষ্যতের তারিখ set করতে পারেন।
+
+এছাড়া, `maximumDate` calculation time-sensitive:
+```tsx
+maximumDate={new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())}
+```
+`today` একবার `new Date()` দিয়ে set হয় component mount-এ। অ্যাপ দীর্ঘক্ষণ খোলা থাকলে `today` stale হয় — কিন্তু এটি ক্ষুদ্র সমস্যা।
+
+✅ **প্রস্তাবিত সমাধান:**
+
+```ts
+const MAX_FUTURE_DAYS = 30; // এক মাসের বেশি ভবিষ্যতের তারিখ দেওয়া অযৌক্তিক
+
+function isDateValid(date: Date): boolean {
+  const now = new Date();
+  const pastCutoff = new Date(now);
+  pastCutoff.setDate(pastCutoff.getDate() - MAX_PAST_DAYS);
+  pastCutoff.setHours(0, 0, 0, 0);
+  
+  const futureCutoff = new Date(now);
+  futureCutoff.setDate(futureCutoff.getDate() + MAX_FUTURE_DAYS);
+  futureCutoff.setHours(23, 59, 59, 999);
+  
+  return date >= pastCutoff && date <= futureCutoff;
+}
+```
+
+---
+
+## 🐛 সমস্যা ৭: `isStepAccessible` — ধাপ ১ এর জন্য এবং Edge Case
+
+📁 **ফাইল:** [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts#L18-L46)
+📍 **লাইন নম্বর:** 18-46
+⚠️ **সমস্যার ধরন:** লজিক
+🔴 **গুরুত্ব:** High
+
+📝 **সমস্যার বিবরণ:**
+```ts
+// 1-step-per-calendar-day rule: Prevent speedrunning
+if (planState.lastCompletedAt) {
+  const d = new Date(planState.lastCompletedAt);
+  const lastDay = `${d.getFullYear()}-...`;
+  const nowD = new Date();
+  const todayDay = `${nowD.getFullYear()}-...`;
+  if (lastDay === todayDay) {
+    return false;
+  }
+}
+```
+**সমস্যা ১:** এই ফাংশন `step` ≤ 0 বা `step` > 41 validate করে না। `step = 0` বা `step = 42` দিলে:
+- `step > 1 && !planState.completedSteps.includes(step - 1)` → `step = 0` হলে `step > 1` false, তাই skip হয়
+- কিন্তু function `true` return করতে পারে step 0 এর জন্য, যা invalid
+
+**সমস্যা ২:** ব্যবহারকারী plan activate করার পর **প্রথম দিনেই** ধাপ 1 সম্পূর্ণ করতে পারবেন না কারণ `lastCompletedAt` not checked against activation time correctly — আসলে করতে পারবেন কারণ `lastCompletedAt` null থাকে first time-এ। কিন্তু **ধাপ 1 সম্পূর্ণ করার পর একই দিনে ধাপ 2 accessible নয়** — এটি সঠিক আচরণ।
+
+✅ **প্রস্তাবিত সমাধান:**
+
+```ts
+export function isStepAccessible(step: number, planState: PlanState): boolean {
+  // Boundary check
+  if (step < 1 || step > 41) return false;
+  if (!planState.isActive) return false;
+  
+  // ... বাকি লজিক অপরিবর্তিত
+}
+```
+
+---
+
+## 🐛 সমস্যা ৮: Slip-Up এবং Trigger Log-এ Duplicate ID সমস্যা
+
+📁 **ফাইল:** [slip-up/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/slip-up/index.tsx#L55-L77)
+📍 **লাইন নম্বর:** 55-77
+⚠️ **সমস্যার ধরন:** Edge Case
+🔴 **গুরুত্ব:** Medium
+
+📝 **সমস্যার বিবরণ:**
+```ts
+const slipUp = {
+  id: `su_${Date.now()}`,
+  ...
+};
+// কিছু লাইন পর:
+dispatch({
+  type: 'ADD_TRIGGER_LOG',
+  payload: {
+    id: `tl_su_${Date.now()}`,
+    ...
+  },
+});
+```
+`Date.now()` মিলিসেকেন্ড রিটার্ন করে। দুটি dispatch খুব দ্রুত হলে একই `Date.now()` value পেতে পারে — ফলে দুটি অবজেক্টের ID একই হতে পারে। যদিও prefix ভিন্ন (`su_` vs `tl_su_`), কিন্তু ক্র্যাভিং স্ক্রিনে (`craving/index.tsx:108`) `Math.random()` ব্যবহার করা হচ্ছে — এটি slip-up স্ক্রিনেও হওয়া উচিত consistency-র জন্য।
+
+✅ **প্রস্তাবিত সমাধান:**
+
+```ts
+// slip-up/index.tsx
+const slipUp = {
+  id: `su_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+  ...
+};
+// একইভাবে trigger log ID:
+id: `tl_su_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+```
+
+---
+
+## 🐛 সমস্যা ৯: `ProfileEditor` — Dark Mode-এ Hardcoded Color
+
+📁 **ফাইল:** [ProfileEditor.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/ProfileEditor.tsx#L220-L227)
+📍 **লাইন নম্বর:** 220-227
+⚠️ **সমস্যার ধরন:** UX-বিরোধী আচরণ
+🔴 **গুরুত্ব:** Medium
+
+📝 **সমস্যার বিবরণ:**
+```ts
+infoLabel: {
+  color: '#64748b', // Hardcoded
+  fontWeight: '500',
+},
+infoValue: {
+  fontWeight: '600',
+  color: '#1e293b', // Hardcoded
+},
+```
+Dark mode-এ এই hardcoded color-গুলো পড়া কঠিন হবে (dark background-এ dark text)।
+
+✅ **প্রস্তাবিত সমাধান:**
+Inline style দিয়ে theme color ব্যবহার করুন:
+
+```tsx
+<Typography variant="body" style={{ color: theme.colors.textSecondary, fontWeight: '500' }}>{/* label */}</Typography>
+<Typography variant="body" style={{ color: theme.colors.text, fontWeight: '600' }}>{/* value */}</Typography>
+```
+
+---
+
+## 🐛 সমস্যা ১০: `DataManager` — `Text` কম্পোনেন্ট ব্যবহার হচ্ছে `Typography`-র বদলে
+
+📁 **ফাইল:** [DataManager.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/DataManager.tsx#L105-L114)
+📍 **লাইন নম্বর:** 105, 114
+⚠️ **সমস্যার ধরন:** UX-বিরোধী আচরণ (Font consistency ভাঙা)
+🔴 **গুরুত্ব:** Low
+
+📝 **সমস্যার বিবরণ:**
+```tsx
+import { View, Text, TouchableOpacity, ... } from 'react-native';
+...
+<Text style={[styles.exportButtonText, ...]}>📤 এক্সপোর্ট</Text>
+<Text style={[styles.importButtonText, ...]}>📥 ইম্পোর্ট</Text>
+```
+অন্যান্য সব কম্পোনেন্টে `Typography` ব্যবহার হচ্ছে কিন্তু এখানে সরাসরি `Text` — ফলে Hind Siliguri font apply হবে না।
+
+✅ **প্রস্তাবিত সমাধান:**
+`Text` → `Typography` পরিবর্তন করুন:
+
+```tsx
+import Typography from '@/components/Typography';
+// ...
+<Typography variant="body" style={{ color: theme.colors.primary, fontWeight: '700' }}>📤 এক্সপোর্ট</Typography>
+<Typography variant="body" style={{ color: theme.colors.infoText, fontWeight: '700' }}>📥 ইম্পোর্ট</Typography>
+```
+
+---
+
+## 🐛 সমস্যা ১১: `BreathingGuide` — `Text` কম্পোনেন্ট ব্যবহার হচ্ছে `Typography`-র বদলে
+
+📁 **ফাইল:** [BreathingGuide.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/craving/BreathingGuide.tsx#L2)
+📍 **লাইন নম্বর:** 2, 53, 61, 64
+⚠️ **সমস্যার ধরন:** UX-বিরোধী আচরণ (Font consistency ভাঙা)
+🔴 **গুরুত্ব:** Low
+
+📝 **সমস্যার বিবরণ:**
+একই সমস্যা — `Text` ব্যবহার হচ্ছে `Typography`-র বদলে।
+
+✅ **প্রস্তাবিত সমাধান:**
+DhikrGuide-এর মতো `Typography` কম্পোনেন্ট ব্যবহার করুন।
+
+---
+
+## 🐛 সমস্যা ১২: `CravingTimer` — Pause/Resume-এ Timer Drift
+
+📁 **ফাইল:** [CravingTimer.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/CravingTimer.tsx#L51-L74)
+📍 **লাইন নম্বর:** 51-74, 77-83
+⚠️ **সমস্যার ধরন:** গাণিতিক
+🔴 **গুরুত্ব:** High
+
+📝 **সমস্যার বিবরণ:**
+```ts
+const start = useCallback(() => {
+  // Animate smoothly to 0 over the custom duration
+  progress.value = withTiming(0, {
+    duration: remaining * 1000,
+    ...
+  });
+  tick.current = setInterval(() => {
+    setRemaining((prev) => {
+      if (prev <= 1) { ... return 0; }
+      return prev - 1;
+    });
+  }, 1000);
+}, [running, remaining]);
+```
+**সমস্যা:** Pause → Resume করলে:
+1. `pause()` → `cancelAnimation(progress)` — Reanimated animation cancel হয়
+2. `start()` re-call → **নতুন animation শুরু হয় `remaining * 1000` duration-এ** — এটি সঠিক
+3. **কিন্তু** `progress.value` pause-এর সময় যা ছিল (যেমন 0.6) → নতুন `withTiming` animation 0.6 থেকে 0 পর্যন্ত যাবে `remaining * 1000` duration-এ — এটি **drift** তৈরি করে কারণ actual remaining time এবং animation duration match করলেও value jump হতে পারে।
+
+আরও গুরুত্বপূর্ণ: `setInterval` 1000ms precise নয় — JavaScript-এ `setInterval` guaranteed 1-second নয়, ব্যাকগ্রাউন্ডে আরও ধীর হতে পারে। ফলে animation আর text counter out-of-sync হতে পারে।
+
+✅ **প্রস্তাবিত সমাধান:**
+`setInterval` বাদ দিয়ে `remaining` গণনা **absolute time**-based করুন:
+
+```ts
+const startTimeRef = useRef<number | null>(null);
+const initialRemainingRef = useRef(TOTAL_SECONDS);
+
+const start = useCallback(() => {
+  if (running) return;
+  setRunning(true);
+  startTimeRef.current = Date.now();
+  initialRemainingRef.current = remaining;
+  
+  progress.value = withTiming(0, {
+    duration: remaining * 1000,
+    easing: Easing.linear,
+  }, (finished) => {
+    if (finished) runOnJS(handleComplete)();
+  });
+
+  tick.current = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTimeRef.current!) / 1000);
+    const newRemaining = Math.max(0, initialRemainingRef.current - elapsed);
+    setRemaining(newRemaining);
+    if (newRemaining <= 0 && tick.current) clearInterval(tick.current);
+  }, 250); // 250ms interval for smoother updates
+}, [running, remaining]);
+```
+
+---
+
+## 🐛 সমস্যা ১৩: `NavigationGuard` — `segments[0]` Change-এ `hasNavigated` Reset সমস্যা
+
+📁 **ফাইল:** [_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/_layout.tsx#L24-L27)
+📍 **লাইন নম্বর:** 24-27
+⚠️ **সমস্যার ধরন:** React Native নির্দিষ্ট সমস্যা
+🔴 **গুরুত্ব:** Medium
+
+📝 **সমস্যার বিবরণ:**
+```ts
+// Reset hasNavigated when the top-level segment changes
+useEffect(() => {
+  hasNavigated.current = false;
+}, [segments[0]]);
+```
+`segments[0]` প্রতিটি re-render-এ নতুন array থেকে আসে। Expo Router-এ `useSegments()` প্রতিবার নতুন array return করে, কিন্তু `segments[0]` primitive value, তাই comparison সঠিক হওয়া উচিত। তবে:
+
+**সমস্যা:** যখন ব্যবহারকারী onboarding থেকে tabs-এ যান, `segments[0]` পরিবর্তন হয় `(onboarding)` → `(tabs)` → `hasNavigated.current = false` → পরবর্তী effect-এ **আবার navigation guard চলে** → double navigation possible।
+
+এটি বিরল কিন্তু edge case-এ ঘটতে পারে।
+
+✅ **প্রস্তাবিত সমাধান:**
+Navigation guard-কে simpler করুন — `hasNavigated` reset করার দরকার নেই segment change-এ:
+
+```ts
+useEffect(() => {
+  if (!hydrated) return;
+  if (hasNavigated.current) return;
+  
+  const inOnboarding = segments[0] === '(onboarding)';
+  const inTabs = segments[0] === '(tabs)';
+  
+  if (!state.userProfile?.onboardingCompleted) {
+    if (!inOnboarding) {
+      hasNavigated.current = true;
+      loadOnboardingStep().then((savedStep) => {
+        if (savedStep === 1) {
+          router.replace('/(onboarding)/profile-setup');
+        } else {
+          router.replace('/(onboarding)/welcome');
+        }
+      });
+    }
+  } else if (!inTabs && !inOnboarding) {
+    hasNavigated.current = true;
+    router.replace('/(tabs)');
+  }
+}, [hydrated, state.userProfile?.onboardingCompleted]);
+// segments সরিয়ে দিন dependency থেকে — শুধু hydrated এবং onboarding status-এ depend করুন
+```
+
+---
+
+## 🐛 সমস্যা ১৪: `clearOldTriggerLogs` — `slipUps` array clean হচ্ছে না
+
+📁 **ফাইল:** [StorageService.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/services/StorageService.ts#L60-L72)
+📍 **লাইন নম্বর:** 60-72
+⚠️ **সমস্যার ধরন:** Edge Case অনুপস্থিত
+🔴 **গুরুত্ব:** Low
+
+📝 **সমস্যার বিবরণ:**
+`clearOldTriggerLogs` function `triggerLogs` এবং `cravingSessions` পুরাতন entries মুছে ফেলে, কিন্তু `slipUps` array-কে clean করে না। দীর্ঘমেয়াদে `slipUps` array অযথা বড় হতে পারে, যদিও সাধারণত এটি ছোট থাকে।
+
+✅ **প্রস্তাবিত সমাধান:**
+
+```ts
+export function clearOldTriggerLogs(state: AppState, daysThreshold: number): AppState {
+  const cutoff = Date.now() - daysThreshold * 24 * 60 * 60 * 1000;
+  const filteredLogs = state.triggerLogs.filter(
+    (log) => new Date(log.timestamp).getTime() >= cutoff,
+  );
+  const filteredSessions = state.cravingSessions.filter(
+    (session) => new Date(session.startTime).getTime() >= cutoff,
+  );
+  // SlipUps older than 1 year = archive
+  const yearCutoff = Date.now() - 365 * 24 * 60 * 60 * 1000;
+  const filteredSlipUps = state.slipUps.filter(
+    (su) => new Date(su.reportedAt).getTime() >= yearCutoff,
+  );
+  
+  if (filteredLogs.length === state.triggerLogs.length && 
+      filteredSessions.length === state.cravingSessions.length &&
+      filteredSlipUps.length === state.slipUps.length) {
+    return state; // no changes — return same reference
+  }
+  return { ...state, triggerLogs: filteredLogs, cravingSessions: filteredSessions, slipUps: filteredSlipUps };
+}
+```
+
+---
+
+## 🐛 সমস্যা ১৫: `DataManager` Import — কোনো Schema Validation নেই
+
+📁 **ফাইল:** [DataManager.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/DataManager.tsx#L57-L92)
+📍 **লাইন নম্বর:** 57-92
+⚠️ **সমস্যার ধরন:** Edge Case / Type সমস্যা
+🔴 **গুরুত্ব:** Medium
+
+📝 **সমস্যার বিবরণ:**
+```ts
+const requiredFields = ['userProfile', 'planState', 'stepProgress', 'milestones', 'bookmarks'];
+const isValid = requiredFields.every((field) => field in parsed);
+```
+কেবল field **existence** check হচ্ছে, কিন্তু:
+- `userProfile` যদি `null` না হয়ে একটি string হয়?
+- `planState.completedSteps` যদি array না হয়ে object হয়?
+- Malicious JSON import করলে app crash হতে পারে
+
+যদিও `migrateAppState` ফাংশন অনেক fallback দেয়, কিন্তু সেটি `HYDRATE` action-এ চলে — `DataManager` সরাসরি `onImport(parsed)` কল করে যা `dispatch({ type: 'HYDRATE', payload: parsed })` চলায়।
+
+✅ **প্রস্তাবিত সমাধান:**
+Basic type validation যোগ করুন:
+
+```ts
+function isValidBackupData(parsed: any): boolean {
+  if (typeof parsed !== 'object' || parsed === null) return false;
+  
+  const requiredFields = ['userProfile', 'planState', 'stepProgress', 'milestones', 'bookmarks'];
+  if (!requiredFields.every((field) => field in parsed)) return false;
+  
+  // planState shape validation
+  if (typeof parsed.planState !== 'object' || parsed.planState === null) return false;
+  if (typeof parsed.planState.isActive !== 'boolean') return false;
+  
+  // stepProgress must be an object
+  if (typeof parsed.stepProgress !== 'object' || parsed.stepProgress === null) return false;
+  
+  // bookmarks must be an array
+  if (!Array.isArray(parsed.bookmarks)) return false;
+  
+  return true;
+}
+```
+
+---
+
+## 🐛 সমস্যা ১৬: `RECORD_SLIP_UP` — `lastSlipUpAt` Field Optional (`?`) কিন্তু ব্যবহারে Required
+
+📁 **ফাইল:** [types/index.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/types/index.ts#L52) + [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts#L68)
+📍 **লাইন নম্বর:** types/index.ts:52, trackerUtils.ts:68
+⚠️ **সমস্যার ধরন:** Type সমস্যা
+🔴 **গুরুত্ব:** Medium
+
+📝 **সমস্যার বিবরণ:**
+```ts
+// types/index.ts
+export interface PlanState {
+  lastSlipUpAt?: string | null;  // optional (?) field
+}
+```
+```ts
+// trackerUtils.ts
+const streakBaseDate = planState.lastSlipUpAt || activatedAt;
+```
+`lastSlipUpAt` optional (`?`) — অর্থাৎ property থাকতেও পারে, নাও থাকতে পারে। কিন্তু কোডে এটি consistent ভাবে ব্যবহার হচ্ছে `undefined` বা `null` হিসেবে — `||` operator দিয়ে। TypeScript-এ `?` এবং `| null` আলাদা জিনিস — এটি confusion তৈরি করতে পারে।
+
+`INITIAL_PLAN_STATE`-এ `lastSlipUpAt` explicitly set করা হয়নি — মানে `undefined` — কিন্তু migration-এ `raw.planState?.lastSlipUpAt ?? null` set করা হচ্ছে।
+
+✅ **প্রস্তাবিত সমাধান:**
+`?` সরিয়ে explicit `null` রাখুন:
+
+```ts
+export interface PlanState {
+  lastSlipUpAt: string | null;  // required field, null when no slip-up
+}
+```
+এবং `INITIAL_PLAN_STATE`-এ:
+```ts
+export const INITIAL_PLAN_STATE: PlanState = {
+  ...
+  lastSlipUpAt: null,
+};
+```
+
+---
+
+## 🎯 Quick Wins — সহজ কিন্তু বড় প্রভাব
+
+| # | পরিবর্তন | প্রভাব | জটিলতা |
+|---|----------|--------|--------|
+| 1 | **সমস্যা ৩**: Slip-Up screen-এ ভুল তথ্য সংশোধন (1 লাইন text change) | ❌→✅ ব্যবহারকারী সঠিক তথ্য পায় | ⚡ ১ মিনিট |
+| 2 | **সমস্যা ৭**: `isStepAccessible`-এ boundary check যোগ | Edge case প্রতিরোধ | ⚡ ২ মিনিট |
+| 3 | **সমস্যা ৮**: Slip-Up ID-তে random suffix যোগ | Duplicate ID prevention | ⚡ ২ মিনিট |
+| 4 | **সমস্যা ৯**: ProfileEditor-এ hardcoded color fix | Dark mode UX | ⚡ ৫ মিনিট |
+| 5 | **সমস্যা ১০-১১**: `Text` → `Typography` migration | Font consistency | ⚡ ১০ মিনিট |
+| 6 | **সমস্যা ১৬**: `lastSlipUpAt` type fix | Type safety | ⚡ ৩ মিনিট |
+| 7 | **সমস্যা ২**: `computeProgressStats`-এ guard clause | Division by zero prevention | ⚡ ৫ মিনিট |
+| 8 | **সমস্যা ১**: Dual milestone detection সরানো | Double navigation fix | ⚡ ৫ মিনিট |
+
+---
+
+## Proposed Changes
+
+### Core Logic Layer
+
+#### [MODIFY] [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts)
+- সমস্যা ২: `computeProgressStats`-এ division by zero guard + precision fix
+- সমস্যা ৭: `isStepAccessible`-এ boundary validation
+
+#### [MODIFY] [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx)
+- সমস্যা ১৬: `INITIAL_PLAN_STATE`-এ `lastSlipUpAt: null` যোগ
+
+---
+
+### Type Layer
+
+#### [MODIFY] [types/index.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/types/index.ts)
+- সমস্যা ১৬: `lastSlipUpAt?` → `lastSlipUpAt` (required)
+
+---
+
+### Screen Layer
+
+#### [MODIFY] [tracker/[step].tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/tracker/%5Bstep%5D.tsx)
+- সমস্যা ১: Duplicate milestone detection সরানো
+
+#### [MODIFY] [slip-up/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/slip-up/index.tsx)
+- সমস্যা ৩: ভুল UX text সংশোধন
+- সমস্যা ৮: ID generation improvement
+
+#### [MODIFY] [profile-setup.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/%28onboarding%29/profile-setup.tsx)
+- সমস্যা ৫: Upper bound validation
+
+#### [MODIFY] [quit-date.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/%28onboarding%29/quit-date.tsx)
+- সমস্যা ৬: Future date upper bound
+
+#### [MODIFY] [app/(tabs)/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/%28tabs%29/index.tsx)
+- সমস্যা ৪: Stats refresh on pull-to-refresh
+
+---
+
+### Component Layer
+
+#### [MODIFY] [ProfileEditor.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/ProfileEditor.tsx)
+- সমস্যা ৯: Hardcoded color → theme color
+
+#### [MODIFY] [DataManager.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/DataManager.tsx)
+- সমস্যা ১০: `Text` → `Typography`
+- সমস্যা ১৫: Basic import validation
+
+#### [MODIFY] [BreathingGuide.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/craving/BreathingGuide.tsx)
+- সমস্যা ১১: `Text` → `Typography`
+
+#### [MODIFY] [CravingTimer.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/CravingTimer.tsx)
+- সমস্যা ১২: Timer drift fix (absolute time-based)
+
+---
+
+### Service Layer
+
+#### [MODIFY] [StorageService.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/services/StorageService.ts)
+- সমস্যা ১৪: `slipUps` cleanup logic
+
+---
+
+### Navigation Layer
+
+#### [MODIFY] [_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/_layout.tsx)
+- সমস্যা ১৩: NavigationGuard simplification
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```bash
+# বিদ্যমান টেস্ট চালানো
+cd "/home/shazol/antigravaty plus kiro/41 Smoke-free-path/smoke-free-path"
+npx jest --passWithNoTests
+```
+
+### Manual Verification
+- প্রতিটি fix-এর পর `npx expo start` দিয়ে অ্যাপ চালিয়ে verify করা
+- Slip-Up screen-এর text পড়ে সঠিক তথ্য আছে কিনা যাচাই
+- Dark mode-এ ProfileEditor দেখা
+- Timer pause/resume করে drift check
+- Milestone detection দুবার trigger হচ্ছে কিনা verify
+
+---
+
+> [!NOTE]
+> এই অডিটে কোনো **catastrophic data loss bug** পাওয়া যায়নি। কোডবেসের মৌলিক স্থাপত্য ভালো — state management, persistence, এবং reducer pattern সুগঠিত। সমস্যাগুলো মূলত **edge case handling**, **consistency**, এবং **precision** লেভেলের — যা C→A grade transition-এ সবচেয়ে গুরুত্বপূর্ণ।

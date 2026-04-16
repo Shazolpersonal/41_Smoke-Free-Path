@@ -1,0 +1,438 @@
+# 🔬 ধোঁয়া-মুক্ত পথ (Smoke-Free Path) — Deep Code Review & Upgrade Analysis v2
+
+> **প্রজেক্ট**: Smoke-Free Path (ধোঁয়া-মুক্ত পথ)  
+> **টেকনোলজি**: React Native (Expo SDK 54), TypeScript, expo-router v6  
+> **তারিখ**: ১৩ এপ্রিল ২০২৬  
+> **রিভিউয়ার**: Antigravity AI Senior Code Auditor (Claude Opus 4.6)  
+> **রিভিউ ধরন**: Full Codebase Deep Audit — প্রতিটি ফাইল, ফাংশন, এবং ডাটা ফ্লো বিশ্লেষিত
+
+---
+
+## 📊 Executive Summary (সারসংক্ষেপ)
+
+> [!IMPORTANT]
+> এই রিভিউটি পূর্ববর্তী C+ গ্রেডের রিভিউ (১১ এপ্রিল ২০২৬) এর সাথে **বর্তমান কোডবেসের তুলনা** করে তৈরি। পূর্ববর্তী রিভিউতে ১৬টি বাগ চিহ্নিত হয়েছিল — তার মধ্যে **১২টি ইতিমধ্যে সমাধান হয়েছে**।
+
+| বিভাগ | পূর্ববর্তী গ্রেড | বর্তমান গ্রেড | লক্ষ্য গ্রেড | অবশিষ্ট সমস্যা |
+|:---|:---:|:---:|:---:|:---:|
+| 🐛 Bug Analysis | C+ | **B+** | A | **4** টি বাগ |
+| ⚙️ Feature Completeness | C | **B** | A | **11** টি মিসিং ফিচার |
+| 🏗️ Code Quality | B- | **B+** | A | **10** টি রিফ্যাক্টর সুপারিশ |
+| 🗺️ Overall Readiness | C+ | **B** | A | **৩-পর্যায়ের** রোডম্যাপ |
+
+### ✅ পূর্ববর্তী রিভিউ থেকে কী কী ঠিক হয়েছে (Fixed Since Last Review)
+
+| পূর্ববর্তী বাগ/ইস্যু | অবস্থা | যেভাবে ঠিক হয়েছে |
+|:---|:---:|:---|
+| BUG-C1: Amiri ফন্ট লোড হচ্ছে না | ✅ Fixed | `useFonts({ 'Amiri': require(...) })` + `app.json` fonts plugin-এ রেজিস্টার করা হয়েছে |
+| BUG-C2: `CravingSession.triggerId` টাইপ মিসম্যাচ | ✅ Fixed | `types/index.ts:110` — `triggerId: TriggerType \| null` করা হয়েছে |
+| BUG-C3: Hydration race condition | ✅ Fixed | Promise-based approach, `setHydrated(true)` in `.finally()`, timer বাদ দেওয়া হয়েছে |
+| BUG-M1: `SlipUp.triggerId` মিসম্যাচ | ✅ Fixed | `types/index.ts:149` — `triggerId: TriggerType \| null` |
+| BUG-M2: `console.warn` override | ✅ Fixed | `LogBox.ignoreLogs(['expo-notifications'])` ব্যবহার করা হয়েছে |
+| BUG-M4: Debounced save — state হারানো | ✅ Fixed | `AppState` lifecycle listener যোগ হয়েছে — background-এ immediate flush |
+| BUG-M5: `completedSteps` duplicate | ✅ Fixed | `Array.from(new Set(...))` migration ও reducer উভয়তেই |
+| BUG-M6: `UPDATE_LAST_OPENED` dispatch হচ্ছে না | ✅ Fixed | App active event ও mount-এ dispatch হচ্ছে |
+| F1: Error Boundary | ✅ Added | `ErrorBoundary.tsx` — বাংলা UI সহ crash recovery |
+| F2: Loading / Skeleton | ✅ Added | `SkeletonScreen.tsx` — animated placeholder |
+| F5: Data Export/Backup | ✅ Added | Settings-এ export/import (JSON, expo-file-system + expo-sharing) |
+| F6: Dark Mode | ✅ Added | `theme.tsx` — ThemeProvider, light/dark/system preference |
+| F7: App Lifecycle | ✅ Added | `RNAppState` listener — save on background, cleanup on active |
+| F9: Date Picker | ✅ Fixed | `@react-native-community/datetimepicker` ব্যবহৃত, platform-specific |
+| R1: Theme System | ✅ Added | `theme.tsx` — colors, spacing, typography, shadows centralized |
+| R2-R3: Shared Components | ✅ Added | `Card.tsx`, `ScreenHeader.tsx` তৈরি হয়েছে |
+| R4: Constants | ✅ Added | `constants/index.ts` — `TRIGGER_LABELS`, `MILESTONE_BADGES`, `TOTAL_STEPS` |
+| R5: Custom Hooks | ✅ Added | `useProgressStats`, `useMilestones`, `useWeeklySummary` hooks |
+| R6: Error Boundary | ✅ Added | `ErrorBoundary.tsx` |
+| R11: Data Cleanup | ✅ Added | `clearOldTriggerLogs()` এখন app active-এ কল হচ্ছে |
+| R12: AppState listener | ✅ Added | Background flush ও foreground re-engagement |
+
+---
+
+## ১. 🐛 Bug Analysis (বাগ বিশ্লেষণ)
+
+> [!NOTE]
+> পূর্ববর্তী ১৬টি বাগের মধ্যে ১২টি সমাধান হয়েছে। বর্তমানে **৪টি** সক্রিয় বাগ/ইস্যু আছে।
+
+---
+
+### 🟠 Major Bugs (ভুল behavior কিন্তু ক্র্যাশ নয়)
+
+---
+
+#### BUG-M3: `ACTIVATE_PLAN` vs `ACTIVATE_PLAN_WITH_DATE` — আংশিক সমাধান
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [index.tsx (Home)](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/index.tsx#L39-L49) |
+| **অবস্থা** | ⚠️ আংশিক সমাধান — `handleActivatePlan()` এ `totalResets > 0` check আছে এবং quit-date screen-এ navigate করে |
+| **অবশিষ্ট সমস্যা** | প্রথমবার plan activate করলে (reset নয়) `ACTIVATE_PLAN` dispatch হয় যা `new Date().toISOString()` ব্যবহার করে — কিন্তু onboarding flow-তে ইউজার quit-date screen-এ already custom date select করেছে এবং `ACTIVATE_PLAN_WITH_DATE` dispatch হয়েছে। **সমস্যা হবে যদি** onboarding skip হয় কোনোভাবে এবং Home থেকে plan start করা হয় — তখন quit date ভুল হবে |
+| **প্রভাব** | Edge case — বিরল পরিস্থিতি, তবে data integrity risk আছে |
+| **সমাধান** | Home-এর "যাত্রা শুরু করুন" button সবসময় quit-date screen-এ navigate করান (শুধু reset-এর পরে নয়) |
+
+---
+
+#### BUG-M7: Theme System তৈরি হয়েছে কিন্তু অধিকাংশ Screen-এ এখনো ব্যবহৃত নয়
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইলসমূহ** | প্রায় সব screen file — [craving/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/craving/index.tsx), [slip-up/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/slip-up/index.tsx), [progress.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx), [tracker/[step].tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/tracker/%5Bstep%5D.tsx), etc. |
+| **সমস্যা** | `theme.tsx` এ `ThemeProvider`, `useTheme`, light/dark theme তৈরি হয়েছে এবং `_layout.tsx`-এ wrap করা হয়েছে — কিন্তু শুধুমাত্র `Card.tsx`, `ScreenHeader.tsx`, `SkeletonScreen.tsx`, এবং `settings.tsx`-এ `useTheme()` ব্যবহৃত। বাকি **১০+ স্ক্রিনে** এখনো hardcoded `#2E7D32`, `#f5f5f5`, `#fff` ব্যবহার হচ্ছে |
+| **প্রভাব** | Dark Mode চালু করলে `settings.tsx` dark হবে কিন্তু বাকি সব screen light-ই থাকবে — **ভাঙা Dark Mode UX** |
+| **সমাধান** | সব screen-এ `useTheme()` import করে `theme.colors` ব্যবহার করুন — নিচে Refactoring Recommendations-এ বিস্তারিত |
+
+---
+
+### 🟡 Minor Bugs (ছোটখাটো সমস্যা)
+
+---
+
+#### BUG-m4: HTML `<input>` element — Web Platform Fallback
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [quit-date.tsx:179-204](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(onboarding)/quit-date.tsx#L179-L204) |
+| **অবস্থা** | ⚠️ এখনো আছে — Web fallback হিসেবে raw `<input type="date">` ব্যবহৃত |
+| **প্রভাব** | শুধু Web-এ কাজ করে — TypeScript-এ valid কিন্তু React Native philosophy ভাঙে। তবে `@react-native-community/datetimepicker` iOS ও Android-এ সঠিকভাবে ব্যবহৃত হচ্ছে, তাই এটি **কার্যত কোনো সমস্যা নয়** mobile-এ |
+| **রেটিং**: Low priority — web support secondary |
+
+---
+
+#### BUG-m8: `progress.tsx`-এ `TOTAL_STEPS` পুনরায় define করা হয়েছে
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [progress.tsx:25](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx#L25) |
+| **সমস্যা** | `const TOTAL_STEPS = 41;` — `constants/index.ts`-এও `export const TOTAL_STEPS = 41;` আছে কিন্তু import করা হয়নি |
+| **প্রভাব** | DRY violation — minor, কিন্তু ভবিষ্যতে value পরিবর্তন করলে sync miss হতে পারে |
+| **সমাধান** | `import { TOTAL_STEPS } from '@/constants';` ব্যবহার করুন |
+
+---
+
+### 📋 Bug Summary Table
+
+| ID | Severity | ফাইল | অবস্থা | Priority |
+|:---|:---:|:---|:---:|:---:|
+| BUG-M3 | 🟠 Major | `index.tsx` (Home) | ⚠️ আংশিক | Medium |
+| BUG-M7 | 🟠 Major | ১০+ screen files | 🆕 নতুন | **High** |
+| BUG-m4 | 🟡 Minor | `quit-date.tsx` | ⚠️ রয়ে গেছে | Low |
+| BUG-m8 | 🟡 Minor | `progress.tsx` | 🆕 নতুন | Low |
+
+---
+
+## ২. ⚙️ Feature Gap Analysis (ফিচার গ্যাপ বিশ্লেষণ)
+
+> C-grade থেকে A-grade যেতে নিচের ফিচারগুলো এখনো দরকার:
+
+### ✅ আগে মিসিং ছিল, এখন আছে
+
+| ফিচার | অবস্থা | কিভাবে যোগ হয়েছে |
+|:---|:---:|:---|
+| Error Boundary | ✅ সম্পূর্ণ | `ErrorBoundary.tsx` — বাংলা crash recovery screen |
+| Loading / Skeleton | ✅ সম্পূর্ণ | `SkeletonScreen.tsx` — animated shimmer |
+| Data Export/Backup | ✅ সম্পূর্ণ | Settings-এ JSON export/import |
+| Dark Mode | ⚠️ আংশিক | Theme system আছে, কিন্তু বেশিরভাগ screen-এ adopt হয়নি |
+| App Lifecycle | ✅ সম্পূর্ণ | Background save, foreground refresh, data cleanup |
+| Date Picker | ✅ সম্পূর্ণ | Native picker (iOS/Android) + web fallback |
+| Haptic Feedback | ✅ সম্পূর্ণ | `expo-haptics` — step complete ও checklist toggle-এ |
+
+### 🔴 High Priority (অবশ্যই করতে হবে — A-grade essential)
+
+| # | ফিচার | বর্তমান অবস্থা | কেন দরকার |
+|:---:|:---|:---|:---|
+| F3 | **Offline/Error User Feedback** | ⚠️ আংশিক | `saveAppState()` failure-এ 3-চেষ্টার পর Alert দেখায়, কিন্তু network/storage error-এর জন্য কোনো persistent banner নেই |
+| F4 | **Accessibility (a11y)** | ⚠️ আংশিক | `settings.tsx`, `tracker/[step].tsx`-এ কিছু `accessibilityLabel` আছে। কিন্তু `progress.tsx`, `craving/index.tsx`, `dua.tsx`, `library.tsx`-এ নেই |
+| F20 | **Dark Mode Adoption** | ⚠️ Critical Gap | Theme system তৈরি কিন্তু 80%+ screen-এ hardcoded colors — dark mode ভাঙা |
+
+### 🟡 Medium Priority (User Experience উল্লেখযোগ্যভাবে উন্নত করবে)
+
+| # | ফিচার | বর্তমান অবস্থা | কেন দরকার |
+|:---:|:---|:---|:---|
+| F8 | **Search / Filter** | ❌ নেই | ৪১টি দোয়া ও ইসলামিক কন্টেন্টে search করার উপায় নেই |
+| F11 | **Sharing Feature** | ❌ নেই | Milestone অর্জন share করার option নেই (expo-sharing installed কিন্তু শুধু data export-এ ব্যবহৃত) |
+| F12 | **Community / Social** | ❌ নেই | একাকী journey — অন্য ইউজারদের সাথে connection নেই |
+| F14 | **Smooth Screen Transitions** | ⚠️ আংশিক | Craving, Slip-up, Trigger-log screen-এ slide-up animation আছে, কিন্তু tab transitions ও card animations নেই |
+| F18 | **Streak Counter & Gamification** | ⚠️ আংশিক | Milestone আছে, কিন্তু daily streak, points, badges system নেই |
+
+### 🟢 Low Priority (Nice-to-have — A+ grade)
+
+| # | ফিচার | বর্তমান অবস্থা | কেন দরকার |
+|:---:|:---|:---|:---|
+| F13 | **Widget Support** | ❌ নেই | Home screen widget |
+| F15 | **Audio Recitation** | ❌ নেই | আরবি দোয়া শোনার option |
+| F16 | **Multi-language** | ❌ শুধু বাংলা | ইংরেজি, উর্দু — wider audience |
+| F17 | **Analytics / Insights** | ⚠️ Basic | Weekly trigger chart আছে, কিন্তু detailed trend analysis নেই |
+
+---
+
+## ৩. 🏗️ Code Quality & Architecture (কোড কোয়ালিটি)
+
+### ✅ Strengths (যা অত্যন্ত ভালো করা হয়েছে)
+
+| বিষয় | বিবরণ | গ্রেড |
+|:---|:---|:---:|
+| **TypeScript** | সমগ্র codebase TypeScript — well-typed interfaces, enums, clean type exports | **A** |
+| **State Management** | `useReducer` + Context — predictable, idempotent actions, clean reducer | **A-** |
+| **Data Migration** | `migrateAppState()` — backward compatibility, `dailyProgress → stepProgress` migration | **A** |
+| **Test Coverage** | Property-based tests (fast-check) + unit tests — 6 property test suites, 2 unit test files | **B+** |
+| **Content Separation** | ৫টি JSON data file (238KB+ content) — code-free content updates | **A** |
+| **Error Handling** | ErrorBoundary, save failure alerts, notification graceful degradation | **B+** |
+| **Notification Architecture** | Mock fallback for Expo Go, LogBox suppression, identifier-based cancel | **A** |
+| **Lifecycle Management** | Background save, foreground refresh, old data cleanup | **A** |
+| **Theme Infrastructure** | Light/dark themes, system preference, AsyncStorage persistence | **A-** |
+| **Custom Hooks** | `useProgressStats`, `useMilestones`, `useWeeklySummary` — clean separation | **A** |
+| **Data Export/Import** | JSON backup with validation, date display, confirmation dialog | **A-** |
+| **Haptic Feedback** | Step complete ও checklist toggle-এ vibration | **B+** |
+| **Accessibility Effort** | `AccessibilityInfo.isReduceMotionEnabled()` check, some labels | **B** |
+| **Onboarding Flow** | 3-step flow (welcome → profile → quit-date), step persistence | **A-** |
+
+---
+
+### 🔶 Remaining Architecture Issues
+
+---
+
+#### ARCH-1: Theme System Adoption Gap (সবচেয়ে জরুরি)
+
+```
+theme.tsx (ThemeProvider, useTheme) ✅ তৈরি হয়েছে
+├── ব্যবহৃত: Card.tsx, ScreenHeader.tsx, SkeletonScreen.tsx, settings.tsx
+└── ব্যবহৃত নয়: 
+    ├── index.tsx (Home)         → hardcoded #2E7D32, #f5f5f5
+    ├── progress.tsx             → hardcoded #2E7D32, #f5f5f5
+    ├── tracker.tsx              → hardcoded
+    ├── dua.tsx                  → hardcoded
+    ├── library.tsx              → hardcoded
+    ├── craving/index.tsx        → hardcoded
+    ├── slip-up/index.tsx        → hardcoded
+    ├── trigger-log/index.tsx    → hardcoded
+    ├── tracker/[step].tsx       → hardcoded
+    ├── _layout.tsx              → headerStyle: '#2E7D32' hardcoded
+    ├── (tabs)/_layout.tsx       → tabBar colors hardcoded
+    ├── ErrorBoundary.tsx        → hardcoded
+    ├── ArabicText.tsx           → color '#1a1a1a' hardcoded
+    ├── CravingTimer.tsx         → hardcoded
+    └── IslamicCard.tsx          → hardcoded
+```
+
+> **প্রভাব**: Dark Mode সক্রিয় করলে বেশিরভাগ screen এখনও সাদা ব্যাকগ্রাউন্ডে দেখাবে  
+> **সমাধান**: প্রতিটি screen-এ `const { theme } = useTheme();` import করে সব hardcoded color `theme.colors.primary`, `theme.colors.background` ইত্যাদি দিয়ে replace করুন
+
+---
+
+#### ARCH-2: বড় Screen Files — কিন্তু আগের চেয়ে ভালো
+
+| ফাইল | Lines | আগে | মন্তব্য |
+|:---|:---:|:---:|:---|
+| [settings.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/settings.tsx) | **747** | 522 | বড় হয়েছে — export/import/theme features যোগ হওয়ায় |
+| [tracker/[step].tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/tracker/%5Bstep%5D.tsx) | **641** | 575 | Hadith, reflection, family, money sections |
+| [craving/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/craving/index.tsx) | **457** | 437 | BreathingGuide, DhikrGuide inline components |
+| [quit-date.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(onboarding)/quit-date.tsx) | **435** | — | Platform-specific picker logic |
+| [progress.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx) | **394** | 651 | ✅ **উন্নত** — components extracted (ProgressCalendar, HealthTimeline, MilestoneList) |
+
+> **মূল্যায়ন**: Progress screen-এ component extraction ভালো হয়েছে। Settings ও Tracker screen এখনো বড় — তবে functionality অনুযায়ী acceptable
+
+---
+
+#### ARCH-3: Card/ScreenHeader Components তৈরি কিন্তু বেশিরভাগ Screen-এ ব্যবহৃত নয়
+
+- `Card.tsx` ও `ScreenHeader.tsx` তৈরি হয়েছে theme-aware হিসেবে
+- কিন্তু **কোনো main screen এগুলো import করে না** — সব screen নিজস্ব `styles.card`, `styles.header` define করে
+- **সমাধান**: Shared components-এ migrate করুন
+
+---
+
+#### ARCH-4: Data Loading — Lazy কিন্তু Module-Level Cache
+
+| বিষয় | বর্তমান | মূল্যায়ন |
+|:---|:---|:---|
+| JSON loading | Lazy (first access-এ load) | ✅ ভালো — startup-এ সব load হয় না |
+| Memory cache | Module-level `_stepPlans`, `_islamicContent` etc. | ✅ ভালো — re-load হয় না |
+| Total data size | 238KB (5 JSON files) | ⚠️ মোবাইলে acceptable, তবে step_plans.json (142KB) alone বড় |
+
+---
+
+### 🔧 Remaining Refactoring Recommendations
+
+| # | কী করতে হবে | Priority | সময় |
+|:---:|:---|:---:|:---:|
+| R1 | **সব Screen-এ `useTheme()` adopt করুন** — Dark Mode কাজ করবে | 🔴 High | 4-6 hr |
+| R2 | **Shared `Card`, `ScreenHeader` components ব্যবহার করুন** — duplicate card styles সরান | 🟡 Medium | 2-3 hr |
+| R3 | **`settings.tsx` split করুন** — NotificationSettings, ProfileEditor, DataManager components | 🟡 Medium | 2 hr |
+| R4 | **`tracker/[step].tsx` split করুন** — ChecklistSection, IslamicSection, NavigationBar | 🟡 Medium | 2 hr |
+| R5 | **Tab Layout dark mode** — `(tabs)/_layout.tsx`-এ `tabBarStyle` theme-aware করুন | 🔴 High | 1 hr |
+| R6 | **Root Stack header dark mode** — `_layout.tsx`-এ `headerStyle` theme-aware করুন | 🔴 High | 0.5 hr |
+| R7 | **`ArabicText.tsx`-এ theme color** — `#1a1a1a` hardcoded, dark mode-এ অদৃশ্য হবে | 🔴 High | 0.5 hr |
+| R8 | **`ErrorBoundary.tsx`-এ theme** — dark mode-এ white background সমস্যা | 🟡 Medium | 0.5 hr |
+| R9 | **`TOTAL_STEPS` duplicate সরান** — `progress.tsx`-এ import from constants | 🟢 Low | 5 min |
+| R10 | **`FlatList` ব্যবহার বৃদ্ধি করুন** — `dua.tsx`, `library.tsx`-এ `ScrollView` → `FlatList` | 🟡 Medium | 2 hr |
+
+---
+
+### 📈 Performance Assessment
+
+| বিষয় | অবস্থা | মূল্যায়ন |
+|:---|:---:|:---|
+| JSON lazy loading | ✅ | `ContentService.ts` — first-access cache pattern |
+| Debounced persistence | ✅ | 300ms debounce + background flush |
+| `useMemo` for computed values | ✅ | Progress stats, milestones, weekly summary |
+| `FlatList` usage | ⚠️ আংশিক | `progress.tsx`-এ chart-এ FlatList ব্যবহৃত, কিন্তু `dua.tsx`, `library.tsx`-এ ScrollView |
+| Re-render optimization | ⚠️ | Single AppContext — সব state change-এ পুরো tree re-render |
+| Property-based testing | ✅ | 6 test suites — reducer, migration, storage, utilities |
+
+---
+
+## ৪. 🗺️ Action Roadmap (কর্মপরিকল্পনা)
+
+> **সহজ ভাষায় বোঝানো হচ্ছে** — আপনার প্রজেক্ট ইতিমধ্যে B গ্রেডে আছে! A গ্রেডে যেতে ৩টি ধাপ বাকি।
+
+---
+
+### 🎨 Phase 1: Dark Mode সম্পূর্ণ করুন (সবচেয়ে জরুরি) — ⏰ ১ সপ্তাহ
+
+> **উদ্দেশ্য**: Dark Mode সব screen-এ সঠিকভাবে কাজ করবে
+
+```mermaid
+graph TD
+    A["Phase 1: Dark Mode সম্পূর্ণকরণ"] --> B["Home Screen — useTheme() যোগ"]
+    A --> C["Progress Screen — useTheme() যোগ"]
+    A --> D["Tracker Screen — useTheme() যোগ"]
+    A --> E["Craving Screen — useTheme() যোগ"]
+    A --> F["Dua ও Library — useTheme() যোগ"]
+    A --> G["Tab Bar ও Header — theme-aware"]
+    A --> H["ArabicText ও ErrorBoundary — theme"]
+```
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 1.1 | **Home, Progress, Tracker screen-এ dark mode যোগ** — রাতে চোখের আরাম পাবেন | 3 hr |
+| 1.2 | **Craving, Slip-up, Trigger-log screen-এ dark mode** — সব screen সামঞ্জস্যপূর্ণ হবে | 2 hr |
+| 1.3 | **Dua, Library screen-এ dark mode** — ইসলামিক কন্টেন্ট পড়তে সুবিধা | 1.5 hr |
+| 1.4 | **Tab bar ও navigation header-এ dark mode** — পুরো অ্যাপ consistent দেখাবে | 1 hr |
+| 1.5 | **ArabicText, ErrorBoundary, প্রতিটি component-এ theme** — কোনো কিছু বাদ থাকবে না | 1 hr |
+| 1.6 | **Shared Card ও ScreenHeader components ব্যবহার করুন** — duplicate code কমবে | 2 hr |
+
+---
+
+### 🚀 Phase 2: UX Excellence (ইউজার অভিজ্ঞতা চূড়ান্তকরণ) — ⏰ ২ সপ্তাহ
+
+> **উদ্দেশ্য**: অ্যাপটি ব্যবহার করতে আনন্দদায়ক ও inclusive হবে
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 2.1 | **Accessibility সব screen-এ যোগ করুন** — দৃষ্টি প্রতিবন্ধী ব্যক্তিরাও ব্যবহার করতে পারবেন | 4 hr |
+| 2.2 | **Search ফিচার** — দোয়া ও কন্টেন্ট দ্রুত খুঁজুন | 4 hr |
+| 2.3 | **Sharing Feature** — মাইলস্টোন অর্জন বন্ধুদের সাথে share করুন | 4 hr |
+| 2.4 | **Streak Counter** — কতদিন ধারাবাহিকভাবে চলছেন তা দেখান | 3 hr |
+| 2.5 | **FlatList conversion** — দোয়া ও লাইব্রেরি screen-এ performance উন্নত | 2 hr |
+| 2.6 | **বড় screen files split করুন** — settings.tsx, tracker/[step].tsx ভাগ করুন | 3 hr |
+| 2.7 | **Home "যাত্রা শুরু" bug fix** — সবসময় quit-date screen-এ navigate করান | 0.5 hr |
+
+---
+
+### 🧪 Phase 3: Polish & Production (চূড়ান্ত পালিশ) — ⏰ ১ সপ্তাহ
+
+> **উদ্দেশ্য**: App Store-এ publish করার জন্য প্রস্তুত
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 3.1 | **Integration tests বাড়ান** — সব screen-এর automated পরীক্ষা | 6 hr |
+| 3.2 | **Performance profiling** — কোথায় slow হচ্ছে তা খুঁজে ঠিক করুন | 3 hr |
+| 3.3 | **App Icon ও Splash Screen পালিশ** — প্রথম impression | 2 hr |
+| 3.4 | **Privacy Policy তৈরি করুন** — Store-এ বাধ্যতামূলক | 1 hr |
+| 3.5 | **Beta Testing** — ৫-১০ জন ইউজারকে দিয়ে পরীক্ষা | 1 week |
+| 3.6 | **Production Build & Deploy** — EAS Build দিয়ে final build | 2 hr |
+
+---
+
+## 📋 Priority Matrix
+
+```mermaid
+quadrantChart
+    title Priority vs Effort
+    x-axis Low Effort --> High Effort
+    y-axis Low Impact --> High Impact
+    quadrant-1 Do First
+    quadrant-2 Plan Carefully
+    quadrant-3 Quick Wins
+    quadrant-4 Deprioritize
+    "Dark Mode Adopt (R1)": [0.45, 0.95]
+    "Tab/Header Theme (R5-6)": [0.15, 0.88]
+    "ArabicText Theme (R7)": [0.08, 0.82]
+    "Accessibility": [0.40, 0.78]
+    "Search Feature": [0.45, 0.60]
+    "Share Milestones": [0.50, 0.55]
+    "Streak Counter": [0.35, 0.50]
+    "Settings Split (R3)": [0.30, 0.40]
+    "FlatList Convert (R10)": [0.25, 0.45]
+    "TOTAL_STEPS fix (R9)": [0.05, 0.15]
+    "Audio Recitation": [0.75, 0.30]
+    "Multi-language": [0.85, 0.40]
+    "Widget": [0.80, 0.50]
+    "Community": [0.90, 0.55]
+```
+
+---
+
+## 📊 Codebase Health Dashboard
+
+### ফাইল পরিসংখ্যান
+
+| ক্যাটেগরি | ফাইল সংখ্যা | মোট Lines | বিবরণ |
+|:---|:---:|:---:|:---|
+| **Screens** (app/) | 14 | ~4,200 | 7 tabs + onboarding + modals |
+| **Components** | 14 | ~960 | Card, ScreenHeader, ErrorBoundary, etc. |
+| **Services** | 3 | ~450 | Content, Notification, Storage |
+| **Context** | 1 | 374 | AppContext with reducer |
+| **Types** | 2 | 250 | Comprehensive TypeScript definitions |
+| **Hooks** | 4 | ~80 | useProgressStats, useMilestones, etc. |
+| **Utils** | 1 | 144 | trackerUtils |
+| **Theme** | 1 | 177 | Light/Dark theme system |
+| **Tests** | 8 | ~700+ | 6 property + 2 unit tests |
+| **Data** | 5 | — | 238KB JSON content |
+| **মোট** | ~52 | ~6,300+ | |
+
+### Dependencies Health
+
+| প্যাকেজ | Version | অবস্থা |
+|:---|:---|:---:|
+| expo | ~54.0.33 | ✅ Latest stable |
+| react-native | 0.81.5 | ✅ Latest |
+| react | 19.1.0 | ✅ Latest |
+| expo-router | ~6.0.23 | ✅ Latest |
+| typescript | ~5.9.2 | ✅ Latest |
+| expo-haptics | ~15.0.8 | ✅ New addition |
+| datetimepicker | 8.4.4 | ✅ New addition |
+| expo-file-system | ~19.0.21 | ✅ New addition |
+| expo-sharing | ~14.0.8 | ✅ New addition |
+
+---
+
+## 🎯 Final Verdict (চূড়ান্ত মতামত)
+
+> [!TIP]
+> **এই প্রজেক্টটি শেষ রিভিউ থেকে উল্লেখযোগ্যভাবে উন্নত হয়েছে।** ১৬টি বাগের মধ্যে ১২টি সমাধান, ৭টি নতুন ফিচার যোগ, Theme system, custom hooks, shared components, data export/import — সবই প্রফেশনাল মানে করা হয়েছে। **মূল অবশিষ্ট কাজ হলো Dark Mode সব screen-এ adopt করা** — এটি করলে প্রজেক্ট **B+ থেকে A- তে** যাবে।
+
+| মেট্রিক | পূর্ববর্তী রিভিউ | বর্তমান | Phase 1 পরে | সব Phase পরে |
+|:---|:---:|:---:|:---:|:---:|
+| **Active Bugs** | 16 | **4** | 2 | 0 |
+| **Feature Score** | C | **B** | B+ | A |
+| **Code Quality** | B- | **B+** | A- | A |
+| **Overall Grade** | **C+** | **B** | **B+/A-** | **A** |
+
+### গ্রেড উন্নয়ন ইতিহাস
+
+```mermaid
+graph LR
+    A["C+ (১১ এপ্রিল)"] -->|"১২টি বাগ ফিক্স<br/>৭টি ফিচার যোগ"| B["B (১৩ এপ্রিল)"]
+    B -->|"Dark Mode adopt<br/>Theme integration"| C["B+/A-"]
+    C -->|"Search, Share<br/>Accessibility<br/>Testing"| D["A 🎯"]
+    
+    style A fill:#FFA726,color:#000
+    style B fill:#FFD54F,color:#000
+    style C fill:#AED581,color:#000
+    style D fill:#4CAF50,color:#fff
+```
+
+---
+
+> بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ — আল্লাহ আপনার এই প্রচেষ্টা কবুল করুন। আপনি সঠিক পথে আছেন। 🌿

@@ -1,0 +1,495 @@
+# 🔬 ধোঁয়া-মুক্ত পথ (Smoke-Free Path) — Deep Code Review & Upgrade Analysis
+
+> **প্রজেক্ট**: Smoke-Free Path (ধোঁয়া-মুক্ত পথ)  
+> **টেকনোলজি**: React Native (Expo SDK 54), TypeScript, expo-router v6  
+> **তারিখ**: ১১ এপ্রিল ২০২৬  
+> **রিভিউয়ার**: Antigravity AI Senior Code Auditor
+
+---
+
+## 📊 Executive Summary (সারসংক্ষেপ)
+
+| বিভাগ | বর্তমান গ্রেড | লক্ষ্য গ্রেড | মূল সমস্যা সংখ্যা |
+|:---|:---:|:---:|:---:|
+| 🐛 Bug Analysis | C+ | A | **16** টি বাগ |
+| ⚙️ Feature Completeness | C | A | **18** টি মিসিং ফিচার |
+| 🏗️ Code Quality | B- | A | **12** টি রিফ্যাক্টর সুপারিশ |
+| 🗺️ Overall Readiness | C+ | A | **৫-পর্যায়ের** রোডম্যাপ |
+
+> [!IMPORTANT]
+> এই রিভিউটি কোডবেসের প্রতিটি ফাইল, ৩০+ কম্পোনেন্ট/সার্ভিস, এবং ২৪০KB+ ডাটা ফাইল বিশ্লেষণ করে তৈরি করা হয়েছে।
+
+---
+
+## ১. 🐛 Bug Analysis (বাগ বিশ্লেষণ)
+
+### 🔴 Critical Bugs (অ্যাপ ক্র্যাশ বা ডাটা লস হতে পারে)
+
+---
+
+#### BUG-C1: `ArabicText` কম্পোনেন্ট — Amiri ফন্ট লোড হচ্ছে না
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [ArabicText.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/ArabicText.tsx#L17) |
+| **সমস্যা** | `fontFamily: 'Amiri'` ব্যবহার করা হয়েছে কিন্তু `app.json`-এর `expo-font` plugin-এ **কোনো ফন্ট ফাইল** রেজিস্টার করা হয়নি (`"fonts": []`) এবং `_layout.tsx`-এ `useFonts({})` খালি object দিয়ে কল হচ্ছে |
+| **প্রভাব** | আরবি টেক্সট সিস্টেম ডিফল্ট ফন্টে দেখায় — কুরআনের আয়াত ভুলভাবে রেন্ডার হতে পারে, Android-এ ক্র্যাশ হওয়ার সম্ভাবনা |
+| **সমাধান** | Amiri ফন্ট ফাইল (.ttf) ডাউনলোড করে `assets/fonts/` এ রাখুন এবং `useFonts({ 'Amiri': require('../assets/fonts/Amiri-Regular.ttf') })` কল করুন |
+
+---
+
+#### BUG-C2: `CravingSession.triggerId` টাইপ মিসম্যাচ
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [craving/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/craving/index.tsx#L164), [types/index.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/types/index.ts#L110) |
+| **সমস্যা** | `CravingSession.triggerId` টাইপ হলো `string | null`, কিন্তু Craving Screen-এ `selectedTrigger` (`TriggerType | null`) সরাসরি `triggerId` হিসেবে set করা হচ্ছে — `TriggerType` (`'stress'`, `'social'` ইত্যাদি) কোনো UUID নয় |
+| **প্রভাব** | `triggerId` ফিল্ডে ID-এর বদলে trigger type string সেভ হচ্ছে — ভবিষ্যতে data correlation সম্পূর্ণ ভাঙবে |
+| **সমাধান** | হয় `triggerId`-কে `TriggerType | null` করুন, অথবা trigger log তৈরি করে সেই log-এর ID triggerId হিসেবে ব্যবহার করুন |
+
+---
+
+#### BUG-C3: New User Hydration Race Condition
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/_layout.tsx#L26-L38) |
+| **সমস্যা** | নতুন ইউজারের জন্য hydration detection একটি **800ms fallback timer** এর উপর নির্ভর করে। যদি AsyncStorage slow হয় (পুরনো ডিভাইস), দুইটি hydration path conflict করতে পারে — timer fire হলে navigate করবে, তারপর HYDRATE action এসে আবার navigate করবে |
+| **প্রভাব** | পুরনো ডিভাইসে ডাবল navigation, ফ্লিকারিং UI, বিরল ক্ষেত্রে onboarding skip হতে পারে |
+| **সমাধান** | `loadAppState()` থেকে একটি explicit "loading complete" signal ব্যবহার করুন Promise-based approach দিয়ে, timer fallback বাদ দিন |
+
+---
+
+### 🟠 Major Bugs (ভুল behavior কিন্তু ক্র্যাশ নয়)
+
+---
+
+#### BUG-M1: `SlipUp.triggerId` টাইপ মিসম্যাচ (BUG-C2 এর মতো)
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [slip-up/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/slip-up/index.tsx#L36) |
+| **সমস্যা** | `SlipUp.triggerId` (`string | null`) এ `TriggerType` value সেভ হচ্ছে |
+| **প্রভাব** | ডাটা ইনকনসিস্টেন্সি |
+
+---
+
+#### BUG-M2: `console.warn` / `console.error` গ্লোবাল ওভাররাইড
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [NotificationService.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/services/NotificationService.ts#L7-L26) |
+| **সমস্যা** | `console.warn` ও `console.error` গ্লোবালি override করা হয়েছে expo-notifications warning suppress করতে। যদিও `finally` ব্লকে restore করা হয়, **synchronous `require()` এর মাঝে** অন্য কোনো warning হলে সেটি চাপা পড়বে |
+| **প্রভাব** | ডেভেলপমেন্টে গুরুত্বপূর্ণ warning মিস হতে পারে |
+| **সমাধান** | `LogBox.ignoreLogs()` ব্যবহার করুন অথবা expo-notifications-কে আলাদা try-catch-এ রাখুন |
+
+---
+
+#### BUG-M3: `ACTIVATE_PLAN` idempotency কিন্তু `ACTIVATE_PLAN_WITH_DATE` inconsistency
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L126-L149) |
+| **সমস্যা** | HomeScreen এবং TrackerScreen উভয়ই `ACTIVATE_PLAN` dispatch করে (যা `new Date().toISOString()` ব্যবহার করে), কিন্তু onboarding `ACTIVATE_PLAN_WITH_DATE` ব্যবহার করে user-selected date দিয়ে। যদি onboarding-এর পরে Home Screen থেকে "যাত্রা শুরু করুন" চাপা হয়, idempotency guard সুরক্ষা দেয় – কিন্তু plan inactive হলে (reset এর পর) `ACTIVATE_PLAN` quit date ছাড়া activate হবে |
+| **প্রভাব** | Reset করার পর Home থেকে plan start করলে quit date হারিয়ে যায় |
+| **সমাধান** | Reset পর re-activate করলে ইউজারকে quit-date screen-এ নিয়ে যান |
+
+---
+
+#### BUG-M4: Debounced Save — Last State হারানোর সম্ভাবনা
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L292-L301) |
+| **সমস্যা** | 300ms debounce ব্যবহার হচ্ছে। যদি ইউজার একটি action dispatch করে এবং তৎক্ষণাৎ app minimize/kill করে, শেষ state save হবে না |
+| **প্রভাব** | বিরল ক্ষেত্রে step completion বা craving session হারিয়ে যেতে পারে |
+| **সমাধান** | `AppState` change listener ব্যবহার করে app background-এ যাওয়ার সময় immediate flush করুন |
+
+---
+
+#### BUG-M5: `completedSteps` Array Unbounded Growth
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L165-L193) |
+| **সমস্যা** | `COMPLETE_STEP` reducer duplicate check করে (`alreadyCompleted`), কিন্তু migration path-এ `completedStepsFromOld` deduplicate করে না সবসময়। `detectMilestone` এ `new Set()` ব্যবহার হলেও মূল array-তে duplicates থাকতে পারে |
+| **প্রভাব** | Completion count ভুল দেখাতে পারে progress screen-এ |
+
+---
+
+#### BUG-M6: `UPDATE_LAST_OPENED` কখনো dispatch হচ্ছে না
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L247-L248), [_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/_layout.tsx) |
+| **সমস্যা** | `UPDATE_LAST_OPENED` action থাকলেও কোথাও dispatch করা হয়নি। `lastOpenedAt` শুধু hydration detection-এ ব্যবহৃত, কিন্তু কখনো আপডেট হয় না |
+| **প্রভাব** | প্রথমবার ব্যবহারের পর hydration always fallback timer-এ নির্ভর করে |
+| **সমাধান** | App open-এ `dispatch({ type: 'UPDATE_LAST_OPENED', payload: new Date().toISOString() })` কল করুন |
+
+---
+
+### 🟡 Minor Bugs (ছোটখাটো সমস্যা)
+
+---
+
+#### BUG-m1: `width` as string type assertion
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইলসমূহ** | [progress.tsx:115](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx#L115), [CravingTimer.tsx:83](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/CravingTimer.tsx#L83) |
+| **সমস্যা** | `{ width: \`${percent}%\` as any }` ব্যবহার হচ্ছে — `as any` TypeScript safety ভাঙে |
+| **সমাধান** | Percentage width React Native-এ কাজ করে, তবে `DimensionValue` টাইপ ব্যবহার করে explicit cast-এ পরিবর্তন করুন |
+
+---
+
+#### BUG-m2: `ProgressStats` component কোথাও ব্যবহৃত নয়
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [ProgressStats.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/ProgressStats.tsx) |
+| **সমস্যা** | কম্পোনেন্ট তৈরি হয়েছে কিন্তু কোনো screen-এ import/ব্যবহার করা হয়নি — dead code |
+
+---
+
+#### BUG-m3: TRIGGER_LABELS দুইবার define করা হয়েছে
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইলসমূহ** | [progress.tsx:24-30](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx#L24-L30), [trigger-log/index.tsx:176-182](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/trigger-log/index.tsx#L176-L182) |
+| **সমস্যা** | একই `TRIGGER_LABELS` record দুইটি ফাইলে duplicate - DRY violation |
+| **সমাধান** | `types/enums.ts` বা একটি shared constants file-এ move করুন |
+
+---
+
+#### BUG-m4: HTML `<input>` element React Native code-এ
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [quit-date.tsx:139-156](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(onboarding)/quit-date.tsx#L139-L156) |
+| **সমস্যা** | Web platform-এ native HTML `<input type="date">` ব্যবহার করা হয়েছে — এটি TypeScript-এ valid কিন্তু React Native-এর cross-platform philosophy ভাঙে |
+| **প্রভাব** | শুধু web-এ কাজ করে, ভবিষ্যতে web support বাদ দিলে ভাঙবে |
+
+---
+
+#### BUG-m5: `useRef` exhaustive deps warning suppressed
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইলসমূহ** | [_layout.tsx:62](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/_layout.tsx#L62), [_layout.tsx:43 (tabs)](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/_layout.tsx#L43), [MilestoneAnimation.tsx:33](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/MilestoneAnimation.tsx#L33) |
+| **সমস্যা** | `eslint-disable-next-line react-hooks/exhaustive-deps` একাধিক জায়গায় — dependency array incomplete |
+
+---
+
+#### BUG-m6: `ToastAndroid` শুধু Android-এ কাজ করে
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **ফাইল** | [tracker/[step].tsx:20-24](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/tracker/%5Bstep%5D.tsx#L20-L24) |
+| **সমস্যা** | Step complete হলে toast শুধু Android-এ দেখায়, iOS ও Web-এ কোনো feedback নেই |
+
+---
+
+#### BUG-m7: `.android.os.Handler.swp` — swap file committed
+
+| আইটেম | বিবরণ |
+|:---|:---|
+| **সমস্যা** | Root directory-তে `.android.os.Handler.swp` ফাইল আছে — সম্ভবত vim swap file, version control-এ committed |
+| **সমাধান** | `.gitignore`-এ `*.swp` যোগ করুন এবং ফাইলটি delete করুন |
+
+---
+
+## ২. ⚙️ Feature Gap Analysis (ফিচার গ্যাপ বিশ্লেষণ)
+
+> C-grade থেকে A-grade যেতে নিচের ফিচারগুলো দরকার:
+
+### 🔴 High Priority (অবশ্যই করতে হবে — A-grade essential)
+
+| # | ফিচার | বর্তমান অবস্থা | কেন দরকার |
+|:---:|:---|:---|:---|
+| F1 | **Error Boundary** | ❌ নেই | অ্যাপ ক্র্যাশ হলে সাদা স্ক্রিন দেখায়, ইউজার ভয় পায়। একটি সুন্দর error recovery screen দরকার |
+| F2 | **Loading States / Skeleton Screens** | ❌ নেই | Data লোড হওয়ার সময় কোনো feedback নেই — ইউজার মনে করে অ্যাপ হ্যাং হয়ে গেছে |
+| F3 | **Offline Support / Network Error Handling** | ❌ নেই | AsyncStorage fail হলে কোনো user-facing error দেখায় না |
+| F4 | **Accessibility (a11y)** | ⚠️ আংশিক | Settings screen-এ কিছু `accessibilityLabel` আছে, বাকি screen-গুলোতে নেই। VoiceOver/TalkBack ব্যবহারকারীরা অ্যাপ ব্যবহার করতে পারবেন না |
+| F5 | **Data Export / Backup** | ❌ নেই | ইউজারের সব progress একটি device-এ locked — ফোন নষ্ট হলে সব হারিয়ে যাবে |
+| F6 | **Dark Mode** | ❌ নেই | রাতে অ্যাপ ব্যবহার করলে চোখে pain হয়, night_craving_dua ক্যাটেগরি থাকলেও dark UI নেই |
+| F7 | **App State Lifecycle Management** | ❌ নেই | App background-এ গেলে state save হয় না (debounce issue), app foreground-এ আসলে re-engagement logic নেই |
+
+### 🟡 Medium Priority (User Experience উল্লেখযোগ্যভাবে উন্নত করবে)
+
+| # | ফিচার | বর্তমান অবস্থা | কেন দরকার |
+|:---:|:---|:---|:---|
+| F8 | **Search / Filter** | ❌ নেই | ৪১টি দোয়া ও ইসলামিক কন্টেন্টে search করার উপায় নেই |
+| F9 | **Date/Time Picker** | ⚠️ শুধু TextInput | Native date picker নেই — ইউজারকে YYYY-MM-DD ফরম্যাটে টাইপ করতে হয় |
+| F10 | **Haptic Feedback** | ❌ নেই | Step complete, milestone achieve ইত্যাদিতে vibration feedback দিলে engagement বাড়বে |
+| F11 | **Sharing Feature** | ❌ নেই | Milestone অর্জন social media-তে share করার option নেই |
+| F12 | **Community / Social Feature** | ❌ নেই | একাকী journey — অন্য ইউজারদের সাথে connection নেই |
+| F13 | **Widget Support** | ❌ নেই | Home screen widget দিয়ে progress at-a-glance দেখা যায় না |
+| F14 | **Animated Transitions** | ⚠️ ন্যূনতম | শুধু MilestoneAnimation-এ basic spring animation আছে, বাকি সব transition instant |
+
+### 🟢 Low Priority (Nice-to-have — A+ grade)
+
+| # | ফিচার | বর্তমান অবস্থা | কেন দরকার |
+|:---:|:---|:---|:---|
+| F15 | **Audio Recitation** | ❌ নেই | আরবি দোয়া শোনার option থাকলে ভালো হতো |
+| F16 | **Multi-language Support** | ❌ শুধু বাংলা | ইংরেজি, উর্দু ইত্যাদিতে অনুবাদ — wider audience reach |
+| F17 | **Analytics / Usage Insights** | ❌ নেই | কোন ধাপে বেশি সময় লাগে, কোন trigger বেশি — detailed insights |
+| F18 | **Streak Counter & Gamification** | ⚠️ আংশিক | Milestone আছে কিন্তু daily streak, points, badges system নেই |
+
+---
+
+## ৩. 🏗️ Code Quality & Architecture (কোড কোয়ালিটি)
+
+### ✅ যা ভালো করা হয়েছে (Strengths)
+
+| বিষয় | বিবরণ |
+|:---|:---|
+| **TypeScript Usage** | সমগ্র codebase TypeScript-এ — types, interfaces, enums সুন্দরভাবে organized |
+| **State Management** | `useReducer` + Context — simple এবং predictable state flow |
+| **Data Migration** | `migrateAppState()` function — backward compatibility maintain করা হয়েছে |
+| **Test Coverage** | Property-based tests (fast-check) + unit tests — uncommon for mobile apps |
+| **Content Separation** | JSON data files আলাদা — content update-এ code change লাগে না |
+| **Notification Fallback** | expo-notifications mock — Expo Go তে crash prevention |
+| **Idempotent Actions** | `ACTIVATE_PLAN`, `COMPLETE_STEP` — duplicate dispatch handle করে |
+| **Debounced Persistence** | 300ms debounce — unnecessary writes prevent করে |
+
+---
+
+### 🔶 Architecture Issues (আর্কিটেকচার সমস্যা)
+
+#### ARCH-1: God Context — Single Monolithic State
+
+```
+AppContext.tsx → সব কিছু একটি context-এ
+├── UserProfile
+├── PlanState  
+├── StepProgress (41 items)
+├── TriggerLogs (unbounded array)
+├── CravingSessions (unbounded array)
+├── SlipUps (unbounded array)
+├── Bookmarks
+├── Milestones
+└── LastOpenedAt
+```
+
+> **সমস্যা**: যেকোনো state change-এ পুরো component tree re-render হয়।  
+> **সমাধান**: `useMemo` selector pattern ব্যবহার করুন, অথবা state-কে multiple context-এ split করুন (e.g., `UserContext`, `PlanContext`, `LogsContext`)
+
+---
+
+#### ARCH-2: বড় Screen Files — Single Responsibility Violation
+
+| ফাইল | Lines | উপাদান সংখ্যা |
+|:---|:---:|:---|
+| [progress.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/progress.tsx) | **651** | Stats, Calendar, Timeline, Milestones, Chart — সব একটি ফাইলে |
+| [craving/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/craving/index.tsx) | **437** | Timer, Intensity, Triggers, Strategies, Modal — একটি ফাইলে |
+| [settings.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/settings.tsx) | **522** | Notifications, Profile Edit, Reset — একটি ফাইলে |
+| [tracker/[step].tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/tracker/%5Bstep%5D.tsx) | **575** | Checklist, Islamic Content, Tips, Hadith, Navigation — একটি ফাইলে |
+
+> **সমাধান**: প্রতিটি section-কে আলাদা component-এ extract করুন
+
+---
+
+#### ARCH-3: Inline Styles — No Design System
+
+- **প্রতিটি ফাইলে** `StyleSheet.create()` আলাদাভাবে define হয়েছে
+- `#2E7D32` (primary green) **১৫+ বার** hardcoded
+- `#f5f5f5` (background) **৮+ বার** hardcoded
+- Same card style, header style, section title style — সব duplicate
+
+> **সমাধান**: একটি `theme.ts` ফাইল তৈরি করুন:
+> ```typescript
+> // theme.ts
+> export const colors = {
+>   primary: '#2E7D32',
+>   primaryDark: '#1B5E20',
+>   background: '#f5f5f5',
+>   surface: '#fff',
+>   error: '#C62828',
+>   // ...
+> };
+> 
+> export const typography = { ... };
+> export const spacing = { ... };
+> export const shadows = { ... };
+> ```
+
+---
+
+#### ARCH-4: No Data Cleanup / Pagination
+
+| ডাটা | বৃদ্ধির ধরন | সমস্যা |
+|:---|:---|:---|
+| `triggerLogs[]` | **Unbounded** — প্রতিদিন ১-৫ entries | ৬ মাসে ১০০০+ entries, AsyncStorage slow হবে |
+| `cravingSessions[]` | **Unbounded** | একই সমস্যা |
+| `slipUps[]` | **Unbounded** | একই সমস্যা |
+
+> **সমাধান**: `clearOldTriggerLogs()` function আছে কিন্তু কোথাও call হচ্ছে না! App open-এ automatically পুরনো data clean করুন
+
+---
+
+### 🔧 Specific Refactoring Recommendations
+
+| # | কী করতে হবে | কোথায় | কেন |
+|:---:|:---|:---|:---|
+| R1 | **Theme/Design Token System তৈরি** | নতুন `theme.ts` | Color, spacing, typography centralize |
+| R2 | **Shared Card Component** | নতুন `components/Card.tsx` | ৬+ screen-এ same card style duplicate → single component |
+| R3 | **Shared Header Component** | নতুন `components/ScreenHeader.tsx` | প্রতিটি screen-এ green header duplicate |
+| R4 | **Constants File** | নতুন `constants/index.ts` | TRIGGER_LABELS, MILESTONE_BADGES, TOTAL_STEPS সব centralize |
+| R5 | **Custom Hooks** | নতুন `hooks/` directory | `useProgressStats()`, `useMilestones()`, `useWeeklySummary()` extract |
+| R6 | **Error Boundary Component** | নতুন `components/ErrorBoundary.tsx` | Global crash protection |
+| R7 | **ContentService → class-based** | refactor `ContentService.ts` | JSON require()-গুলো top-level → lazy loading for performance |
+| R8 | **Split Progress Screen** | refactor `progress.tsx` | Calendar, Timeline, Chart → আলাদা component |
+| R9 | **Remove Dead Code** | `ProgressStats.tsx` | Unused component delete করুন বা ব্যবহার করুন |
+| R10 | **Fix All `as any` casts** | Multiple files | Type safety restore করুন |
+| R11 | **Data Cleanup on App Start** | `_layout.tsx` | পুরনো trigger logs, craving sessions auto-cleanup |
+| R12 | **Add `AppState` listener** | `AppContext.tsx` | App background-এ যাওয়ার সময় save করুন |
+
+---
+
+### 📈 Performance Concerns
+
+| সমস্যা | ফাইল | প্রভাব | সমাধান |
+|:---|:---|:---|:---|
+| **সব JSON data startup-এ load হয়** | `ContentService.ts` | `step_plans.json` (142KB) + `islamic_content.json` (35KB) + `duas.json` (36KB) = **213KB** একসাথে memory-তে | Lazy loading বা paginated loading |
+| **Single Context re-renders** | `AppContext.tsx` | Bookmark toggle করলে পুরো app re-render | Context splitting বা selector pattern |
+| **No `FlatList`** | `progress.tsx`, `dua.tsx`, `library.tsx` | Long lists-এ `ScrollView` ব্যবহার → সব items একসাথে render | `FlatList` ব্যবহার করুন |
+| **No Image Optimization** | `assets/` | Icon images 17-22KB — adaptive icon ও splash অপটিমাইজ করা উচিত | WebP format ব্যবহার |
+
+---
+
+## ৪. 🗺️ Action Roadmap (কর্মপরিকল্পনা)
+
+> **সহজ ভাষায় বোঝানো হচ্ছে** — প্রতিটি ধাপে কী করতে হবে, কেন করতে হবে
+
+---
+
+### 🏗️ Phase 1: Foundation Fix (ভিত্তি মেরামত) — ⏰ ১-২ সপ্তাহ
+
+> **উদ্দেশ্য**: অ্যাপ যেন ক্র্যাশ না করে এবং ডাটা হারিয়ে না যায়
+
+```mermaid
+graph TD
+    A["Phase 1: ভিত্তি মেরামত"] --> B["Amiri ফন্ট যোগ করুন"]
+    A --> C["triggerId টাইপ ঠিক করুন"]
+    A --> D["Hydration race condition ঠিক করুন"]
+    A --> E["App background save যোগ করুন"]
+    A --> F["UPDATE_LAST_OPENED dispatch করুন"]
+    A --> G["Error Boundary যোগ করুন"]
+    A --> H[".swp ফাইল মুছুন"]
+```
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 1.1 | **আরবি ফন্ট ঠিক করুন** — কুরআনের আয়াত সুন্দরভাবে দেখাবে | ১ hr |
+| 1.2 | **ট্রিগার আইডি সমস্যা ঠিক করুন** — ডাটা সঠিকভাবে save হবে | ২ hr |
+| 1.3 | **লোডিং সমস্যা ঠিক করুন** — পুরনো ফোনে অ্যাপ খুলতে সমস্যা হবে না | ৩ hr |
+| 1.4 | **অ্যাপ বন্ধ করার সময় ডাটা সেভ করুন** — কোনো progress হারাবে না | ২ hr |
+| 1.5 | **ক্র্যাশ প্রতিরোধ স্ক্রিন তৈরি করুন** — অ্যাপ error হলেও ইউজার ভয় পাবে না | ৩ hr |
+| 1.6 | **অপ্রয়োজনীয় ফাইল মুছুন** — প্রজেক্ট পরিষ্কার রাখুন | ০.৫ hr |
+
+---
+
+### 🎨 Phase 2: UX Upgrade (ইউজার এক্সপিরিয়েন্স উন্নয়ন) — ⏰ ২-৩ সপ্তাহ
+
+> **উদ্দেশ্য**: অ্যাপ ব্যবহার করতে আরও সহজ ও আনন্দদায়ক হবে
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 2.1 | **Theme System তৈরি করুন** — সব রঙ ও ডিজাইন এক জায়গায় | ৪ hr |
+| 2.2 | **Dark Mode যোগ করুন** — রাতে চোখের আরাম | ৮ hr |
+| 2.3 | **Loading Screen তৈরি করুন** — ডাটা লোড হওয়ার সময় সুন্দর animation | ৩ hr |
+| 2.4 | **Date Picker উন্নত করুন** — তারিখ বাছাইয়ে calendar দেখাবে | ৩ hr |
+| 2.5 | **Toast/Feedback সব platform-এ** — iOS ও Web-এও success message | ২ hr |
+| 2.6 | **Smooth Animations** — Screen transition, card animation | ৫ hr |
+| 2.7 | **Accessibility যোগ করুন** — দৃষ্টি প্রতিবন্ধী ব্যক্তিরাও ব্যবহার করতে পারবেন | ৪ hr |
+
+---
+
+### 🚀 Phase 3: Feature Expansion (ফিচার সম্প্রসারণ) — ⏰ ৩-৪ সপ্তাহ
+
+> **উদ্দেশ্য**: নতুন ফিচার যোগ করে অ্যাপকে প্রতিযোগী level-এ নিয়ে যাওয়া
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 3.1 | **Search ফিচার** — দোয়া ও কন্টেন্ট দ্রুত খুঁজুন | ৪ hr |
+| 3.2 | **Data Export/Backup** — আপনার progress ব্যাকআপ রাখুন | ৬ hr |
+| 3.3 | **Streak Counter** — কতদিন ধারাবাহিকভাবে চলছেন তা দেখান | ৫ hr |
+| 3.4 | **Share Milestones** — অর্জন বন্ধুদের সাথে share করুন | ৪ hr |
+| 3.5 | **Haptic Feedback** — ফোনে vibration দিয়ে সফলতার অনুভূতি | ২ hr |
+| 3.6 | **Usage Insights** — কোন trigger বেশি, কোন সময় বেশি — বিস্তারিত chart | ৮ hr |
+
+---
+
+### 🧪 Phase 4: Quality Assurance (মান নিশ্চিতকরণ) — ⏰ ১-২ সপ্তাহ
+
+> **উদ্দেশ্য**: কোড পরিষ্কার, পরীক্ষিত এবং production-ready
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 4.1 | **Code Split করুন** — বড় screen-গুলো ছোট ছোট ভাগে ভাগ করুন | ৬ hr |
+| 4.2 | **Dead Code মুছুন** — যেসব code ব্যবহার হচ্ছে না সেগুলো সরান | ২ hr |
+| 4.3 | **FlatList ব্যবহার করুন** — দীর্ঘ তালিকায় performance উন্নত করুন | ৩ hr |
+| 4.4 | **Data Cleanup যোগ করুন** — পুরনো log আপনাআপনি মুছে যাবে | ২ hr |
+| 4.5 | **Integration Test লিখুন** — সব screen-এর automated পরীক্ষা | ৮ hr |
+| 4.6 | **Performance Profiling** — কোথায় slow হচ্ছে তা খুঁজে ঠিক করুন | ৪ hr |
+
+---
+
+### ✨ Phase 5: Polish & Launch (চূড়ান্ত পালিশ) — ⏰ ১ সপ্তাহ
+
+> **উদ্দেশ্য**: App Store-এ publish করার জন্য প্রস্তুত
+
+| কাজ | সহজ ভাষায় | সময় |
+|:---:|:---|:---:|
+| 5.1 | **App Icon & Splash Screen উন্নত করুন** — প্রথম impression গুরুত্বপূর্ণ | ৩ hr |
+| 5.2 | **Store Listing তৈরি করুন** — App Store/Play Store-এর জন্য screenshots | ৩ hr |
+| 5.3 | **Privacy Policy তৈরি করুন** — Store-এ publish করতে বাধ্যতামূলক | ২ hr |
+| 5.4 | **Beta Testing** — ৫-১০ জন ইউজারকে দিয়ে পরীক্ষা করান | ১ week |
+| 5.5 | **Production Build & Deploy** — EAS Build দিয়ে final APK/IPA তৈরি | ৩ hr |
+
+---
+
+## 📋 Priority Matrix (মূল সারণী)
+
+```mermaid
+quadrantChart
+    title Priority vs Effort
+    x-axis Low Effort --> High Effort
+    y-axis Low Impact --> High Impact
+    quadrant-1 Do First
+    quadrant-2 Plan Carefully
+    quadrant-3 Quick Wins
+    quadrant-4 Deprioritize
+    "Font Fix (BUG-C1)": [0.15, 0.85]
+    "TypeID Fix (BUG-C2)": [0.25, 0.80]
+    "Error Boundary": [0.30, 0.90]
+    "Theme System": [0.45, 0.75]
+    "Dark Mode": [0.60, 0.70]
+    "Code Split": [0.55, 0.60]
+    "Search": [0.40, 0.55]
+    "Data Export": [0.65, 0.65]
+    "Haptic": [0.15, 0.35]
+    "Share": [0.50, 0.45]
+    "Audio": [0.75, 0.30]
+    "Multi-lang": [0.85, 0.40]
+    "Widget": [0.80, 0.50]
+    "Dead Code Cleanup": [0.10, 0.25]
+```
+
+---
+
+## 🎯 Final Verdict (চূড়ান্ত মতামত)
+
+> [!TIP]
+> **এই প্রজেক্টের ভিত্তি অনেক শক্তিশালী।** TypeScript, property-based testing, clean state management, rich Islamic content — এসব প্রফেশনাল মানের কাজ। মূল সমস্যা হলো **critical bugs fix করা** এবং **UX polish** করা। Phase 1 ও Phase 2 সম্পন্ন করলে এটি **B+ grade** হবে, সব Phase সম্পন্ন করলে নিশ্চিত **A grade**।
+
+| মেট্রিক | বর্তমান | Phase 1 পরে | Phase 1-2 পরে | সব Phase পরে |
+|:---|:---:|:---:|:---:|:---:|
+| **Bug Count** | 16 | 6 | 3 | 0 |
+| **Feature Score** | C | C+ | B | A |
+| **Code Quality** | B- | B | B+ | A |
+| **Overall Grade** | **C+** | **B-** | **B+** | **A** |
+
+---
+
+> বিসমিল্লাহির রাহমানির রাহীম — আল্লাহ আপনার এই প্রচেষ্টা কবুল করুন। 🌿
