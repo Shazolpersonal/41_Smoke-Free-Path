@@ -80,7 +80,7 @@ export default function QuitDateScreen() {
   const [showAndroidPicker, setShowAndroidPicker] = useState(false);
   const [dateError, setDateError] = useState('');
 
-  function handleDateChange(_event: DateTimePickerEvent, date?: Date) {
+  function handleDateChange(_event: DateTimePickerEvent | null, date?: Date) {
     if (Platform.OS === 'android') {
       setShowAndroidPicker(false);
     }
@@ -223,7 +223,7 @@ export default function QuitDateScreen() {
                 const parts = e.target.value.split('-');
                 if (parts.length === 3) {
                   const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                  if (!isNaN(d.getTime())) handleDateChange({} as DateTimePickerEvent, d);
+                  if (!isNaN(d.getTime())) handleDateChange(null, d);
                 }
               }}
               style={{
