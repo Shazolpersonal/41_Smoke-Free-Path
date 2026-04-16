@@ -1,0 +1,45 @@
+Starting project at /app/smoke-free-path
+Starting Metro Bundler
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web ./index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 59.2% ( 89/257)
+Web ./index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 59.2% (279/477)
+Web ./index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 59.2% (594/839)
+Web ./index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 84.7% ( 969/1053)
+Web Bundled 17211ms index.ts (1387 modules)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 214ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 89ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 68ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 81ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 72ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 92ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 73ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 85ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 93ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 95ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 109ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 125ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 77ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 68ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
