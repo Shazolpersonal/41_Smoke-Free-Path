@@ -124,6 +124,7 @@ export const lightTheme: Theme = {
 // ─── Dark Theme ───────────────────────────────────────────────────────────────
 
 export const darkTheme: Theme = {
+  ...lightTheme,
   colors: {
     primary: '#10B981',
     primaryDark: '#059669',

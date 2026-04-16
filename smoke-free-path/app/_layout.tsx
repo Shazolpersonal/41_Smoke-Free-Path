@@ -10,7 +10,6 @@ import { scheduleReEngagementNotification } from '@/services/NotificationService
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider, useTheme } from '../theme';
 import { ToastProvider } from '@/context/ToastContext';
-import MilestoneDetector from '@/components/MilestoneDetector';
 
 SplashScreen.preventAutoHideAsync();
 I18nManager.forceRTL(false);
@@ -19,29 +18,27 @@ function NavigationGuard() {
   const { state, hydrated } = useAppContext();
   const router = useRouter();
   const segments = useSegments();
-  const hasNavigated = useRef(false);
 
   useEffect(() => {
     if (!hydrated) return;
-    if (hasNavigated.current) return;
 
     const inOnboarding = segments[0] === '(onboarding)';
     const inTabs = segments[0] === '(tabs)';
 
     if (!state.userProfile?.onboardingCompleted) {
-      hasNavigated.current = true;
-      loadOnboardingStep().then((savedStep) => {
-        if (savedStep === 1) {
-          if (!inOnboarding) router.replace('/(onboarding)/profile-setup');
-        } else {
-          if (!inOnboarding) router.replace('/(onboarding)/welcome');
-        }
-      });
+      if (!inOnboarding) {
+        loadOnboardingStep().then((savedStep) => {
+          if (savedStep === 1) {
+            router.replace('/(onboarding)/profile-setup');
+          } else {
+            router.replace('/(onboarding)/welcome');
+          }
+        });
+      }
     } else if (!inTabs && !inOnboarding) {
-      hasNavigated.current = true;
       router.replace('/(tabs)');
     }
-  }, [hydrated, state.userProfile?.onboardingCompleted, router]);
+  }, [hydrated, state.userProfile?.onboardingCompleted, router, segments]);
 
   return null;
 }
@@ -75,7 +72,6 @@ function RootLayoutInner() {
   return (
     <>
       <NavigationGuard />
-      <MilestoneDetector />
       <Stack
         screenOptions={{
           animation: reduceMotion ? 'none' : 'ios_from_right',
@@ -100,14 +96,14 @@ function RootLayoutInner() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ToastProvider>
           <AppProvider>
             <RootLayoutInner />
           </AppProvider>
-        </ErrorBoundary>
-      </ToastProvider>
-    </ThemeProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

@@ -33,11 +33,12 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 import type { TriggerType } from '@/types';
+import { loadAppState } from '@/services/StorageService';
 
 export default function ProgressScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const { planState, stepProgress, triggerLogs } = state;
 
   const completedCount = planState.completedSteps.length;
@@ -47,7 +48,7 @@ export default function ProgressScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
   
-  const progressPercent = Math.round((completedCount / TOTAL_STEPS) * 100);
+  const progressPercent = Math.min(100, Math.round((completedCount / Math.max(1, TOTAL_STEPS)) * 100));
   const progressWidth = useSharedValue(0);
 
   useEffect(() => {
@@ -81,10 +82,17 @@ export default function ProgressScreen() {
     setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 500);
-  }, []);
+    try {
+      const appState = await loadAppState();
+      if (appState) {
+        dispatch({ type: 'HYDRATE', payload: appState });
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [dispatch]);
 
   const phaseMessage = useMemo(
     () => getPhaseMessage(planState.currentStep || 1),
@@ -319,7 +327,7 @@ export default function ProgressScreen() {
             {weeklyChartData.length === 0 ? (
               <View style={styles.emptyState} accessibilityLabel="এই সপ্তাহে কোনো ট্রিগার লগ নেই। ট্রিগার লগ করুন।">
                 <Typography variant="display" style={{ marginBottom: theme.spacing.md }}>📊</Typography>
-                <Typography variant="subheading" color="text" style={styles.boldTextCenter}>কোনো ট্রিগার লগ নেই</Typography>
+                <Typography variant="subheading" color="text" style={styles.boldTextCenter}>এই সপ্তাহে কোনো ট্রিগার লগ নেই</Typography>
                 <Typography variant="body" color="textSecondary" align="center" style={{ marginBottom: theme.spacing.md }}>
                   এই সপ্তাহে কোনো ট্রিগার লগ করা হয়নি
                 </Typography>

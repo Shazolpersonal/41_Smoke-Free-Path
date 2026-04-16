@@ -16,7 +16,13 @@ import type { UserProfile } from '@/types';
 import { requestPermission, setupAndroidChannel } from '@/services/NotificationService';
 import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
-import { DEFAULT_CIGARETTE_PRICE_PER_PACK } from '@/constants/calculations';
+import {
+  DEFAULT_CIGARETTE_PRICE_PER_PACK,
+  MIN_CIGARETTES_PER_DAY,
+  MAX_CIGARETTES_PER_DAY,
+  MIN_SMOKING_YEARS,
+  MAX_SMOKING_YEARS,
+} from '@/constants/calculations';
 
 const MAX_PAST_DAYS = 30;
 const MAX_FUTURE_DAYS = 30;
@@ -46,7 +52,7 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
   return (
     <View
       style={[styles.progressContainer, { gap: theme.spacing.sm, marginBottom: theme.spacing.md }]}
-      accessibilityLabel={`ধাপ ${currentStep} এর মধ্যে ${totalSteps}`}
+      accessibilityLabel={`ধাপ ${currentStep - 1} এর মধ্যে ${totalSteps - 1}`}
     >
       {Array.from({ length: totalSteps }, (_, i) => (
         <View
@@ -80,7 +86,7 @@ export default function QuitDateScreen() {
   const [showAndroidPicker, setShowAndroidPicker] = useState(false);
   const [dateError, setDateError] = useState('');
 
-  function handleDateChange(_event: DateTimePickerEvent, date?: Date) {
+  function handleDateChange(_event: DateTimePickerEvent | null, date?: Date) {
     if (Platform.OS === 'android') {
       setShowAndroidPicker(false);
     }
@@ -100,6 +106,32 @@ export default function QuitDateScreen() {
       return;
     }
 
+    // Process inputs, handling Bengali digits
+    const parseNumberInput = (input: string, fallback: string | number) => {
+      const sanitized = (input ?? String(fallback)).replace(/[\u09e6-\u09ef]/g, (d) => String(d.charCodeAt(0) - 2534));
+      return parseInt(sanitized, 10);
+    };
+
+    const parsedCigsPerDay = parseNumberInput(params.cigarettesPerDay, existingProfile?.cigarettesPerDay ?? '10');
+    const parsedSmokingYears = parseNumberInput(params.smokingYears, existingProfile?.smokingYears ?? '1');
+    const parsedPricePerPack = parseNumberInput(params.cigarettePricePerPack, existingProfile?.cigarettePricePerPack ?? DEFAULT_CIGARETTE_PRICE_PER_PACK);
+
+    // Validation Rules
+    if (isNaN(parsedCigsPerDay) || parsedCigsPerDay < MIN_CIGARETTES_PER_DAY || parsedCigsPerDay > MAX_CIGARETTES_PER_DAY) {
+      Alert.alert('ভুল ইনপুট', `দৈনিক সিগারেট সংখ্যা ${MIN_CIGARETTES_PER_DAY} থেকে ${MAX_CIGARETTES_PER_DAY} এর মধ্যে হতে হবে।`);
+      return;
+    }
+
+    if (isNaN(parsedSmokingYears) || parsedSmokingYears < MIN_SMOKING_YEARS || parsedSmokingYears > MAX_SMOKING_YEARS) {
+      Alert.alert('ভুল ইনপুট', `ধূমপানের বছর ${MIN_SMOKING_YEARS} থেকে ${MAX_SMOKING_YEARS} এর মধ্যে হতে হবে।`);
+      return;
+    }
+
+    if (isNaN(parsedPricePerPack) || parsedPricePerPack <= 0) {
+      Alert.alert('ভুল ইনপুট', 'প্রতি প্যাকের মূল্য ধনাত্মক হতে হবে।');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await setupAndroidChannel();
@@ -108,9 +140,9 @@ export default function QuitDateScreen() {
       const profile: UserProfile = {
         id: existingProfile?.id ?? Date.now().toString(),
         name: params.name ?? existingProfile?.name ?? '',
-        cigarettesPerDay: parseInt(params.cigarettesPerDay ?? String(existingProfile?.cigarettesPerDay ?? '10'), 10),
-        smokingYears: parseInt(params.smokingYears ?? String(existingProfile?.smokingYears ?? '1'), 10),
-        cigarettePricePerPack: parseInt(params.cigarettePricePerPack ?? String(existingProfile?.cigarettePricePerPack ?? DEFAULT_CIGARETTE_PRICE_PER_PACK), 10),
+        cigarettesPerDay: parsedCigsPerDay,
+        smokingYears: parsedSmokingYears,
+        cigarettePricePerPack: parsedPricePerPack,
         cigarettesPerPack: existingProfile?.cigarettesPerPack ?? 20,
         notificationsEnabled,
         morningNotificationTime: existingProfile?.morningNotificationTime ?? '08:00',
@@ -149,7 +181,7 @@ export default function QuitDateScreen() {
         </TouchableOpacity>
         <StepProgress currentStep={3} totalSteps={3} />
         <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
-          <Typography variant="small" style={[styles.stepIndicator, { color: theme.colors.primary, marginBottom: theme.spacing.xs }]}>ধাপ ২ / ২</Typography>
+          <Typography variant="small" style={[styles.stepIndicator, { color: theme.colors.primary, marginBottom: theme.spacing.xs }]}>ধাপ ৩ / ৩</Typography>
           <Typography variant="display" style={[styles.title, { color: theme.colors.primaryDark, marginBottom: theme.spacing.xs }]}>যাত্রা শুরু করুন</Typography>
           <Typography variant="body" style={[styles.subtitle, { color: theme.colors.textSecondary }]}>আপনার ধূমপান ত্যাগের তারিখ নির্বাচন করুন</Typography>
         </View>
@@ -223,7 +255,7 @@ export default function QuitDateScreen() {
                 const parts = e.target.value.split('-');
                 if (parts.length === 3) {
                   const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                  if (!isNaN(d.getTime())) handleDateChange({} as DateTimePickerEvent, d);
+                  if (!isNaN(d.getTime())) handleDateChange(null, d);
                 }
               }}
               style={{

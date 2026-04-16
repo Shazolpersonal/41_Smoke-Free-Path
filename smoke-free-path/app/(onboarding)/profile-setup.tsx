@@ -10,6 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAppContext } from '@/context/AppContext';
+
 import { saveOnboardingStep } from '@/services/StorageService';
 import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
@@ -35,7 +37,7 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
   return (
     <View
       style={[styles.progressContainer, { marginBottom: theme.spacing.md }]}
-      accessibilityLabel={`ধাপ ${currentStep} এর মধ্যে ${totalSteps}`}
+      accessibilityLabel={`ধাপ ${currentStep - 1} এর মধ্যে ${totalSteps - 1}`}
     >
       {Array.from({ length: totalSteps }, (_, i) => (
         <View
@@ -53,11 +55,13 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
 export default function ProfileSetupScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { state } = useAppContext();
+  const { userProfile } = state;
   const [form, setForm] = useState<FormData>({
-    name: '',
-    cigarettesPerDay: '',
-    smokingYears: '',
-    cigarettePricePerPack: String(DEFAULT_CIGARETTE_PRICE_PER_PACK),
+    name: userProfile?.name ?? '',
+    cigarettesPerDay: userProfile?.cigarettesPerDay?.toString() ?? '',
+    smokingYears: userProfile?.smokingYears?.toString() ?? '',
+    cigarettePricePerPack: userProfile?.cigarettePricePerPack?.toString() ?? String(DEFAULT_CIGARETTE_PRICE_PER_PACK),
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -143,7 +147,7 @@ export default function ProfileSetupScreen() {
           <StepProgress currentStep={2} totalSteps={3} />
           
           <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
-            <Typography variant="small" color="primary" style={{ fontWeight: '600', marginBottom: theme.spacing.xs }}>ধাপ ১ / ২</Typography>
+            <Typography variant="small" color="primary" style={{ fontWeight: '600', marginBottom: theme.spacing.xs }}>ধাপ ২ / ৩</Typography>
             <Typography variant="display" color="primaryDark" style={{ marginBottom: theme.spacing.xs }}>আপনার পরিচয়</Typography>
             <Typography variant="body" color="textSecondary">আপনার সম্পর্কে কিছু তথ্য দিন</Typography>
           </View>

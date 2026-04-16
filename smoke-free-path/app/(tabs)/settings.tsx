@@ -38,7 +38,6 @@ export default function SettingsScreen() {
     if (!TIME_REGEX.test(eveningTime)) { showToast('সন্ধ্যার সময় HH:MM ফরম্যাটে দিন', 'error'); return; }
     setIsSaving(true);
     try {
-      dispatch({ type: 'SET_USER_PROFILE', payload: { ...profile, notificationsEnabled, morningNotificationTime: morningTime, eveningNotificationTime: eveningTime } });
       if (notificationsEnabled) {
         const stepContent = getStepContent(planState.currentStep);
         const { smokeFreeDays } = computeProgressStats(profile, planState, state.slipUps);
@@ -48,8 +47,12 @@ export default function SettingsScreen() {
       } else {
         await cancelAll();
       }
+      dispatch({ type: 'SET_USER_PROFILE', payload: { ...profile, notificationsEnabled, morningNotificationTime: morningTime, eveningNotificationTime: eveningTime } });
       try { await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (err) { console.error('Haptics Error:', err); }
       showToast('সেটিংস সফলভাবে সংরক্ষিত হয়েছে।', 'success');
+    } catch (error) {
+      console.error('Settings save error:', error);
+      showToast('সেটিংস সংরক্ষণে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
     } finally {
       setIsSaving(false);
     }

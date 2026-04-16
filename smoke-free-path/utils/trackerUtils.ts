@@ -19,7 +19,7 @@ const MS_PER_DAY = 86_400_000;
 
 export function isStepAccessible(step: number, planState: PlanState): boolean {
   // Boundary check
-  if (step < 1 || step > 41) return false;
+  if (!Number.isInteger(step) || step < 1 || step > 41) return false;
   if (!planState.isActive) return false;
   
   // User can always view steps they have already completed
@@ -33,6 +33,20 @@ export function isStepAccessible(step: number, planState: PlanState): boolean {
   // To access a new step, the previous step must be completed
   if (step > 1 && !planState.completedSteps.includes(step - 1)) {
     return false;
+  }
+
+  // Cap max accessible step based on days since activation
+  // This guards against device date manipulation and state migration issues
+  // where lastCompletedAt might be null.
+  if (planState.activatedAt) {
+    const actDate = new Date(planState.activatedAt);
+    const nowD = new Date();
+    const actDateOnly = Date.UTC(actDate.getFullYear(), actDate.getMonth(), actDate.getDate());
+    const nowDateOnly = Date.UTC(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+    const diffDays = Math.floor((nowDateOnly - actDateOnly) / MS_PER_DAY);
+    if (step > diffDays + 1) {
+      return false;
+    }
   }
 
   // 1-step-per-calendar-day rule: Prevent speedrunning

@@ -19,7 +19,7 @@ export default function StepPlanScreen() {
   const { theme } = useTheme();
   const { planState, stepProgress, bookmarks } = state;
 
-  const stepNum = parseInt(step ?? '1', 10);
+  const stepNum = Number(step ?? '1');
   const plan = useMemo(() => getStepPlan(stepNum), [stepNum]);
   const islamicContent = useMemo(
     () => (plan ? getStepContent(stepNum) : null),
@@ -27,14 +27,26 @@ export default function StepPlanScreen() {
   );
 
   useEffect(() => {
+    if (!Number.isInteger(stepNum) || stepNum < 1 || stepNum > 41) {
+      router.replace('/(tabs)/tracker');
+      return;
+    }
     if (planState.isActive && !isStepAccessible(stepNum, planState)) {
-       Alert.alert('ধাপটি লক করা আছে', 'এই ধাপটি এখনও আপনার জন্য আনলক হয়নি।');
-       router.replace('/(tabs)/tracker');
+       Alert.alert(
+         'ধাপটি লক করা আছে',
+         'এই ধাপটি এখনও আপনার জন্য আনলক হয়নি।',
+         [{
+           text: 'ঠিক আছে',
+           onPress: () => router.replace('/(tabs)/tracker')
+         }],
+         { cancelable: false }
+       );
     }
   }, [stepNum, planState, router]);
 
   const checkmarkScale = useRef(new Animated.Value(0)).current;
   const checkmarkOpacity = useRef(new Animated.Value(0)).current;
+  const isCompleting = useRef(false);
 
   const progress = stepProgress[stepNum];
   const completedItems = progress?.completedItems ?? [];
@@ -80,13 +92,15 @@ export default function StepPlanScreen() {
   }, [checkmarkScale, checkmarkOpacity]);
 
   const handleCompleteStep = useCallback(() => {
+    if (isStepComplete || isCompleting.current) return;
+    isCompleting.current = true;
     animateCheckmark();
     dispatch({ type: 'COMPLETE_STEP', payload: stepNum });
     AccessibilityInfo.announceForAccessibility('ধাপ সম্পূর্ণ হয়েছে!');
     try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     Alert.alert('মাশাআল্লাহ!', 'ধাপ সম্পূর্ণ হয়েছে ✓');
     // মাইলস্টোন ডিটেকশন MilestoneDetector-এ কেন্দ্রীভূত
-  }, [dispatch, stepNum]);
+  }, [dispatch, stepNum, isStepComplete, animateCheckmark]);
 
   const handlePrevStep = useCallback(() => {
     router.replace(`/tracker/${stepNum - 1}`);

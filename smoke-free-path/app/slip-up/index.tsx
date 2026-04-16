@@ -91,9 +91,10 @@ export default function SlipUpScreen() {
 
     if (decision === 'reset_plan') {
       dispatch({ type: 'RESET_PLAN' });
+      router.replace('/(tabs)');
+    } else {
+      router.replace('/(tabs)/tracker');
     }
-
-    router.replace('/(tabs)');
   };
 
   return (
