@@ -61,7 +61,8 @@ export type AppAction =
   | { type: 'ACHIEVE_MILESTONE'; payload: { steps: number; achievedAt: string } }
   | { type: 'TOGGLE_BOOKMARK'; payload: string }
   | { type: 'UPDATE_LAST_OPENED'; payload: string }
-  | { type: 'HYDRATE'; payload: AppState };
+  | { type: 'HYDRATE'; payload: AppState }
+  | { type: 'CLEANUP_OLD_DATA'; payload: Pick<AppState, 'triggerLogs' | 'cravingSessions' | 'slipUps'> };
 
 // ─── Migration ────────────────────────────────────────────────────────────────
 
@@ -119,11 +120,18 @@ function migrateAppState(raw: any): AppState {
     };
   }
 
+  const rawCompletedSteps = Array.isArray(planState.completedSteps)
+    ? planState.completedSteps
+    : [];
+  const validCompletedSteps = rawCompletedSteps.filter(
+    (step) => typeof step === 'number' && !isNaN(step) && step >= 1 && step <= 41
+  );
+
   return {
     userProfile,
     planState: {
       ...planState,
-      completedSteps: Array.from(new Set(planState.completedSteps)),
+      completedSteps: Array.from(new Set(validCompletedSteps)),
     },
     stepProgress: raw.stepProgress ?? stepProgress,
     triggerLogs: raw.triggerLogs ?? [],
@@ -322,6 +330,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         return state;
       }
 
+    case 'CLEANUP_OLD_DATA':
+      return {
+        ...state,
+        triggerLogs: action.payload.triggerLogs,
+        cravingSessions: action.payload.cravingSessions,
+        slipUps: action.payload.slipUps,
+      };
+
     default:
       return state;
   }
@@ -367,7 +383,14 @@ export function AppProvider({ children }: AppProviderProps) {
         // Cleanup old data
         const cleaned = clearOldTriggerLogs(stateRef.current, 90);
         if (cleaned !== stateRef.current) {
-          dispatch({ type: 'HYDRATE', payload: cleaned });
+          dispatch({
+            type: 'CLEANUP_OLD_DATA',
+            payload: {
+              triggerLogs: cleaned.triggerLogs,
+              cravingSessions: cleaned.cravingSessions,
+              slipUps: cleaned.slipUps,
+            },
+          });
         }
       }
     });
