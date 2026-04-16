@@ -19,7 +19,7 @@ const MS_PER_DAY = 86_400_000;
 
 export function isStepAccessible(step: number, planState: PlanState): boolean {
   // Boundary check
-  if (step < 1 || step > 41) return false;
+  if (!Number.isInteger(step) || step < 1 || step > 41) return false;
   if (!planState.isActive) return false;
   
   // User can always view steps they have already completed
