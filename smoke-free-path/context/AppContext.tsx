@@ -293,10 +293,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         // Already counted today — idempotent
         // no change
       } else {
-        const lastDate = new Date(last + 'T00:00:00Z');
-        const todayDate = new Date(today + 'T00:00:00Z');
-        const diffDays = Math.round(
-          (todayDate.getTime() - lastDate.getTime()) / (24 * 60 * 60 * 1000)
+        const [lastYear, lastMonth, lastDay] = last.split('-').map(Number);
+        const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
+        const lastDateUtc = Date.UTC(lastYear, lastMonth - 1, lastDay);
+        const todayDateUtc = Date.UTC(todayYear, todayMonth - 1, todayDay);
+        const diffDays = Math.floor(
+          (todayDateUtc - lastDateUtc) / (24 * 60 * 60 * 1000)
         );
 
         if (diffDays === 1) {
