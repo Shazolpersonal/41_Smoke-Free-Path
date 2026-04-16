@@ -189,17 +189,17 @@ export default function ProgressScreen() {
             <View
               style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
               accessible={true}
-              accessibilityLabel={`বাঁচানো সিগারেট: ${stats.savedCigarettes}`}
+              accessibilityLabel={`বাঁচানো সিগারেট: ${stats.totalSavedCigarettes}`}
             >
-              <Typography variant="heading" color="primary">{stats.savedCigarettes}</Typography>
+              <Typography variant="heading" color="primary">{stats.totalSavedCigarettes}</Typography>
               <Typography variant="small" color="textSecondary">বাঁচানো সিগারেট</Typography>
             </View>
             <View
               style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
               accessible={true}
-              accessibilityLabel={`সাশ্রয়কৃত অর্থ: ৳${Math.round(stats.savedMoney)}`}
+              accessibilityLabel={`সাশ্রয়কৃত অর্থ: ৳${Math.round(stats.totalSavedMoney)}`}
             >
-              <Typography variant="heading" color="primary">৳{Math.round(stats.savedMoney)}</Typography>
+              <Typography variant="heading" color="primary">৳{Math.round(stats.totalSavedMoney)}</Typography>
               <Typography variant="small" color="textSecondary">সাশ্রয়কৃত অর্থ</Typography>
             </View>
           </Animated.View>

@@ -150,6 +150,7 @@ export interface SlipUp {
   triggerId: TriggerType | null;
   decision: SlipUpDecision;
   trackerStep: number;               // কোন ধাপে স্লিপ-আপ হয়েছে
+  cigarettesSmoked?: number;         // স্লিপ-আপে খাওয়া সিগারেটের সংখ্যা
 }
 
 // ─── App State ────────────────────────────────────────────────────────────────
@@ -184,8 +185,11 @@ export interface HealthTimelineEntry {
 
 export interface ProgressStats {
   smokeFreeDays: number;             // মোট ধূমপান-মুক্ত দিন
-  savedCigarettes: number;           // বাঁচানো সিগারেটের সংখ্যা
-  savedMoney: number;                // বাঁচানো অর্থ (টাকা)
+  totalSmokeFreeDays: number;        // স্লিপ-আপ সহ মোট দিন (activatedAt থেকে)
+  streakSavedCigarettes: number;     // বর্তমান স্ট্রিকে বাঁচানো সিগারেটের সংখ্যা
+  streakSavedMoney: number;          // বর্তমান স্ট্রিকে বাঁচানো অর্থ (টাকা)
+  totalSavedCigarettes: number;      // মোট বাঁচানো সিগারেটের সংখ্যা
+  totalSavedMoney: number;           // মোট বাঁচানো অর্থ (টাকা)
 }
 
 export interface WeeklyTriggerSummary {

@@ -6,6 +6,7 @@ import type {
   PlanState,
   StepProgress,
   StepStatus,
+  SlipUp,
 } from '@/types';
 import type { TriggerType } from '@/types';
 import { MIN_CIGARETTES_PER_DAY } from '@/constants/calculations';
@@ -63,24 +64,55 @@ export function getStepStatus(
   return 'incomplete';
 }
 
-export function computeProgressStats(profile: UserProfile, planState: PlanState): ProgressStats {
+export function computeProgressStats(profile: UserProfile, planState: PlanState, slipUps: SlipUp[] = []): ProgressStats {
   const activatedAt = planState.activatedAt;
-  if (!activatedAt) return { smokeFreeDays: 0, savedCigarettes: 0, savedMoney: 0 };
+  if (!activatedAt) return {
+    smokeFreeDays: 0,
+    totalSmokeFreeDays: 0,
+    streakSavedCigarettes: 0,
+    streakSavedMoney: 0,
+    totalSavedCigarettes: 0,
+    totalSavedMoney: 0,
+  };
   
   // Streak (consecutive days) and savings are based on last slip-up
   const streakBaseDate = planState.lastSlipUpAt || activatedAt;
   const streakDiff = Math.max(0, Date.now() - new Date(streakBaseDate).getTime());
   const smokeFreeDays = Math.floor(streakDiff / 86_400_000);
   
+  // Total days since plan started
+  const totalDiff = Math.max(0, Date.now() - new Date(activatedAt).getTime());
+  const totalSmokeFreeDays = Math.floor(totalDiff / 86_400_000);
+
   // Guard against invalid profile values
   const cigsPerDay = Math.max(MIN_CIGARETTES_PER_DAY, profile.cigarettesPerDay);
   const cigsPerPack = Math.max(1, profile.cigarettesPerPack); // never 0
   const pricePerPack = Math.max(0, profile.cigarettePricePerPack);
   
-  const savedCigarettes = smokeFreeDays * cigsPerDay;
-  const savedMoney = (savedCigarettes / cigsPerPack) * pricePerPack;
+  // Calculate slipped cigarettes since activatedAt
+  const activatedTime = new Date(activatedAt).getTime();
+  let totalSlippedCigarettes = 0;
+  for (const slipUp of slipUps) {
+    const slipTime = new Date(slipUp.reportedAt).getTime();
+    if (slipTime >= activatedTime) {
+      totalSlippedCigarettes += (slipUp.cigarettesSmoked || 1);
+    }
+  }
+
+  const streakSavedCigarettes = smokeFreeDays * cigsPerDay;
+  const streakSavedMoney = (streakSavedCigarettes / cigsPerPack) * pricePerPack;
+
+  const totalSavedCigarettes = Math.max(0, (totalSmokeFreeDays * cigsPerDay) - totalSlippedCigarettes);
+  const totalSavedMoney = Math.max(0, (totalSavedCigarettes / cigsPerPack) * pricePerPack);
   
-  return { smokeFreeDays, savedCigarettes, savedMoney };
+  return {
+    smokeFreeDays,
+    totalSmokeFreeDays,
+    streakSavedCigarettes,
+    streakSavedMoney,
+    totalSavedCigarettes,
+    totalSavedMoney
+  };
 }
 
 // ─── Milestone Detection ──────────────────────────────────────────────────────

@@ -41,7 +41,7 @@ export default function SettingsScreen() {
       dispatch({ type: 'SET_USER_PROFILE', payload: { ...profile, notificationsEnabled, morningNotificationTime: morningTime, eveningNotificationTime: eveningTime } });
       if (notificationsEnabled) {
         const stepContent = getStepContent(planState.currentStep);
-        const { smokeFreeDays } = computeProgressStats(profile, planState);
+        const { smokeFreeDays } = computeProgressStats(profile, planState, state.slipUps);
         await setupAndroidChannel();
         if (stepContent) await scheduleMorningNotification(stepContent, morningTime);
         await scheduleEveningNotification(smokeFreeDays, planState.completedSteps.length, eveningTime);

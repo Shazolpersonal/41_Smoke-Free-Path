@@ -85,7 +85,7 @@ test('Property 3: smokeFreeDays Calculation from planActivatedAt', () => {
       };
 
       const before = Date.now();
-      const stats = computeProgressStats(profile, planState);
+      const stats = computeProgressStats(profile, planState, []);
       const after = Date.now();
 
       // smokeFreeDays must equal floor((now - activatedAt) / 86400000)
@@ -99,17 +99,17 @@ test('Property 3: smokeFreeDays Calculation from planActivatedAt', () => {
       // smokeFreeDays must be non-negative (past dates only)
       expect(stats.smokeFreeDays).toBeGreaterThanOrEqual(0);
 
-      // savedCigarettes and savedMoney must be non-negative
-      expect(stats.savedCigarettes).toBeGreaterThanOrEqual(0);
-      expect(stats.savedMoney).toBeGreaterThanOrEqual(0);
+      // totalSavedCigarettes and totalSavedMoney must be non-negative
+      expect(stats.totalSavedCigarettes).toBeGreaterThanOrEqual(0);
+      expect(stats.totalSavedMoney).toBeGreaterThanOrEqual(0);
 
-      // savedCigarettes = smokeFreeDays * cigarettesPerDay
-      expect(stats.savedCigarettes).toBe(stats.smokeFreeDays * profile.cigarettesPerDay);
+      // totalSavedCigarettes = smokeFreeDays * cigarettesPerDay
+      expect(stats.totalSavedCigarettes).toBe(stats.smokeFreeDays * profile.cigarettesPerDay);
 
-      // savedMoney derived from savedCigarettes
+      // totalSavedMoney derived from totalSavedCigarettes
       const expectedMoney =
-        (stats.savedCigarettes / profile.cigarettesPerPack) * profile.cigarettePricePerPack;
-      expect(stats.savedMoney).toBeCloseTo(expectedMoney, 10);
+        (stats.totalSavedCigarettes / profile.cigarettesPerPack) * profile.cigarettePricePerPack;
+      expect(stats.totalSavedMoney).toBeCloseTo(expectedMoney, 10);
     }),
     { numRuns: 100 }
   );
