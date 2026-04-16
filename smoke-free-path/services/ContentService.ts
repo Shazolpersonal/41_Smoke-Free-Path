@@ -13,6 +13,7 @@ import type {
 let _stepPlans: StepPlan[] | null = null;
 let _islamicContent: IslamicContent[] | null = null;
 let _duas: IslamicContent[] | null = null;
+let _contentMap: Map<string, IslamicContent> | null = null;
 let _milestones: Milestone[] | null = null;
 let _healthTimeline: HealthTimelineEntry[] | null = null;
 
@@ -78,6 +79,15 @@ function getHealthTimelineData(): HealthTimelineEntry[] {
   return _healthTimeline!;
 }
 
+function getContentMap(): Map<string, IslamicContent> {
+  if (_contentMap === null) {
+    _contentMap = new Map();
+    getIslamicContentData().forEach((c) => _contentMap!.set(c.id, c));
+    getDuasData().forEach((d) => _contentMap!.set(d.id, d));
+  }
+  return _contentMap!;
+}
+
 // ─── Step Plans ───────────────────────────────────────────────────────────────
 
 export function getStepPlan(step: number): StepPlan | null {
@@ -104,17 +114,15 @@ export function getAllIslamicContent(): IslamicContent[] {
 }
 
 export function getIslamicContentById(id: string): IslamicContent | null {
-  return (
-    getIslamicContentData().find((c) => c.id === id) ??
-    getDuasData().find((d) => d.id === id) ??
-    null
-  );
+  return getContentMap().get(id) ?? null;
 }
 
 export function getRelatedContent(contentId: string): IslamicContent[] {
-  const item = getIslamicContentData().find((c) => c.id === contentId);
+  const item = getContentMap().get(contentId);
   if (!item || item.relatedContentIds.length === 0) return [];
-  return getIslamicContentData().filter((c) => item.relatedContentIds.includes(c.id));
+  return item.relatedContentIds
+    .map((id) => getContentMap().get(id))
+    .filter((c): c is IslamicContent => c !== undefined);
 }
 
 // ─── Milestones ───────────────────────────────────────────────────────────────
