@@ -176,7 +176,7 @@ export default function ProgressScreen() {
           </View>
         )}
 
-        {planState.isActive && stats.smokeFreeDays > 0 && (
+        {planState.isActive && (
           <Animated.View entering={FadeInDown.delay(200).duration(600).springify()} style={styles.statsRow}>
             <View
               style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
