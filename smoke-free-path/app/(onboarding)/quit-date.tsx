@@ -16,7 +16,13 @@ import type { UserProfile } from '@/types';
 import { requestPermission, setupAndroidChannel } from '@/services/NotificationService';
 import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
-import { DEFAULT_CIGARETTE_PRICE_PER_PACK } from '@/constants/calculations';
+import {
+  DEFAULT_CIGARETTE_PRICE_PER_PACK,
+  MIN_CIGARETTES_PER_DAY,
+  MAX_CIGARETTES_PER_DAY,
+  MIN_SMOKING_YEARS,
+  MAX_SMOKING_YEARS,
+} from '@/constants/calculations';
 
 const MAX_PAST_DAYS = 30;
 const MAX_FUTURE_DAYS = 30;
@@ -100,6 +106,32 @@ export default function QuitDateScreen() {
       return;
     }
 
+    // Process inputs, handling Bengali digits
+    const parseNumberInput = (input: string, fallback: string | number) => {
+      const sanitized = (input ?? String(fallback)).replace(/[\u09e6-\u09ef]/g, (d) => String(d.charCodeAt(0) - 2534));
+      return parseInt(sanitized, 10);
+    };
+
+    const parsedCigsPerDay = parseNumberInput(params.cigarettesPerDay, existingProfile?.cigarettesPerDay ?? '10');
+    const parsedSmokingYears = parseNumberInput(params.smokingYears, existingProfile?.smokingYears ?? '1');
+    const parsedPricePerPack = parseNumberInput(params.cigarettePricePerPack, existingProfile?.cigarettePricePerPack ?? DEFAULT_CIGARETTE_PRICE_PER_PACK);
+
+    // Validation Rules
+    if (isNaN(parsedCigsPerDay) || parsedCigsPerDay < MIN_CIGARETTES_PER_DAY || parsedCigsPerDay > MAX_CIGARETTES_PER_DAY) {
+      Alert.alert('ভুল ইনপুট', `দৈনিক সিগারেট সংখ্যা ${MIN_CIGARETTES_PER_DAY} থেকে ${MAX_CIGARETTES_PER_DAY} এর মধ্যে হতে হবে।`);
+      return;
+    }
+
+    if (isNaN(parsedSmokingYears) || parsedSmokingYears < MIN_SMOKING_YEARS || parsedSmokingYears > MAX_SMOKING_YEARS) {
+      Alert.alert('ভুল ইনপুট', `ধূমপানের বছর ${MIN_SMOKING_YEARS} থেকে ${MAX_SMOKING_YEARS} এর মধ্যে হতে হবে।`);
+      return;
+    }
+
+    if (isNaN(parsedPricePerPack) || parsedPricePerPack <= 0) {
+      Alert.alert('ভুল ইনপুট', 'প্রতি প্যাকের মূল্য ধনাত্মক হতে হবে।');
+      return;
+    }
+
     setIsLoading(true);
     try {
       await setupAndroidChannel();
@@ -108,9 +140,9 @@ export default function QuitDateScreen() {
       const profile: UserProfile = {
         id: existingProfile?.id ?? Date.now().toString(),
         name: params.name ?? existingProfile?.name ?? '',
-        cigarettesPerDay: parseInt(params.cigarettesPerDay ?? String(existingProfile?.cigarettesPerDay ?? '10'), 10),
-        smokingYears: parseInt(params.smokingYears ?? String(existingProfile?.smokingYears ?? '1'), 10),
-        cigarettePricePerPack: parseInt(params.cigarettePricePerPack ?? String(existingProfile?.cigarettePricePerPack ?? DEFAULT_CIGARETTE_PRICE_PER_PACK), 10),
+        cigarettesPerDay: parsedCigsPerDay,
+        smokingYears: parsedSmokingYears,
+        cigarettePricePerPack: parsedPricePerPack,
         cigarettesPerPack: existingProfile?.cigarettesPerPack ?? 20,
         notificationsEnabled,
         morningNotificationTime: existingProfile?.morningNotificationTime ?? '08:00',
