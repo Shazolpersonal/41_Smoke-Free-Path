@@ -5,7 +5,7 @@
 
 import * as fc from 'fast-check';
 
-import { composeShareMessage } from '@/app/milestone/[id]';
+import { composeShareMessage } from '@/components/MilestoneShareButton';
 import type { Milestone } from '@/types';
 
 // ─── Arbitrary: Milestone ─────────────────────────────────────────────────────
