@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
 import { FormInput } from './FormElements';
 import type { UserProfile, PlanState } from '@/types';
+import { MIN_CIGARETTES_PER_DAY } from '@/constants/calculations';
 
 function formatDate(isoString: string | null): string {
   if (!isoString) return '—';
@@ -41,8 +42,8 @@ export default function ProfileEditor({ profile, planState, onSave }: ProfileEdi
       return;
     }
     const cigs = parseInt(editCigsPerDay, 10);
-    if (isNaN(cigs) || cigs <= 0) {
-      Alert.alert('ত্রুটি', 'দৈনিক সিগারেট সংখ্যা সঠিকভাবে দিন।');
+    if (isNaN(cigs) || cigs < MIN_CIGARETTES_PER_DAY) {
+      Alert.alert('ত্রুটি', `দৈনিক সিগারেট সংখ্যা অন্তত ${MIN_CIGARETTES_PER_DAY} হতে হবে।`);
       return;
     }
     const years = parseInt(editSmokingYears, 10);
