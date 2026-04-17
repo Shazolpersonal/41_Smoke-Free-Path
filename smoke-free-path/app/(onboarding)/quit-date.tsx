@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -312,7 +313,17 @@ export default function QuitDateScreen() {
           onPress={handleStart}
           disabled={isLoading}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isLoading }}
+          accessibilityLabel={isLoading ? "সেটআপ হচ্ছে..." : "এখনই শুরু করুন"}
         >
+          {isLoading && (
+            <ActivityIndicator
+              size="small"
+              color={theme.colors.onPrimary}
+              style={{ marginRight: theme.spacing.sm }}
+            />
+          )}
           <Typography variant="title" style={[styles.startButtonText, { color: theme.colors.onPrimary }]}>
             {isLoading ? 'সেটআপ হচ্ছে...' : 'এখনই শুরু করুন'}
           </Typography>
@@ -409,6 +420,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     borderRadius: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     shadowOffset: { width: 0, height: 4 },
