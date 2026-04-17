@@ -412,6 +412,14 @@ export function AppProvider({ children }: AppProviderProps) {
       });
   }, []);
 
+  // ─── Fix old incorrect cigarettePricePerPack default ──────
+  useEffect(() => {
+    if (state.userProfile && state.userProfile.cigarettePricePerPack === 15) {
+      console.log('🔄 Fixing incorrect cigarettePricePerPack default from 15 to 300');
+      dispatch({ type: 'SET_USER_PROFILE', payload: { ...state.userProfile, cigarettePricePerPack: 300 } });
+    }
+  }, [state.userProfile?.cigarettePricePerPack]);
+
   // Persist state with debounce (1500ms) to avoid excessive AsyncStorage writes
   const saveFailureCountRef = useRef(0);
   useEffect(() => {
