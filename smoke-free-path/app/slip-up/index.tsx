@@ -10,6 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '@/context/AppContext';
 import { useTheme } from '@/hooks/useTheme';
@@ -64,7 +65,7 @@ export default function SlipUpScreen() {
       smokedCount = 100;
     }
     const slipUp = {
-      id: `su_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+      id: `su_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
       reportedAt: new Date().toISOString(),
       triggerId: selectedTrigger,
       decision,
@@ -79,7 +80,7 @@ export default function SlipUpScreen() {
       dispatch({
         type: 'ADD_TRIGGER_LOG',
         payload: {
-          id: `tl_su_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+          id: `tl_su_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
           type: selectedTrigger,
           timestamp: new Date().toISOString(),
           note: 'স্লিপ-আপের সাথে সম্পর্কিত',
