@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
@@ -6,13 +6,11 @@ import {
   Modal,
   StyleSheet,
   Animated,
-  AccessibilityInfo,
 } from 'react-native';
 import Typography from '@/components/Typography';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { useAppContext } from '@/context/AppContext';
 import { useTheme } from '@/hooks/useTheme';
+import { useCravingSession, StrategyTab } from '@/hooks/useCravingSession';
 import CravingTimer from '@/components/CravingTimer';
 import TriggerSelector from '@/components/TriggerSelector';
 import Card from '@/components/Card';
@@ -21,11 +19,8 @@ import DhikrGuide from '@/components/craving/DhikrGuide';
 import DuaLink from '@/components/craving/DuaLink';
 import ActivityList from '@/components/craving/ActivityList';
 import GroundingGuide from '@/components/craving/GroundingGuide';
-import type { CravingStrategy, CravingOutcome, TriggerType } from '@/types';
 
 // ─── Strategy Tabs ────────────────────────────────────────────────────────────
-
-type StrategyTab = 'breathing' | 'dhikr' | 'dua' | 'activity' | 'grounding';
 
 const STRATEGY_TABS: { key: StrategyTab; label: string }[] = [
   { key: 'breathing', label: 'গভীর শ্বাস' },
@@ -35,111 +30,27 @@ const STRATEGY_TABS: { key: StrategyTab; label: string }[] = [
   { key: 'grounding', label: 'মনোযোগ' },
 ];
 
-const GROUNDING_STEPS = [
-  { count: 5, label: '৫টি জিনিস দেখুন (যেমন: টেবিল, গাছ)।', icon: '👁️' },
-  { count: 4, label: '৪টি জিনিস স্পর্শ করুন\n(যেমন: আপনার জামা বা চেয়ার)।', icon: '✋' },
-  { count: 3, label: '৩টি শব্দ শোনার চেষ্টা করুন\n(যেমন: পাখির ডাক বা ফ্যানের শব্দ)।', icon: '👂' },
-  { count: 2, label: '২টি জিনিসের গন্ধ অনুভব করুন\n(যেমন: চা বা বাতাসের গন্ধ)।', icon: '👃' },
-  { count: 1, label: '১টি ইতিবাচক চিন্তা বা স্বাদ অনুভব করুন।', icon: '🧠' },
-];
-
-
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function CravingScreen() {
   const router = useRouter();
-  const { dispatch } = useAppContext();
   const { theme } = useTheme();
 
-  const [intensity, setIntensity] = useState<number>(5);
-  const [activeTab, setActiveTab] = useState<StrategyTab>('breathing');
-  const [usedStrategies, setUsedStrategies] = useState<Set<CravingStrategy>>(new Set());
-  const [timerComplete, setTimerComplete] = useState(false);
-  const [showOutcomeModal, setShowOutcomeModal] = useState(false);
-  const [sessionStartTime] = useState(new Date().toISOString());
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType | null>(null);
-
-  // Slide-up animation on mount
-  const slideAnim = useRef(new Animated.Value(60)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
-      if (reduceMotion) {
-        slideAnim.setValue(0);
-        fadeAnim.setValue(1);
-        return;
-      }
-      Animated.parallel([
-        Animated.timing(slideAnim, { toValue: 0, duration: 350, useNativeDriver: true }),
-        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-      ]).start();
-    });
-  }, [slideAnim, fadeAnim]);
-
-  const markStrategyUsed = useCallback((tab: StrategyTab) => {
-    setActiveTab(tab);
-    const strategyMap: Record<StrategyTab, CravingStrategy> = {
-      breathing: 'breathing',
-      dhikr: 'dhikr',
-      dua: 'dua',
-      activity: 'activity',
-      grounding: 'grounding',
-    };
-    setUsedStrategies((prev) => new Set([...prev, strategyMap[tab]]));
-  }, []);
-
-  const handleTimerComplete = useCallback(() => {
-    setTimerComplete(true);
-    setShowOutcomeModal(true);
-    setUsedStrategies((prev) => new Set([...prev, 'countdown']));
-  }, []);
-
-  const handleTimerCancel = useCallback(() => {
-    router.back();
-  }, [router]);
-
-  const handleOutcome = useCallback(
-    (outcome: CravingOutcome) => {
-      setShowOutcomeModal(false);
-
-      const session = {
-        id: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-        startTime: sessionStartTime,
-        endTime: new Date().toISOString(),
-        intensity,
-        outcome,
-        strategiesUsed: Array.from(usedStrategies),
-        triggerId: selectedTrigger,
-      };
-
-      dispatch({ type: 'ADD_CRAVING_SESSION', payload: session });
-
-      // Also log the trigger if selected
-      if (selectedTrigger) {
-        dispatch({
-          type: 'ADD_TRIGGER_LOG',
-          payload: {
-            id: `tl_cr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-            type: selectedTrigger,
-            timestamp: sessionStartTime,
-            note: 'ক্র্যাভিং সেশনের সাথে সম্পর্কিত',
-            cravingSessionId: session.id,
-            isSlipUp: outcome === 'slipped',
-          },
-        });
-      }
-
-      if (outcome === 'slipped') {
-        router.replace('/slip-up');
-      } else {
-        try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
-        router.back();
-      }
-    },
-    [dispatch, intensity, usedStrategies, selectedTrigger, sessionStartTime, router],
-  );
+  const {
+    intensity,
+    setIntensity,
+    activeTab,
+    showOutcomeModal,
+    setShowOutcomeModal,
+    selectedTrigger,
+    setSelectedTrigger,
+    slideAnim,
+    fadeAnim,
+    markStrategyUsed,
+    handleTimerComplete,
+    handleTimerCancel,
+    handleOutcome,
+  } = useCravingSession();
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.primary }]}>
