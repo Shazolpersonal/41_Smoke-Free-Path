@@ -112,11 +112,13 @@ function migrateAppState(raw: any): AppState {
   }
 
   // ─── Fix old incorrect cigarettePricePerPack default ──────
-  // Migration: Update old default value of 15 to realistic 300
-  if (userProfile && userProfile.cigarettePricePerPack === 15) {
+  // Migration: If the price is unrealistically low (<= 50), it's likely a single cigarette price.
+  // Convert it to a pack price based on cigarettesPerPack.
+  if (userProfile && userProfile.cigarettePricePerPack <= 50) {
+    const packSize = userProfile.cigarettesPerPack > 0 ? userProfile.cigarettesPerPack : 20;
     userProfile = {
       ...userProfile,
-      cigarettePricePerPack: 300, // Realistic Bangladesh market price
+      cigarettePricePerPack: userProfile.cigarettePricePerPack * packSize,
     };
   }
 

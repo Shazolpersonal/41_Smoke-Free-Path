@@ -109,28 +109,6 @@ export default function SettingsScreen() {
           </View>
         </Card>
 
-        {/* Fix old cigarette price data */}
-        {profile && profile.cigarettePricePerPack === 15 && (
-          <Card style={{ marginBottom: theme.spacing.md, backgroundColor: theme.colors.warning + '20', borderColor: theme.colors.warning, borderWidth: 1 }}>
-            <Typography variant="subheading" color="text" style={{ marginBottom: theme.spacing.xs, fontWeight: '700' }}>⚠️ ডেটা আপডেট প্রয়োজন</Typography>
-            <Typography variant="small" color="textSecondary" style={{ marginBottom: theme.spacing.sm, lineHeight: 18 }}>
-              আপনার প্রোফাইলে পুরানো ভুল সিগারেটের দাম (৳15) রয়েছে। বাংলাদেশের বাস্তব মূল্য (৳300) এ আপডেট করুন।
-            </Typography>
-            <TouchableOpacity
-              style={[styles.fixButton, { backgroundColor: theme.colors.warning, borderRadius: 10, paddingVertical: 12, alignItems: 'center' }]}
-              onPress={() => {
-                if (profile) {
-                  dispatch({ type: 'SET_USER_PROFILE', payload: { ...profile, cigarettePricePerPack: 300 } });
-                  showToast('সিগারেটের দাম ৳300 এ আপডেট হয়েছে', 'success');
-                }
-              }}
-              activeOpacity={0.85}
-            >
-              <Typography variant="subheading" color="onPrimary" style={{ fontWeight: '700' }}>এখনই ঠিক করুন</Typography>
-            </TouchableOpacity>
-          </Card>
-        )}
-
         <DataManager state={state} onImport={(parsed) => dispatch({ type: 'HYDRATE', payload: parsed })} />
 
         <TouchableOpacity style={[styles.resetButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.error, borderRadius: 12, paddingVertical: 14, alignItems: 'center', borderWidth: 1.5 }]} onPress={handleResetPlan} activeOpacity={0.85} accessibilityLabel="প্ল্যান রিসেট করুন" accessibilityRole="button" accessibilityHint="এটি আপনার সমস্ত অগ্রগতি মুছে ফেলবে">
