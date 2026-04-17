@@ -14,9 +14,10 @@ import { useRouter } from 'expo-router';
 import { useAppContext } from '@/context/AppContext';
 import { useTheme } from '@/hooks/useTheme';
 import IslamicCard from '@/components/IslamicCard';
-import TriggerSelector from '@/components/TriggerSelector';
-import Card from '@/components/Card';
 import Typography from '@/components/Typography';
+import CigarettesInputCard from '@/components/slip-up/CigarettesInputCard';
+import TriggerReasonCard from '@/components/slip-up/TriggerReasonCard';
+import DecisionCard from '@/components/slip-up/DecisionCard';
 import { getDuasByCategory } from '@/services/ContentService';
 import type { TriggerType, SlipUpDecision } from '@/types';
 
@@ -123,58 +124,19 @@ export default function SlipUpScreen() {
           <Typography variant="body" color="text">{MOTIVATIONAL_MESSAGE}</Typography>
         </View>
 
-        <Card style={styles.card}>
-          <Typography variant="subheading" color="text" style={{ marginBottom: 4 }}>কতগুলো সিগারেট খেয়েছেন?</Typography>
-          <TextInput
-            style={[styles.input, { borderColor: theme.colors.border, color: theme.colors.text, backgroundColor: theme.colors.surface }]}
-            keyboardType="number-pad"
-            value={cigarettesSmoked}
-            onChangeText={setCigarettesSmoked}
-            placeholder="১"
-            placeholderTextColor={theme.colors.textSecondary}
-            maxLength={3}
-          />
-          <Typography variant="small" color="textSecondary" style={{ marginTop: 8 }}>আপনার মোট সাশ্রয় থেকে এটি বাদ দেওয়া হবে।</Typography>
-        </Card>
+        <CigarettesInputCard
+          value={cigarettesSmoked}
+          onChangeText={setCigarettesSmoked}
+        />
 
-        <Card style={styles.card}>
-          <Typography variant="subheading" color="text" style={{ marginBottom: 4 }}>কোন ট্রিগার কারণ ছিল? (ঐচ্ছিক)</Typography>
-          <Typography variant="body" color="textSecondary" style={{ marginBottom: 12 }}>এটি জানলে ভবিষ্যতে আরও ভালো প্রস্তুতি নিতে পারবেন।</Typography>
-          <TriggerSelector selected={selectedTrigger} onSelect={setSelectedTrigger} />
-        </Card>
+        <TriggerReasonCard
+          selectedTrigger={selectedTrigger}
+          onSelectTrigger={setSelectedTrigger}
+        />
 
-        <Card style={styles.card}>
-          <Typography variant="subheading" color="text" style={{ marginBottom: 10 }}>এখন কী করতে চান?</Typography>
-
-          <TouchableOpacity
-            style={[styles.decisionBtn, { backgroundColor: theme.colors.primary }]}
-            onPress={() => handleDecision('continue')}
-            activeOpacity={0.85}
-          >
-            <Typography variant="subheading" color="onPrimary" style={{ marginBottom: 4 }}>বর্তমান ধাপ থেকে চালিয়ে যান</Typography>
-            <Typography variant="small" color="onPrimary" style={{ lineHeight: 17, opacity: 0.87 }}>আপনার স্ট্রিক রিসেট হবে, কিন্তু মোট সাশ্রয়ের হিসাব থেকে শুধু এই সিগারেটগুলো বাদ যাবে এবং প্ল্যানের ধাপ অপরিবর্তিত থাকবে</Typography>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.decisionBtn, styles.decisionBtnReset, { backgroundColor: theme.colors.surface, borderColor: theme.colors.error }]}
-            onPress={() => {
-              Alert.alert(
-                '⚠ প্ল্যান রিসেট',
-                'এটি আপনার সমস্ত অগ্রগতি মুছে ফেলবে এবং নতুন করে শুরু হবে। আপনি কি নিশ্চিত?',
-                [
-                  { text: 'বাতিল', style: 'cancel' },
-                  { text: 'রিসেট করুন', style: 'destructive', onPress: () => handleDecision('reset_plan') },
-                ]
-              );
-            }}
-            activeOpacity={0.85}
-          >
-            <Typography variant="subheading" color="error" style={{ marginBottom: 4 }}>প্ল্যান রিসেট করুন</Typography>
-            <Typography variant="small" color="textSecondary" style={{ lineHeight: 17 }}>
-              নতুন সংকল্পে নতুন শুরু — আল্লাহ তাওবাকারীদের ভালোবাসেন
-            </Typography>
-          </TouchableOpacity>
-        </Card>
+        <DecisionCard
+          onDecision={handleDecision}
+        />
       </Animated.ScrollView>
     </SafeAreaView>
   );
@@ -206,21 +168,4 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: undefined, // Set via inline style
   },
-  card: {
-    marginBottom: 14,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 16,
-    marginTop: 8,
-    fontFamily: 'HindSiliguri-Regular',
-  },
-  decisionBtn: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
-  },
-  decisionBtnReset: { borderWidth: 1.5 },
 });
