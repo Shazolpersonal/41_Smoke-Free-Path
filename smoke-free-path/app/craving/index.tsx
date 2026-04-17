@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Typography from '@/components/Typography';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useAppContext } from '@/context/AppContext';
 import { useTheme } from '@/hooks/useTheme';
@@ -105,7 +106,7 @@ export default function CravingScreen() {
       setShowOutcomeModal(false);
 
       const session = {
-        id: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        id: `cs_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
         startTime: sessionStartTime,
         endTime: new Date().toISOString(),
         intensity,
@@ -121,7 +122,7 @@ export default function CravingScreen() {
         dispatch({
           type: 'ADD_TRIGGER_LOG',
           payload: {
-            id: `tl_cr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+            id: `tl_cr_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
             type: selectedTrigger,
             timestamp: sessionStartTime,
             note: 'ক্র্যাভিং সেশনের সাথে সম্পর্কিত',
