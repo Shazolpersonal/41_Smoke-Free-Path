@@ -9,7 +9,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAppContext } from '@/context/AppContext';
 import { saveOnboardingStep } from '@/services/StorageService';
@@ -17,6 +17,8 @@ import type { UserProfile } from '@/types';
 import { requestPermission, setupAndroidChannel } from '@/services/NotificationService';
 import { useTheme } from '@/hooks/useTheme';
 import Typography from '@/components/Typography';
+import { StepProgress } from '@/components/StepProgress';
+import { QuitDatePicker } from '@/components/onboarding/QuitDatePicker';
 import {
   DEFAULT_CIGARETTE_PRICE_PER_PACK,
   MIN_CIGARETTES_PER_DAY,
@@ -27,13 +29,6 @@ import {
 
 const MAX_PAST_DAYS = 30;
 const MAX_FUTURE_DAYS = 30;
-
-function formatBengaliDate(date: Date): string {
-  const d = String(date.getDate()).padStart(2, '0');
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const y = date.getFullYear();
-  return `${d}/${m}/${y}`;
-}
 
 function isDateValid(date: Date): boolean {
   const now = new Date();
@@ -48,22 +43,29 @@ function isDateValid(date: Date): boolean {
   return date >= pastCutoff && date <= futureCutoff;
 }
 
-function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
+function MotivationCard() {
   const { theme } = useTheme();
   return (
-    <View
-      style={[styles.progressContainer, { gap: theme.spacing.sm, marginBottom: theme.spacing.md }]}
-      accessibilityLabel={`ধাপ ${currentStep - 1} এর মধ্যে ${totalSteps - 1}`}
-    >
-      {Array.from({ length: totalSteps }, (_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.progressDot,
-            { backgroundColor: i < currentStep ? theme.colors.primary : theme.colors.border }
-          ]}
-        />
-      ))}
+    <View style={[styles.motivationCard, { backgroundColor: theme.colors.surface, borderLeftColor: theme.colors.primary, padding: 20, marginBottom: 20 }]}>
+      <Typography variant="title" isArabic style={[styles.motivationArabic, { color: theme.colors.primary, marginBottom: theme.spacing.sm }]}>
+        وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ
+      </Typography>
+      <Typography variant="body" style={[styles.motivationBangla, { color: theme.colors.textSecondary, marginBottom: theme.spacing.xs }]}>
+        "আমার সাফল্য কেবল আল্লাহর সাহায্যেই।"
+      </Typography>
+      <Typography variant="small" style={[styles.motivationSource, { color: theme.colors.textDisabled }]}>— সূরা হুদ, আয়াত ৮৮</Typography>
+    </View>
+  );
+}
+
+function JourneyCard() {
+  const { theme } = useTheme();
+  return (
+    <View style={[styles.journeyCard, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, padding: theme.spacing.lg, marginBottom: theme.spacing.xl }]}>
+      <Typography variant="display" style={[styles.journeyIcon, { fontSize: 40, marginBottom: 12 }]}>🌿</Typography>
+      <Typography variant="subheading" style={[styles.journeyText, { color: theme.colors.primary }]}>
+        আজ থেকে আপনার ৪১-ধাপের ধোঁয়া-মুক্ত যাত্রা শুরু হোক
+      </Typography>
     </View>
   );
 }
@@ -187,122 +189,22 @@ export default function QuitDateScreen() {
           <Typography variant="body" style={[styles.subtitle, { color: theme.colors.textSecondary }]}>আপনার ধূমপান ত্যাগের তারিখ নির্বাচন করুন</Typography>
         </View>
 
-        <View style={[styles.motivationCard, { backgroundColor: theme.colors.surface, borderLeftColor: theme.colors.primary, padding: 20, marginBottom: 20 }]}>
-          <Typography variant="title" isArabic style={[styles.motivationArabic, { color: theme.colors.primary, marginBottom: theme.spacing.sm }]}>
-            وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ
-          </Typography>
-          <Typography variant="body" style={[styles.motivationBangla, { color: theme.colors.textSecondary, marginBottom: theme.spacing.xs }]}>
-            "আমার সাফল্য কেবল আল্লাহর সাহায্যেই।"
-          </Typography>
-          <Typography variant="small" style={[styles.motivationSource, { color: theme.colors.textDisabled }]}>— সূরা হুদ, আয়াত ৮৮</Typography>
-        </View>
+        <MotivationCard />
 
-        {/* Quit Date Picker */}
-        <View style={[styles.dateCard, { backgroundColor: theme.colors.surface, padding: theme.spacing.md, marginBottom: 20 }]}>
-          <Typography variant="subheading" style={[styles.dateLabel, { color: theme.colors.primary, marginBottom: theme.spacing.xs }]}>🗓️ ধূমপান ত্যাগের তারিখ</Typography>
-          <Typography variant="small" style={[styles.dateHint, { color: theme.colors.textDisabled, marginBottom: theme.spacing.sm }]}>
-            আজ থেকে শুরু করতে পারেন, অথবা গত ৩০ দিনের মধ্যে একটি তারিখ বেছে নিন
-          </Typography>
+        <QuitDatePicker
+          selectedDate={selectedDate}
+          minDate={minDate}
+          maxFutureDays={MAX_FUTURE_DAYS}
+          today={today}
+          dateError={dateError}
+          showAndroidPicker={showAndroidPicker}
+          setShowAndroidPicker={setShowAndroidPicker}
+          handleDateChange={handleDateChange}
+          setSelectedDate={setSelectedDate}
+          setDateError={setDateError}
+        />
 
-          {/* Selected date display */}
-          <View style={[styles.selectedDateDisplay, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, paddingVertical: 12, paddingHorizontal: theme.spacing.md, marginBottom: 12 }]}>
-            <Typography variant="heading" style={[styles.selectedDateText, { color: theme.colors.primaryDark }]}>{formatBengaliDate(selectedDate)}</Typography>
-          </View>
-
-          {/* iOS: inline picker */}
-          {Platform.OS === 'ios' && (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="inline"
-              minimumDate={minDate}
-              maximumDate={new Date(today.getFullYear(), today.getMonth(), today.getDate() + MAX_FUTURE_DAYS)}
-              onChange={handleDateChange}
-              locale="bn"
-              style={{ marginBottom: theme.spacing.sm }}
-            />
-          )}
-
-          {/* Android: button to open modal picker */}
-          {Platform.OS === 'android' && (
-            <>
-              <TouchableOpacity
-                style={[styles.androidPickerBtn, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, paddingVertical: 12, marginBottom: theme.spacing.sm }]}
-                onPress={() => setShowAndroidPicker(true)}
-                activeOpacity={0.8}
-              >
-                <Typography variant="body" style={[styles.androidPickerBtnText, { color: theme.colors.primary }]}>📅 তারিখ পরিবর্তন করুন</Typography>
-              </TouchableOpacity>
-              {showAndroidPicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display="default"
-                  minimumDate={minDate}
-                  maximumDate={new Date(today.getFullYear(), today.getMonth(), today.getDate() + MAX_FUTURE_DAYS)}
-                  onChange={handleDateChange}
-                />
-              )}
-            </>
-          )}
-
-          {/* Web fallback */}
-          {Platform.OS === 'web' && (
-            <input
-              type="date"
-              value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
-              min={`${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, '0')}-${String(minDate.getDate()).padStart(2, '0')}`}
-              onChange={(e) => {
-                const parts = e.target.value.split('-');
-                if (parts.length === 3) {
-                  const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                  if (!isNaN(d.getTime())) handleDateChange(null, d);
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                fontSize: 16,
-                borderRadius: 12,
-                border: dateError ? `1.5px solid ${theme.colors.error}` : `1.5px solid ${theme.colors.border}`,
-                backgroundColor: theme.colors.surface,
-                color: theme.colors.text,
-                boxSizing: 'border-box',
-                marginTop: 8,
-                outline: 'none',
-              }}
-            />
-          )}
-
-          {dateError ? <Typography variant="small" style={[styles.errorText, { color: theme.colors.error, marginTop: theme.spacing.xs, marginLeft: theme.spacing.xs }]}>{dateError}</Typography> : null}
-
-          <View style={[styles.quickDateRow, { gap: 10, marginTop: 12 }]}>
-            <TouchableOpacity
-              style={[styles.quickDateBtn, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, paddingVertical: 10 }]}
-              onPress={() => { setSelectedDate(new Date(today)); setDateError(''); }}
-            >
-              <Typography variant="small" style={[styles.quickDateText, { color: theme.colors.primary }]}>আজই</Typography>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.quickDateBtn, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, paddingVertical: 10 }]}
-              onPress={() => {
-                const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
-                setSelectedDate(yesterday);
-                setDateError('');
-              }}
-            >
-              <Typography variant="small" style={[styles.quickDateText, { color: theme.colors.primary }]}>গতকাল</Typography>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={[styles.journeyCard, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.border, padding: theme.spacing.lg, marginBottom: theme.spacing.xl }]}>
-          <Typography variant="display" style={[styles.journeyIcon, { fontSize: 40, marginBottom: 12 }]}>🌿</Typography>
-          <Typography variant="subheading" style={[styles.journeyText, { color: theme.colors.primary }]}>
-            আজ থেকে আপনার ৪১-ধাপের ধোঁয়া-মুক্ত যাত্রা শুরু হোক
-          </Typography>
-        </View>
+        <JourneyCard />
 
         <TouchableOpacity
           style={[
@@ -364,48 +266,6 @@ const styles = StyleSheet.create({
   },
   motivationSource: {
     textAlign: 'center',
-  },
-  dateCard: {
-    borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  dateLabel: {
-    fontWeight: '700',
-  },
-  dateHint: { },
-  selectedDateDisplay: {
-    borderRadius: 10,
-    alignItems: 'center',
-    borderWidth: 1.5,
-  },
-  selectedDateText: {
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  androidPickerBtn: {
-    borderRadius: 10,
-    alignItems: 'center',
-    borderWidth: 1.5,
-  },
-  androidPickerBtnText: {
-    fontWeight: '600',
-  },
-  errorText: { },
-  quickDateRow: {
-    flexDirection: 'row',
-  },
-  quickDateBtn: {
-    flex: 1,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  quickDateText: {
-    fontWeight: '600',
   },
   journeyCard: {
     borderRadius: 14,
