@@ -23,7 +23,7 @@ function getStepPlans(): StepPlan[] {
   if (_stepPlans === null) {
     try {
       _stepPlans = require('../assets/data/step_plans.json');
-    } catch (e) {
+    } catch {
       return [];
     }
   }
@@ -34,7 +34,7 @@ function getIslamicContentData(): IslamicContent[] {
   if (_islamicContent === null) {
     try {
       _islamicContent = require('../assets/data/islamic_content.json');
-    } catch (e) {
+    } catch {
       return [];
     }
   }
@@ -45,7 +45,7 @@ function getDuasData(): IslamicContent[] {
   if (_duas === null) {
     try {
       _duas = require('../assets/data/duas.json');
-    } catch (e) {
+    } catch {
       return [];
     }
   }
@@ -56,7 +56,7 @@ function getMilestonesData(): Milestone[] {
   if (_milestones === null) {
     try {
       _milestones = require('../assets/data/milestones.json');
-    } catch (e) {
+    } catch {
       return [];
     }
   }
@@ -67,7 +67,7 @@ function getHealthTimelineData(): HealthTimelineEntry[] {
   if (_healthTimeline === null) {
     try {
       _healthTimeline = require('../assets/data/health_timeline.json');
-    } catch (e) {
+    } catch {
       return [];
     }
   }

@@ -3,7 +3,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   DimensionValue,
@@ -16,22 +15,17 @@ import { getPhaseMessage } from '@/utils/trackerUtils';
 import { TRIGGER_LABELS, TOTAL_STEPS } from '@/constants';
 import { useProgressStats } from '@/hooks/useProgressStats';
 import { useMilestones } from '@/hooks/useMilestones';
-import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 import { useTheme } from '@/hooks/useTheme';
 import ProgressCalendar from '@/components/ProgressCalendar';
 import HealthTimeline from '@/components/HealthTimeline';
 import MilestoneList from '@/components/MilestoneList';
+import WeeklyTriggerChart from '@/components/WeeklyTriggerChart';
+import ProgressStats from '@/components/ProgressStats';
+import ProgressBarCard from '@/components/ProgressBarCard';
 import Card from '@/components/Card';
 import ScreenHeader from '@/components/ScreenHeader';
 import Typography from '@/components/Typography';
-import Animated, { 
-  FadeInDown, 
-  FadeIn, 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring,
-  withTiming
-} from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { TriggerType } from '@/types';
 import { loadAppState } from '@/services/StorageService';
 
@@ -44,20 +38,10 @@ export default function ProgressScreen() {
   const completedCount = planState.completedSteps.length;
   const stats = useProgressStats();
   const milestoneEntries = useMilestones();
-  const weeklySummary = useWeeklySummary();
 
   const [refreshing, setRefreshing] = useState(false);
   
   const progressPercent = Math.min(100, Math.round((completedCount / Math.max(1, TOTAL_STEPS)) * 100));
-  const progressWidth = useSharedValue(0);
-
-  useEffect(() => {
-    progressWidth.value = withSpring(progressPercent, { damping: 15, stiffness: 100 });
-  }, [progressPercent]);
-
-  const animatedProgressStyle = useAnimatedStyle(() => ({
-    width: `${progressWidth.value}%` as DimensionValue,
-  }));
 
   const COLLAPSE_KEY = 'progress_section_collapse';
   const [collapsed, setCollapsed] = useState({
@@ -107,23 +91,6 @@ export default function ProgressScreen() {
     return record;
   }, [milestoneEntries]);
 
-  const weeklyChartData = useMemo(() => {
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const recent = triggerLogs.filter((l) => new Date(l.timestamp).getTime() >= cutoff);
-    const counts: Partial<Record<TriggerType, number>> = {};
-    for (const log of recent) {
-      counts[log.type] = (counts[log.type] ?? 0) + 1;
-    }
-    const max = Math.max(1, ...(Object.values(counts) as number[]));
-    return (Object.entries(counts) as [TriggerType, number][]).map(([type, count]) => ({
-      type,
-      count,
-      percent: count / max,
-    }));
-  }, [triggerLogs]);
-
-
-
   const nextMilestoneMotivation = useMemo(() => {
     const nextMilestone = milestoneEntries.find((entry) => entry.achievedAt === null);
     if (!nextMilestone) return null;
@@ -149,21 +116,7 @@ export default function ProgressScreen() {
         }
       >
         <Animated.View entering={FadeInDown.duration(600).springify()}>
-          <Card style={styles.progressBarCard}>
-            <View style={styles.progressBarHeader}>
-              <Typography variant="subheading" style={styles.boldText}>{completedCount}/৪১ ধাপ সম্পূর্ণ</Typography>
-              <Typography variant="subheading" color="primary" style={styles.boldText}>{progressPercent}%</Typography>
-            </View>
-            <View
-              style={[styles.progressBarTrack, { backgroundColor: theme.colors.border }]}
-              accessible={true}
-              accessibilityLabel={`৪১ ধাপের মধ্যে ${completedCount}টি সম্পন্ন, ${progressPercent}%`}
-            >
-              <Animated.View
-                style={[styles.progressBarFill, { backgroundColor: theme.colors.primary }, animatedProgressStyle]}
-              />
-            </View>
-          </Card>
+          <ProgressBarCard completedCount={completedCount} progressPercent={progressPercent} />
         </Animated.View>
 
         {nextMilestoneMotivation && (
@@ -185,31 +138,8 @@ export default function ProgressScreen() {
         )}
 
         {planState.isActive && (
-          <Animated.View entering={FadeInDown.delay(200).duration(600).springify()} style={styles.statsRow}>
-            <View
-              style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
-              accessible={true}
-              accessibilityLabel={`ধূমপান-মুক্ত দিন: ${stats.smokeFreeDays}`}
-            >
-              <Typography variant="heading" color="primary">{stats.smokeFreeDays}</Typography>
-              <Typography variant="small" color="textSecondary">ধূমপান-মুক্ত দিন</Typography>
-            </View>
-            <View
-              style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
-              accessible={true}
-              accessibilityLabel={`বাঁচানো সিগারেট: ${stats.totalSavedCigarettes}`}
-            >
-              <Typography variant="heading" color="primary">{stats.totalSavedCigarettes}</Typography>
-              <Typography variant="small" color="textSecondary">বাঁচানো সিগারেট</Typography>
-            </View>
-            <View
-              style={[styles.statCard, { backgroundColor: theme.colors.surface }]}
-              accessible={true}
-              accessibilityLabel={`সাশ্রয়কৃত অর্থ: ৳${Math.round(stats.totalSavedMoney)}`}
-            >
-              <Typography variant="heading" color="primary">৳{Math.round(stats.totalSavedMoney)}</Typography>
-              <Typography variant="small" color="textSecondary">সাশ্রয়কৃত অর্থ</Typography>
-            </View>
+          <Animated.View entering={FadeInDown.delay(200).duration(600).springify()}>
+            <ProgressStats stats={stats} />
           </Animated.View>
         )}
 
@@ -278,59 +208,7 @@ export default function ProgressScreen() {
             <Typography variant="body" color="textSecondary">{collapsed.triggerChart ? '▶' : '▼'}</Typography>
           </TouchableOpacity>
           {!collapsed.triggerChart && (
-          <Card style={styles.chartCard}>
-            {weeklyChartData.length === 0 ? (
-              <View style={styles.emptyState} accessibilityLabel="এই সপ্তাহে কোনো ট্রিগার লগ নেই। ট্রিগার লগ করুন।">
-                <Typography variant="display" style={{ marginBottom: theme.spacing.md }}>📊</Typography>
-                <Typography variant="subheading" color="text" style={styles.boldTextCenter}>এই সপ্তাহে কোনো ট্রিগার লগ নেই</Typography>
-                <Typography variant="body" color="textSecondary" align="center" style={{ marginBottom: theme.spacing.md }}>
-                  এই সপ্তাহে কোনো ট্রিগার লগ করা হয়নি
-                </Typography>
-                <TouchableOpacity
-                  style={[styles.emptyStateCTA, { backgroundColor: theme.colors.primary }]}
-                  onPress={() => router.push('/trigger-log')}
-                  accessibilityRole="button"
-                  accessibilityLabel="ট্রিগার লগ করুন"
-                >
-                  <Typography variant="body" color="onPrimary" style={{ fontWeight: '600' }}>ট্রিগার লগ করুন</Typography>
-                </TouchableOpacity>
-              </View>
-            ) : (
-                <View style={styles.chartContainer}>
-                  {weeklyChartData.map(({ type, count, percent }) => (
-                    <View
-                      key={type}
-                      style={styles.chartRow}
-                      accessible={true}
-                      accessibilityLabel={`${TRIGGER_LABELS[type]}: ${count} বার`}
-                    >
-                      <Typography variant="small" color="textSecondary" style={{ width: 80 }}>{TRIGGER_LABELS[type]}</Typography>
-                      <View style={[styles.chartBarBg, { backgroundColor: theme.colors.border }]}>
-                        <View
-                          style={[
-                            styles.chartBarFill,
-                            { width: `${Math.round(percent * 100)}%` as DimensionValue, backgroundColor: theme.colors.primary },
-                          ]}
-                        />
-                      </View>
-                      <Typography variant="small" color="primary" style={styles.chartCountText}>{count}</Typography>
-                    </View>
-                  ))}
-                </View>
-              )}
-
-          {weeklySummary && (
-            <View style={[styles.chartSummary, { borderTopColor: theme.colors.border }]}>
-              <Typography variant="small" color="textSecondary">
-                সবচেয়ে বেশি:{' '}
-                <Typography variant="small" color="primaryDark" style={{ fontWeight: '700' }}>
-                  {TRIGGER_LABELS[weeklySummary.topTrigger]}
-                </Typography>{' '}
-                ({weeklySummary.count} বার)
-              </Typography>
-            </View>
-          )}
-        </Card>
+          <WeeklyTriggerChart />
         )}
 
         </Animated.View>
@@ -370,40 +248,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: { },
   boldText: { fontWeight: '700' },
-  boldTextCenter: { fontWeight: '700', marginBottom: 4, textAlign: 'center' },
-  progressBarCard: {
-    marginBottom: 12,
-  },
-  progressBarHeader: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  progressBarTrack: { 
-    height: 12, 
-    borderRadius: 6, 
-    overflow: 'hidden' 
-  },
-  progressBarFill: { 
-    height: 12, 
-    borderRadius: 6 
-  },
-  statsRow: { 
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  statCard: {
-    flex: 1, 
-    borderRadius: 20, 
-    padding: 16, 
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
   phaseCard: { 
     padding: 16, 
     marginTop: 16, 
@@ -415,39 +259,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', 
     alignItems: 'center', 
     paddingVertical: 8,
-  },
-  chartCard: {
-    borderRadius: 20,
-    padding: 16,
-  },
-  chartContainer: {
-    paddingVertical: 8,
-  },
-  chartRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginBottom: 12 
-  },
-  chartBarBg: { 
-    flex: 1, 
-    height: 10, 
-    borderRadius: 5, 
-    overflow: 'hidden', 
-    marginHorizontal: 12 
-  },
-  chartBarFill: { 
-    height: 10, 
-    borderRadius: 5 
-  },
-  chartCountText: { 
-    fontWeight: '700', 
-    width: 28, 
-    textAlign: 'right' 
-  },
-  chartSummary: { 
-    marginTop: 12, 
-    paddingTop: 12, 
-    borderTopWidth: 1 
   },
   triggerLogButton: { 
     borderWidth: 2,
@@ -479,13 +290,4 @@ const styles = StyleSheet.create({
     borderLeftWidth: 6 
   },
   motivationText: { fontWeight: '600', lineHeight: 24 },
-  emptyState: { 
-    alignItems: 'center', 
-    paddingVertical: 32 
-  },
-  emptyStateCTA: { 
-    borderRadius: 12, 
-    paddingVertical: 12, 
-    paddingHorizontal: 24 
-  },
 });
