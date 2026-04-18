@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '../theme';
-import { getStepStatus } from '@/utils/trackerUtils';
-import type { PlanState, StepProgress } from '@/types';
-import StepCard from './StepCard';
+import React, { useMemo } from "react";
+import { View, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "../theme";
+import { getStepStatus } from "@/utils/trackerUtils";
+import type { PlanState, StepProgress } from "@/types";
+import StepCard from "./StepCard";
 
 const TOTAL_STEPS = 41;
 
@@ -33,10 +33,16 @@ export default function ProgressCalendar({
   }, []);
 
   const cellStatuses = useMemo(() => {
-    const map: Record<number, { status: ReturnType<typeof getStepStatus>; isCurrent: boolean }> = {};
+    const map: Record<
+      number,
+      { status: ReturnType<typeof getStepStatus>; isCurrent: boolean }
+    > = {};
     for (let step = 1; step <= TOTAL_STEPS; step++) {
       const status = getStepStatus(step, planState, stepProgress);
-      map[step] = { status, isCurrent: currentStep === step && status === 'incomplete' };
+      map[step] = {
+        status,
+        isCurrent: currentStep === step && status === "incomplete",
+      };
     }
     return map;
   }, [planState, stepProgress, currentStep]);
@@ -62,7 +68,7 @@ export default function ProgressCalendar({
                 status={status}
                 isCurrent={isCurrent}
                 onPress={() => {
-                  if (status !== 'future') router.push(`/tracker/${step}`);
+                  if (status !== "future") router.push(`/tracker/${step}`);
                 }}
               />
             );
@@ -79,11 +85,11 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
     marginBottom: 4,
   },
   rowCentered: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
 });
