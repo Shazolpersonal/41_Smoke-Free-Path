@@ -153,6 +153,8 @@ function ProfileForm({
           style={[styles.editSaveBtn, { backgroundColor: theme.colors.primary }]}
           onPress={handleSave}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="প্রোফাইল সংরক্ষণ করুন"
         >
           <Typography variant="body" style={{ color: theme.colors.onPrimary, fontWeight: '700' }}>
             সংরক্ষণ করুন
@@ -162,6 +164,8 @@ function ProfileForm({
           style={[styles.editCancelBtn, { borderColor: theme.colors.border }]}
           onPress={onCancel}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="সম্পাদনা বাতিল করুন"
         >
           <Typography variant="body" style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>
             বাতিল
@@ -211,7 +215,11 @@ export default function ProfileEditor({ profile, planState, onSave }: ProfileEdi
           প্রোফাইল তথ্য
         </Typography>
         {!editingProfile && (
-          <TouchableOpacity onPress={() => setEditingProfile(true)}>
+          <TouchableOpacity
+            onPress={() => setEditingProfile(true)}
+            accessibilityRole="button"
+            accessibilityLabel="প্রোফাইল সম্পাদনা করুন"
+          >
             <Typography variant="body" style={{ color: theme.colors.primary, fontWeight: '700' }}>
               সম্পাদনা
             </Typography>
