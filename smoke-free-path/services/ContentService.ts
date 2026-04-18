@@ -24,7 +24,6 @@ function getStepPlans(): StepPlan[] {
     try {
       _stepPlans = require('../assets/data/step_plans.json');
     } catch (e) {
-      console.error('[ContentService] Failed to load step_plans.json', e);
       return [];
     }
   }
@@ -36,7 +35,6 @@ function getIslamicContentData(): IslamicContent[] {
     try {
       _islamicContent = require('../assets/data/islamic_content.json');
     } catch (e) {
-      console.error('[ContentService] Failed to load islamic_content.json', e);
       return [];
     }
   }
@@ -48,7 +46,6 @@ function getDuasData(): IslamicContent[] {
     try {
       _duas = require('../assets/data/duas.json');
     } catch (e) {
-      console.error('[ContentService] Failed to load duas.json', e);
       return [];
     }
   }
@@ -60,7 +57,6 @@ function getMilestonesData(): Milestone[] {
     try {
       _milestones = require('../assets/data/milestones.json');
     } catch (e) {
-      console.error('[ContentService] Failed to load milestones.json', e);
       return [];
     }
   }
@@ -72,7 +68,6 @@ function getHealthTimelineData(): HealthTimelineEntry[] {
     try {
       _healthTimeline = require('../assets/data/health_timeline.json');
     } catch (e) {
-      console.error('[ContentService] Failed to load health_timeline.json', e);
       return [];
     }
   }
