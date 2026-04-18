@@ -3,7 +3,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   DimensionValue,
