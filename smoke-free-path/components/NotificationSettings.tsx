@@ -115,6 +115,8 @@ export default function NotificationSettings({
               style={[styles.timeButton, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.primary }]}
               onPress={() => setShowMorningPicker(true)}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`সকালের সময় পরিবর্তন করুন। বর্তমান সময়: ${morningValid ? morningTime : 'নির্ধারিত নেই'}`}
             >
               <Typography variant="body" style={{ color: theme.colors.primary, fontWeight: '700' }}>
                 {morningValid ? morningTime : '--:--'}
@@ -132,6 +134,8 @@ export default function NotificationSettings({
               style={[styles.timeButton, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.primary }]}
               onPress={() => setShowEveningPicker(true)}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`সন্ধ্যার সময় পরিবর্তন করুন। বর্তমান সময়: ${eveningValid ? eveningTime : 'নির্ধারিত নেই'}`}
             >
               <Typography variant="body" style={{ color: theme.colors.primary, fontWeight: '700' }}>
                 {eveningValid ? eveningTime : '--:--'}
