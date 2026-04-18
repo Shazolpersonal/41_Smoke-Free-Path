@@ -12,20 +12,9 @@ import { getMilestoneContent, getIslamicContentById } from '@/services/ContentSe
 import MilestoneAnimation from '@/components/MilestoneAnimation';
 import IslamicCard from '@/components/IslamicCard';
 import Typography from '@/components/Typography';
+import MilestoneShareButton from '@/components/MilestoneShareButton';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme';
-import type { Milestone } from '@/types';
-
-// ─── Pure function: compose share message ─────────────────────────────────────
-
-export function composeShareMessage(milestone: Milestone): string {
-  const badge = milestone.achievementBadge ?? '🏆';
-  return (
-    `${badge} ${milestone.titleBangla}!\n\n` +
-    `${milestone.islamicMessage}\n\n` +
-    `ধোঁয়া-মুক্ত পথ অ্যাপ দিয়ে আমার যাত্রা চলছে। 🌿`
-  );
-}
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -52,19 +41,6 @@ export default function MilestoneScreen() {
       }
     })();
   }, []);
-
-  async function handleShare() {
-    if (!milestone) return;
-    try {
-      const message = composeShareMessage(milestone);
-      const result = await Share.share({ message });
-      if (result.action === Share.dismissedAction) {
-        // user cancelled — no error shown
-      }
-    } catch {
-      // failure — no error shown to user
-    }
-  }
 
   if (!milestone) {
     return (
@@ -147,17 +123,7 @@ export default function MilestoneScreen() {
         </View>
 
         {/* Share button */}
-        <TouchableOpacity
-          style={[styles.shareBtn, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.primaryLight }]}
-          onPress={handleShare}
-          activeOpacity={0.85}
-          accessibilityLabel="মাইলস্টোন শেয়ার করুন"
-          accessibilityRole="button"
-        >
-          <Typography variant="subheading" color="primary">
-            শেয়ার করুন 📤
-          </Typography>
-        </TouchableOpacity>
+        <MilestoneShareButton milestone={milestone} />
 
         {/* Dismiss button */}
         <TouchableOpacity
@@ -199,13 +165,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
-  },
-  shareBtn: {
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 1.5,
   },
   errorContainer: {
     flex: 1,

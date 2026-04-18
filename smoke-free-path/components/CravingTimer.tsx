@@ -1,17 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedProps,
-  withTiming,
-  Easing,
-  runOnJS,
-  cancelAnimation,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedProps } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
-import * as Haptics from 'expo-haptics';
 import Typography from '@/components/Typography';
 import { useTheme } from '@/hooks/useTheme';
+import { useCravingTimer } from '@/hooks/useCravingTimer';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -34,85 +27,19 @@ interface CravingTimerProps {
 
 export default function CravingTimer({ onComplete, onCancel, remainingSeconds }: CravingTimerProps) {
   const { theme } = useTheme();
-  const [remaining, setRemaining] = useState(remainingSeconds ?? TOTAL_SECONDS);
-  const [running, setRunning] = useState(false);
-  const completedRef = useRef(false);
   
-  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const initialRemainingRef = useRef(remainingSeconds ?? TOTAL_SECONDS);
-  const progress = useSharedValue(remainingSeconds !== undefined ? (remainingSeconds / TOTAL_SECONDS) : 1);
-
-  useEffect(() => {
-    if (remainingSeconds !== undefined && !running) {
-      setRemaining(remainingSeconds);
-      initialRemainingRef.current = remainingSeconds;
-      progress.value = remainingSeconds / TOTAL_SECONDS;
-    }
-  }, [remainingSeconds, running]);
-
-  const start = useCallback(() => {
-    if (running) return;
-    setRunning(true);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
-
-    startTimeRef.current = Date.now();
-    initialRemainingRef.current = remaining;
-    
-    // Animate smoothly to 0 over the remaining duration
-    progress.value = withTiming(0, {
-      duration: remaining * 1000,
-      easing: Easing.linear,
-    }, (finished) => {
-      if (finished) {
-        runOnJS(handleComplete)();
-      }
-    });
-
-    // Use 250ms interval with absolute time to prevent drift
-    tick.current = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startTimeRef.current!) / 1000);
-      const newRemaining = Math.max(0, initialRemainingRef.current - elapsed);
-      setRemaining(newRemaining);
-      if (newRemaining <= 0 && tick.current) {
-        clearInterval(tick.current);
-      }
-    }, 250);
-  }, [running, remaining]);
-
-  const pause = useCallback(() => {
-    setRunning(false);
-    if (tick.current) clearInterval(tick.current);
-    // Halt the animation
-    cancelAnimation(progress);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
-  }, [progress]);
-
-  const reset = useCallback(() => {
-    setRunning(false);
-    if (tick.current) clearInterval(tick.current);
-    completedRef.current = false;
-    startTimeRef.current = null;
-    const initial = remainingSeconds ?? TOTAL_SECONDS;
-    initialRemainingRef.current = initial;
-    setRemaining(initial);
-    progress.value = withTiming(initial / TOTAL_SECONDS, { duration: 500 });
-  }, [remainingSeconds]);
-
-  const handleComplete = useCallback(() => {
-    setRunning(false);
-    setRemaining(0);
-    if (!completedRef.current) {
-      completedRef.current = true;
-      onComplete();
-    }
-  }, [onComplete]);
-
-  useEffect(() => {
-    return () => {
-      if (tick.current) clearInterval(tick.current);
-    };
-  }, []);
+  const {
+    remaining,
+    running,
+    progress,
+    start,
+    pause,
+    reset,
+  } = useCravingTimer({
+    totalSeconds: TOTAL_SECONDS,
+    remainingSeconds,
+    onComplete,
+  });
 
   const animatedProps = useAnimatedProps(() => {
     return {

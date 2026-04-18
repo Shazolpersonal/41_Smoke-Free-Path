@@ -25,7 +25,7 @@ const computeStrokeDashoffset = (progressVal: number) =>
 test('Property 3: CravingTimer strokeDashoffset calculation', () => {
   fc.assert(
     fc.property(
-      fc.float({ min: 0, max: 1 }),
+      fc.float({ min: 0, max: 1, noNaN: true }),
       (progressValue) => {
         const offset = computeStrokeDashoffset(progressValue);
         if (Number.isNaN(progressValue)) return true;

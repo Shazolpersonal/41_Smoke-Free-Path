@@ -112,11 +112,13 @@ function migrateAppState(raw: any): AppState {
   }
 
   // ─── Fix old incorrect cigarettePricePerPack default ──────
-  // Migration: Update old default value of 15 to realistic 300
-  if (userProfile && userProfile.cigarettePricePerPack === 15) {
+  // Migration: If the price is unrealistically low (<= 50), it's likely a single cigarette price.
+  // Convert it to a pack price based on cigarettesPerPack.
+  if (userProfile && userProfile.cigarettePricePerPack <= 50) {
+    const packSize = userProfile.cigarettesPerPack > 0 ? userProfile.cigarettesPerPack : 20;
     userProfile = {
       ...userProfile,
-      cigarettePricePerPack: 300, // Realistic Bangladesh market price
+      cigarettePricePerPack: userProfile.cigarettePricePerPack * packSize,
     };
   }
 
@@ -143,6 +145,102 @@ function migrateAppState(raw: any): AppState {
     dailyStreak: raw.dailyStreak ?? 0,
     lastStreakDate: raw.lastStreakDate ?? null,
   };
+}
+
+// ─── Reducer Helpers ──────────────────────────────────────────────────────────
+
+function handleCompleteStep(state: AppState, step: number): AppState {
+  if (step < 1 || step > 41) return state;
+  if (!state.planState.isActive) return state;
+  const alreadyCompleted = state.planState.completedSteps.includes(step);
+  if (alreadyCompleted) return state; // idempotent
+
+  const now = new Date().toISOString();
+  const isJourneyComplete = step === 41;
+  const newCompletedSteps = Array.from(new Set([...state.planState.completedSteps, step]));
+  const nextStep = isJourneyComplete ? 41 : Math.max(state.planState.currentStep, step + 1);
+
+  return {
+    ...state,
+    planState: {
+      ...state.planState,
+      currentStep: nextStep,
+      isActive: true, // Always keep true to allow revisiting steps
+      completedSteps: newCompletedSteps,
+      lastCompletedAt: now,
+    },
+    stepProgress: {
+      ...state.stepProgress,
+      [step]: {
+        ...state.stepProgress[step],
+        step,
+        isComplete: true,
+        completedAt: now,
+        completedItems: state.stepProgress[step]?.completedItems ?? [],
+        startedAt: state.stepProgress[step]?.startedAt ?? now,
+      },
+    },
+  };
+}
+
+function handleToggleChecklistItem(state: AppState, payload: { step: number; itemId: string }): AppState {
+  const { step, itemId } = payload;
+  const existing = state.stepProgress[step] ?? {
+    step,
+    completedItems: [],
+    isComplete: false,
+    completedAt: null,
+    startedAt: new Date().toISOString(),
+  };
+  const alreadyDone = existing.completedItems.includes(itemId);
+  const completedItems = alreadyDone
+    ? existing.completedItems.filter((id) => id !== itemId)
+    : [...existing.completedItems, itemId];
+  return {
+    ...state,
+    stepProgress: {
+      ...state.stepProgress,
+      [step]: { ...existing, completedItems },
+    },
+  };
+}
+
+function handleUpdateLastOpened(state: AppState, payload: string): AppState {
+  // Get local date carefully to avoid UTC timezone issues
+  const d = payload ? new Date(payload) : new Date();
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const last = state.lastStreakDate;
+
+  let dailyStreak = state.dailyStreak;
+  let lastStreakDate = state.lastStreakDate;
+
+  if (last === null) {
+    // First time — start streak
+    dailyStreak = 1;
+    lastStreakDate = today;
+  } else if (last === today) {
+    // Already counted today — idempotent
+    // no change
+  } else {
+    const [lastYear, lastMonth, lastDay] = last.split('-').map(Number);
+    const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
+    const lastDateUtc = Date.UTC(lastYear, lastMonth - 1, lastDay);
+    const todayDateUtc = Date.UTC(todayYear, todayMonth - 1, todayDay);
+    const diffDays = Math.floor(
+      (todayDateUtc - lastDateUtc) / (24 * 60 * 60 * 1000)
+    );
+
+    if (diffDays === 1) {
+      // Consecutive day — increment streak
+      dailyStreak = dailyStreak + 1;
+    } else {
+      // Gap — reset streak
+      dailyStreak = 1;
+    }
+    lastStreakDate = today;
+  }
+
+  return { ...state, lastOpenedAt: payload, dailyStreak, lastStreakDate };
 }
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -191,62 +289,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'COMPLETE_STEP': {
-      const step = action.payload;
-      if (step < 1 || step > 41) return state;
-      if (!state.planState.isActive) return state;
-      const alreadyCompleted = state.planState.completedSteps.includes(step);
-      if (alreadyCompleted) return state; // idempotent
-      const now = new Date().toISOString();
-      const isJourneyComplete = step === 41;
-      
-      const newCompletedSteps = Array.from(new Set([...state.planState.completedSteps, step]));
-      const nextStep = isJourneyComplete ? 41 : Math.max(state.planState.currentStep, step + 1);
-      
-      return {
-        ...state,
-        planState: {
-          ...state.planState,
-          currentStep: nextStep,
-          isActive: true, // Always keep true to allow revisiting steps
-          completedSteps: newCompletedSteps,
-          lastCompletedAt: now,
-        },
-        stepProgress: {
-          ...state.stepProgress,
-          [step]: {
-            ...state.stepProgress[step],
-            step,
-            isComplete: true,
-            completedAt: now,
-            completedItems: state.stepProgress[step]?.completedItems ?? [],
-            startedAt: state.stepProgress[step]?.startedAt ?? now,
-          },
-        },
-      };
-    }
+    case 'COMPLETE_STEP':
+      return handleCompleteStep(state, action.payload);
 
-    case 'TOGGLE_CHECKLIST_ITEM': {
-      const { step, itemId } = action.payload;
-      const existing = state.stepProgress[step] ?? {
-        step,
-        completedItems: [],
-        isComplete: false,
-        completedAt: null,
-        startedAt: new Date().toISOString(),
-      };
-      const alreadyDone = existing.completedItems.includes(itemId);
-      const completedItems = alreadyDone
-        ? existing.completedItems.filter((id) => id !== itemId)
-        : [...existing.completedItems, itemId];
-      return {
-        ...state,
-        stepProgress: {
-          ...state.stepProgress,
-          [step]: { ...existing, completedItems },
-        },
-      };
-    }
+    case 'TOGGLE_CHECKLIST_ITEM':
+      return handleToggleChecklistItem(state, action.payload);
 
     case 'ADD_TRIGGER_LOG':
       return { ...state, triggerLogs: [...state.triggerLogs, action.payload] };
@@ -284,43 +331,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, bookmarks };
     }
 
-    case 'UPDATE_LAST_OPENED': {
-      // Get local date carefully to avoid UTC timezone issues
-      const d = action.payload ? new Date(action.payload) : new Date();
-      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      const last = state.lastStreakDate;
-
-      let dailyStreak = state.dailyStreak;
-      let lastStreakDate = state.lastStreakDate;
-
-      if (last === null) {
-        // First time — start streak
-        dailyStreak = 1;
-        lastStreakDate = today;
-      } else if (last === today) {
-        // Already counted today — idempotent
-        // no change
-      } else {
-        const [lastYear, lastMonth, lastDay] = last.split('-').map(Number);
-        const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
-        const lastDateUtc = Date.UTC(lastYear, lastMonth - 1, lastDay);
-        const todayDateUtc = Date.UTC(todayYear, todayMonth - 1, todayDay);
-        const diffDays = Math.floor(
-          (todayDateUtc - lastDateUtc) / (24 * 60 * 60 * 1000)
-        );
-
-        if (diffDays === 1) {
-          // Consecutive day — increment streak
-          dailyStreak = dailyStreak + 1;
-        } else {
-          // Gap — reset streak
-          dailyStreak = 1;
-        }
-        lastStreakDate = today;
-      }
-
-      return { ...state, lastOpenedAt: action.payload, dailyStreak, lastStreakDate };
-    }
+    case 'UPDATE_LAST_OPENED':
+      return handleUpdateLastOpened(state, action.payload);
 
     case 'HYDRATE':
       try {
@@ -411,6 +423,14 @@ export function AppProvider({ children }: AppProviderProps) {
         setHydrated(true); // exactly once
       });
   }, []);
+
+  // ─── Fix old incorrect cigarettePricePerPack default ──────
+  useEffect(() => {
+    if (state.userProfile && state.userProfile.cigarettePricePerPack === 15) {
+      console.log('🔄 Fixing incorrect cigarettePricePerPack default from 15 to 300');
+      dispatch({ type: 'SET_USER_PROFILE', payload: { ...state.userProfile, cigarettePricePerPack: 300 } });
+    }
+  }, [state.userProfile?.cigarettePricePerPack]);
 
   // Persist state with debounce (1500ms) to avoid excessive AsyncStorage writes
   const saveFailureCountRef = useRef(0);
