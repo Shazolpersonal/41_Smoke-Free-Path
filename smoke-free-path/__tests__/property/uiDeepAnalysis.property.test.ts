@@ -25,7 +25,7 @@ const computeStrokeDashoffset = (progressVal: number) =>
 test('Property 3: CravingTimer strokeDashoffset calculation', () => {
   fc.assert(
     fc.property(
-      fc.float({ min: 0, max: 1, noNaN: true }),
+      fc.float({ min: 0, max: 1 }),
       (progressValue) => {
         const offset = computeStrokeDashoffset(progressValue);
         return Math.abs(offset - CIRCUMFERENCE * (1 - progressValue)) < 0.001;
