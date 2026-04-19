@@ -102,7 +102,7 @@ export default function SlipUpScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.primary }]}>
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="ফিরে যান">
           <Typography variant="body" color="onPrimary" style={{ opacity: 0.85 }}>← ফিরে যান</Typography>
         </TouchableOpacity>
         <Typography variant="title" color="onPrimary">স্লিপ-আপ</Typography>

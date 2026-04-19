@@ -113,7 +113,7 @@ export default function TriggerLogScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.primary }]}>
       <View style={[styles.header, { backgroundColor: theme.colors.primary, paddingHorizontal: theme.spacing.md, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.md, gap: theme.spacing.sm }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="ফিরে যান">
           <Typography variant="body" style={[styles.backText, { color: theme.colors.onPrimary, opacity: 0.85 }]}>← ফিরে যান</Typography>
         </TouchableOpacity>
         <Typography variant="title" style={[styles.headerTitle, { color: theme.colors.onPrimary }]}>ট্রিগার লগ</Typography>

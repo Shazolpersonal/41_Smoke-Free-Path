@@ -121,7 +121,7 @@ export default function StepPlanScreen() {
       <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.primary }]}>
         <View style={[styles.errorContainer, { padding: theme.spacing.lg }]}>
           <Typography variant="subheading" style={[styles.errorText, { color: theme.colors.onPrimary }]}>এই ধাপের পরিকল্পনা পাওয়া যায়নি।</Typography>
-          <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: theme.colors.onPrimary + '33', paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.sm }]}>
+          <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: theme.colors.onPrimary + '33', paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.sm }]} accessibilityRole="button" accessibilityLabel="ফিরে যান">
             <Typography variant="body" style={[{ color: theme.colors.onPrimary }]}>ফিরে যান</Typography>
           </TouchableOpacity>
         </View>
@@ -142,7 +142,7 @@ export default function StepPlanScreen() {
       </Animated.View>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.colors.primary, paddingHorizontal: theme.spacing.md, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.lg }]}>
-        <TouchableOpacity onPress={() => router.back()} style={[styles.backButton, { marginRight: theme.spacing.md }]}>
+        <TouchableOpacity onPress={() => router.back()} style={[styles.backButton, { marginRight: theme.spacing.md }]} accessibilityRole="button" accessibilityLabel="ফিরে যান">
           <Typography variant="heading" style={[{ color: theme.colors.onPrimary }]}>←</Typography>
         </TouchableOpacity>
         <View style={styles.headerContent}>
