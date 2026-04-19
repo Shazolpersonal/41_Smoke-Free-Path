@@ -146,7 +146,7 @@ export default function CravingScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.primary }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="ফিরে যান">
           <Typography variant="body" style={[styles.backText, { color: theme.colors.onPrimary, opacity: 0.85 }]}>← ফিরে যান</Typography>
         </TouchableOpacity>
         <Typography variant="body" style={[styles.headerTitle, { color: theme.colors.onPrimary }]}>ক্র্যাভিং টুল</Typography>

@@ -44,7 +44,7 @@ export default function PrivacyPolicyScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.primary }]}>
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityRole="button" accessibilityLabel="ফিরে যান">
           <Text style={[styles.backText, { color: theme.colors.onPrimary, opacity: 0.85 }]}>← ফিরে যান</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.colors.onPrimary }]}>গোপনীয়তা নীতি</Text>
