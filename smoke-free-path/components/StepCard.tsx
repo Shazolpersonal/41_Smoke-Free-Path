@@ -1,14 +1,14 @@
-import React from 'react';
-import { StyleSheet, View, useWindowDimensions, Pressable } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring
-} from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-import { useTheme } from '../theme';
-import Typography from './Typography';
-import type { StepStatus } from '@/types';
+import React from "react";
+import { StyleSheet, View, useWindowDimensions, Pressable } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+import { useTheme } from "../theme";
+import Typography from "./Typography";
+import type { StepStatus } from "@/types";
 
 interface StepCardProps {
   step: number;
@@ -17,13 +17,20 @@ interface StepCardProps {
   onPress: () => void;
 }
 
-export default React.memo(function StepCard({ step, status, isCurrent = false, onPress }: StepCardProps) {
+export default React.memo(function StepCard({
+  step,
+  status,
+  isCurrent = false,
+  onPress,
+}: StepCardProps) {
   const { theme } = useTheme();
   const { width } = useWindowDimensions();
   const COLUMNS = 7;
-  const PADDING = 32; 
+  const PADDING = 32;
   const GAP = 8;
-  const cardSize = Math.floor((width - PADDING - (GAP * (COLUMNS - 1))) / COLUMNS);
+  const cardSize = Math.floor(
+    (width - PADDING - GAP * (COLUMNS - 1)) / COLUMNS,
+  );
 
   const scale = useSharedValue(1);
 
@@ -31,18 +38,18 @@ export default React.memo(function StepCard({ step, status, isCurrent = false, o
     complete: {
       backgroundColor: theme.colors.primary,
       textColor: theme.colors.onPrimary,
-      icon: '✓',
+      icon: "✓",
     },
     incomplete: {
       backgroundColor: theme.colors.surface,
       textColor: theme.colors.primary,
-      icon: '',
+      icon: "",
       borderColor: theme.colors.primary,
     },
     future: {
       backgroundColor: theme.colors.surfaceVariant,
       textColor: theme.colors.textDisabled,
-      icon: '🔒',
+      icon: "🔒",
     },
   };
 
@@ -53,7 +60,7 @@ export default React.memo(function StepCard({ step, status, isCurrent = false, o
   }));
 
   const handlePressIn = () => {
-    if (status === 'future') return;
+    if (status === "future") return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     scale.value = withSpring(0.92, { damping: 10, stiffness: 200 });
   };
@@ -63,34 +70,34 @@ export default React.memo(function StepCard({ step, status, isCurrent = false, o
   };
 
   const accessibilityLabel =
-    status === 'complete'
+    status === "complete"
       ? `ধাপ ${step}, সম্পন্ন`
-      : status === 'future'
-      ? `ধাপ ${step}, লক করা`
-      : isCurrent
-      ? `বর্তমান ধাপ ${step}`
-      : `ধাপ ${step}`;
+      : status === "future"
+        ? `ধাপ ${step}, লক করা`
+        : isCurrent
+          ? `বর্তমান ধাপ ${step}`
+          : `ধাপ ${step}`;
 
   return (
     <Pressable
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      disabled={status === 'future'}
+      disabled={status === "future"}
       accessibilityLabel={accessibilityLabel}
       style={{ margin: 4 }}
     >
       <Animated.View
         style={[
           styles.card,
-          { 
-            backgroundColor: config.backgroundColor, 
-            width: cardSize, 
-            height: cardSize, 
-            borderRadius: 12, 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            borderColor: config.borderColor || 'transparent',
+          {
+            backgroundColor: config.backgroundColor,
+            width: cardSize,
+            height: cardSize,
+            borderRadius: 12,
+            alignItems: "center",
+            justifyContent: "center",
+            borderColor: config.borderColor || "transparent",
             borderWidth: config.borderColor ? 1.5 : 0,
           },
           isCurrent && {
@@ -101,16 +108,38 @@ export default React.memo(function StepCard({ step, status, isCurrent = false, o
           animatedStyle,
         ]}
       >
-        <Typography 
-          variant="small" 
-          style={[styles.stepNumber, { color: isCurrent ? theme.colors.warning : config.textColor, fontWeight: '800' }]}
+        <Typography
+          variant="small"
+          style={[
+            styles.stepNumber,
+            {
+              color: isCurrent ? theme.colors.warning : config.textColor,
+              fontWeight: "800",
+            },
+          ]}
         >
           {step}
         </Typography>
         {isCurrent ? (
-          <Typography variant="small" style={[styles.currentDot, { color: theme.colors.warning, marginTop: 1 }]}>●</Typography>
+          <Typography
+            variant="small"
+            style={[
+              styles.currentDot,
+              { color: theme.colors.warning, marginTop: 1 },
+            ]}
+          >
+            ●
+          </Typography>
         ) : config.icon ? (
-          <Typography variant="small" style={[styles.icon, { color: config.textColor, fontSize: 10, marginTop: 1 }]}>{config.icon}</Typography>
+          <Typography
+            variant="small"
+            style={[
+              styles.icon,
+              { color: config.textColor, fontSize: 10, marginTop: 1 },
+            ]}
+          >
+            {config.icon}
+          </Typography>
         ) : (
           <View style={styles.iconPlaceholder} />
         )}
@@ -120,9 +149,9 @@ export default React.memo(function StepCard({ step, status, isCurrent = false, o
 });
 
 const styles = StyleSheet.create({
-  card: { },
+  card: {},
   stepNumber: { fontSize: 13 },
-  icon: { },
+  icon: {},
   currentDot: { fontSize: 8 },
   iconPlaceholder: {
     height: 14,

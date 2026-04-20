@@ -8,9 +8,9 @@
  * উপস্থিত থাকতে হবে এবং non-empty string value থাকতে হবে।
  */
 
-import * as fc from 'fast-check';
+import * as fc from "fast-check";
 
-jest.mock('react-native-worklets', () => {
+jest.mock("react-native-worklets", () => {
   return {
     useSharedValue: jest.fn(() => ({ value: 0 })),
     useAnimatedStyle: jest.fn(() => ({})),
@@ -19,29 +19,29 @@ jest.mock('react-native-worklets', () => {
   };
 });
 
-import { lightTheme, darkTheme } from '../../theme';
+import { lightTheme, darkTheme } from "../../theme";
 
 const REQUIRED_TOKENS = [
   // existing tokens
-  'primary',
-  'primaryDark',
-  'primaryLight',
-  'background',
-  'surface',
-  'surfaceVariant',
-  'error',
-  'text',
-  'textSecondary',
-  'textDisabled',
-  'border',
-  'success',
+  "primary",
+  "primaryDark",
+  "primaryLight",
+  "background",
+  "surface",
+  "surfaceVariant",
+  "error",
+  "text",
+  "textSecondary",
+  "textDisabled",
+  "border",
+  "success",
   // new semantic tokens
-  'warning',
-  'info',
-  'surfaceElevated',
-  'onPrimary',
-  'chipBackground',
-  'chipBorder',
+  "warning",
+  "info",
+  "surfaceElevated",
+  "onPrimary",
+  "chipBackground",
+  "chipBorder",
 ] as const;
 
 // ─── WCAG Contrast Helpers ────────────────────────────────────────────────────
@@ -65,61 +65,60 @@ function contrastRatio(fg: string, bg: string): number {
 
 // ─── Property 1 ───────────────────────────────────────────────────────────────
 
-describe('Property 1: Theme Token সম্পূর্ণতা', () => {
-  it('all required tokens are present and non-empty strings for any theme', () => {
+describe("Property 1: Theme Token সম্পূর্ণতা", () => {
+  it("all required tokens are present and non-empty strings for any theme", () => {
     // Feature: ui-ux-a-grade-upgrade, Property 1: Theme Token সম্পূর্ণতা
     fc.assert(
-      fc.property(
-        fc.constantFrom(lightTheme, darkTheme),
-        (theme) => {
-          return REQUIRED_TOKENS.every(
-            (token) =>
-              typeof theme.colors[token] === 'string' &&
-              theme.colors[token].length > 0
-          );
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.constantFrom(lightTheme, darkTheme), (theme) => {
+        return REQUIRED_TOKENS.every(
+          (token) =>
+            typeof theme.colors[token] === "string" &&
+            theme.colors[token].length > 0,
+        );
+      }),
+      { numRuns: 100 },
     );
   });
 });
 
 // ─── Property 2 ───────────────────────────────────────────────────────────────
 
-describe('Property 2: Dark Mode WCAG Contrast', () => {
-  it('textDisabled vs surfaceVariant contrast ratio >= 1.0 in dark theme', () => {
+describe("Property 2: Dark Mode WCAG Contrast", () => {
+  it("textDisabled vs surfaceVariant contrast ratio >= 1.0 in dark theme", () => {
     /**
      * **Validates: Requirements 2.3**
      * Feature: ui-ux-a-grade-upgrade, Property 2: Dark Mode WCAG Contrast
      */
     fc.assert(
-      fc.property(
-        fc.constantFrom(darkTheme),
-        (theme) => {
-          return contrastRatio(theme.colors.textDisabled, theme.colors.surfaceVariant) >= 1.0;
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.constantFrom(darkTheme), (theme) => {
+        return (
+          contrastRatio(
+            theme.colors.textDisabled,
+            theme.colors.surfaceVariant,
+          ) >= 1.0
+        );
+      }),
+      { numRuns: 100 },
     );
   });
 });
 
 // ─── Property 3 ───────────────────────────────────────────────────────────────
 
-import { computeNextSelection } from '../../components/TriggerSelector';
+import { computeNextSelection } from "../../components/TriggerSelector";
 
-describe('Property 3: TriggerSelector Toggle Idempotence', () => {
+describe("Property 3: TriggerSelector Toggle Idempotence", () => {
   /**
    * **Validates: Requirements 10.1, 10.2, 10.3, 10.4**
    * Feature: ui-ux-a-grade-upgrade, Property 3: TriggerSelector Toggle Idempotence
    */
-  it('tapping the selected trigger deselects it; tapping another selects it', () => {
+  it("tapping the selected trigger deselects it; tapping another selects it", () => {
     const triggerTypes = fc.constantFrom(
-      'stress',
-      'social',
-      'boredom',
-      'environmental',
-      'habitual'
+      "stress",
+      "social",
+      "boredom",
+      "environmental",
+      "habitual",
     );
 
     fc.assert(
@@ -133,63 +132,62 @@ describe('Property 3: TriggerSelector Toggle Idempotence', () => {
           } else {
             return result === tapped;
           }
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });
 
 // ─── Property 4 ───────────────────────────────────────────────────────────────
 
-describe('Property 4: Responsive Cell Minimum Touch Target', () => {
+describe("Property 4: Responsive Cell Minimum Touch Target", () => {
   const computeCellSize = (screenWidth: number) => {
     const COLUMNS = 7;
     const PADDING = 32;
     const GAP = 8;
-    return Math.floor((screenWidth - PADDING - (GAP * (COLUMNS - 1))) / COLUMNS);
+    return Math.floor((screenWidth - PADDING - GAP * (COLUMNS - 1)) / COLUMNS);
   };
 
   /**
    * **Validates: Requirements 14.1, 14.2, 14.3, 14.4, 27.1, 27.4**
    * Feature: ui-ux-a-grade-upgrade, Property 4: Responsive Cell Minimum Touch Target
    */
-  it('computeCellSize always returns >= 30 for any screen width between 320 and 428', () => {
+  it("computeCellSize always returns >= 30 for any screen width between 320 and 428", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 320, max: 428 }),
-        (screenWidth) => {
-          return computeCellSize(screenWidth) >= 30;
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.integer({ min: 320, max: 428 }), (screenWidth) => {
+        return computeCellSize(screenWidth) >= 30;
+      }),
+      { numRuns: 100 },
     );
   });
 });
 
 // ─── Property 5 ───────────────────────────────────────────────────────────────
 
-describe('Property 5: CravingTimer Progress Calculation', () => {
+describe("Property 5: CravingTimer Progress Calculation", () => {
   const CIRCUMFERENCE = 2 * Math.PI * 120;
   const TIMER_TOTAL_SECONDS = 300;
   const computeStrokeDashoffset = (remainingSeconds: number) => {
-    return CIRCUMFERENCE * (1 - (TIMER_TOTAL_SECONDS - remainingSeconds) / TIMER_TOTAL_SECONDS);
+    return (
+      CIRCUMFERENCE *
+      (1 - (TIMER_TOTAL_SECONDS - remainingSeconds) / TIMER_TOTAL_SECONDS)
+    );
   };
 
   /**
    * **Validates: Requirements 19.1, 19.2, 19.3, 19.4**
    * Feature: ui-ux-a-grade-upgrade, Property 5: CravingTimer Progress Calculation
    */
-  it('computeStrokeDashoffset matches expected formula for any remaining seconds 0–300', () => {
+  it("computeStrokeDashoffset matches expected formula for any remaining seconds 0–300", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 0, max: 300 }),
-        (remaining) => {
-          const expected = CIRCUMFERENCE * (1 - (TIMER_TOTAL_SECONDS - remaining) / TIMER_TOTAL_SECONDS);
-          return Math.abs(computeStrokeDashoffset(remaining) - expected) < 0.001;
-        }
-      ),
-      { numRuns: 100 }
+      fc.property(fc.integer({ min: 0, max: 300 }), (remaining) => {
+        const expected =
+          CIRCUMFERENCE *
+          (1 - (TIMER_TOTAL_SECONDS - remaining) / TIMER_TOTAL_SECONDS);
+        return Math.abs(computeStrokeDashoffset(remaining) - expected) < 0.001;
+      }),
+      { numRuns: 100 },
     );
   });
 });
@@ -204,54 +202,48 @@ export function computeAnimationState(reduceMotionEnabled: boolean): boolean {
   return !reduceMotionEnabled;
 }
 
-describe('Property 6: ReduceMotion Animation Guard', () => {
+describe("Property 6: ReduceMotion Animation Guard", () => {
   /**
    * **Validates: Requirements 20.1, 20.2, 20.3, 20.4, 8.5, 8.6, 11.5, 11.6, 17.3, 19.3, 23.4**
    * Feature: ui-ux-a-grade-upgrade, Property 6: ReduceMotion Animation Guard
    */
-  it('animation is disabled when reduceMotion is enabled, and active when disabled', () => {
+  it("animation is disabled when reduceMotion is enabled, and active when disabled", () => {
     fc.assert(
-      fc.property(
-        fc.boolean(),
-        (reduceMotionEnabled) => {
-          const animationActive = computeAnimationState(reduceMotionEnabled);
-          if (reduceMotionEnabled) {
-            return animationActive === false;
-          } else {
-            return animationActive === true;
-          }
+      fc.property(fc.boolean(), (reduceMotionEnabled) => {
+        const animationActive = computeAnimationState(reduceMotionEnabled);
+        if (reduceMotionEnabled) {
+          return animationActive === false;
+        } else {
+          return animationActive === true;
         }
-      ),
-      { numRuns: 100 }
+      }),
+      { numRuns: 100 },
     );
   });
 });
 
 // ─── Property 7 ───────────────────────────────────────────────────────────────
 
-import { getDefaultDuaCategory } from '../../app/(tabs)/dua';
+import { getDefaultDuaCategory } from "../../app/(tabs)/dua";
 
-describe('Property 7: Dua Time-Based Category Selection', () => {
+describe("Property 7: Dua Time-Based Category Selection", () => {
   /**
    * **Validates: Requirements 26.1, 26.2, 26.3**
    * Feature: ui-ux-a-grade-upgrade, Property 7: Dua Time-Based Category Selection
    */
-  it('returns correct category based on hour of day', () => {
+  it("returns correct category based on hour of day", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ min: 0, max: 23 }),
-        (hour) => {
-          const category = getDefaultDuaCategory(hour);
-          if (hour >= 4 && hour < 12) {
-            return category === 'morning_adhkar';
-          }
-          if (hour >= 15 && hour < 19) {
-            return category === 'evening_adhkar';
-          }
-          return typeof category === 'string' && category.length > 0;
+      fc.property(fc.integer({ min: 0, max: 23 }), (hour) => {
+        const category = getDefaultDuaCategory(hour);
+        if (hour >= 4 && hour < 12) {
+          return category === "morning_adhkar";
         }
-      ),
-      { numRuns: 100 }
+        if (hour >= 15 && hour < 19) {
+          return category === "evening_adhkar";
+        }
+        return typeof category === "string" && category.length > 0;
+      }),
+      { numRuns: 100 },
     );
   });
 });

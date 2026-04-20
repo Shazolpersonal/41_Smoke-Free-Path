@@ -1,7 +1,15 @@
-import React, { useRef, useCallback } from 'react';
-import { View, StyleSheet, ViewStyle, StyleProp, Animated, TouchableOpacity, AccessibilityInfo } from 'react-native';
-import * as Haptics from 'expo-haptics';
-import { useTheme } from '../theme';
+import React, { useRef, useCallback } from "react";
+import {
+  View,
+  StyleSheet,
+  ViewStyle,
+  StyleProp,
+  Animated,
+  TouchableOpacity,
+  AccessibilityInfo,
+} from "react-native";
+import * as Haptics from "expo-haptics";
+import { useTheme } from "../theme";
 
 interface CardProps {
   children: React.ReactNode;

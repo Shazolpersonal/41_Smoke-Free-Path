@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -6,17 +6,21 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
-import Typography from '@/components/Typography';
-import { FormInput } from './FormElements';
-import type { UserProfile, PlanState } from '@/types';
+} from "react-native";
+import { useTheme } from "@/hooks/useTheme";
+import Typography from "@/components/Typography";
+import { FormInput } from "./FormElements";
+import type { UserProfile, PlanState } from "@/types";
 
 function formatDate(isoString: string | null): string {
-  if (!isoString) return '—';
+  if (!isoString) return "—";
   const d = new Date(isoString);
-  if (isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("bn-BD", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 interface ProfileEditorProps {
@@ -25,22 +29,38 @@ interface ProfileEditorProps {
   onSave: (updated: Partial<UserProfile>) => void;
 }
 
-function ProfileDisplay({ profile, planState }: { profile: UserProfile; planState: PlanState }) {
+function ProfileDisplay({
+  profile,
+  planState,
+}: {
+  profile: UserProfile;
+  planState: PlanState;
+}) {
   const { theme } = useTheme();
 
   const INFO_FIELDS = [
-    { label: 'নাম:', value: profile.name },
-    { label: 'দৈনিক সিগারেট:', value: `${profile.cigarettesPerDay}টি` },
-    { label: 'ধূমপানের বছর:', value: `${profile.smokingYears} বছর` },
-    { label: 'শুরু:', value: formatDate(planState.activatedAt) },
+    { label: "নাম:", value: profile.name },
+    { label: "দৈনিক সিগারেট:", value: `${profile.cigarettesPerDay}টি` },
+    { label: "ধূমপানের বছর:", value: `${profile.smokingYears} বছর` },
+    { label: "শুরু:", value: formatDate(planState.activatedAt) },
   ];
 
   return (
     <View style={styles.infoContent}>
       {INFO_FIELDS.map((field, idx) => (
         <View key={idx} style={styles.infoRow}>
-          <Typography variant="body" style={{ color: theme.colors.textSecondary, fontWeight: '500' }}>{field.label}</Typography>
-          <Typography variant="body" style={{ color: theme.colors.text, fontWeight: '600' }}>{field.value}</Typography>
+          <Typography
+            variant="body"
+            style={{ color: theme.colors.textSecondary, fontWeight: "500" }}
+          >
+            {field.label}
+          </Typography>
+          <Typography
+            variant="body"
+            style={{ color: theme.colors.text, fontWeight: "600" }}
+          >
+            {field.value}
+          </Typography>
         </View>
       ))}
     </View>
@@ -62,8 +82,8 @@ function ProfileForm({
     name: profile.name,
     cigarettesPerDay: String(profile.cigarettesPerDay),
     smokingYears: String(profile.smokingYears),
-    cigarettePricePerPack: String(profile.cigarettePricePerPack ?? ''),
-    cigarettesPerPack: String(profile.cigarettesPerPack ?? ''),
+    cigarettePricePerPack: String(profile.cigarettePricePerPack ?? ""),
+    cigarettesPerPack: String(profile.cigarettesPerPack ?? ""),
   });
 
   const handleChange = (key: keyof typeof formData, value: string) => {
@@ -73,27 +93,35 @@ function ProfileForm({
   const handleSave = () => {
     const name = formData.name.trim();
     if (!name) {
-      Alert.alert('ত্রুটি', 'নাম খালি রাখা যাবে না।');
+      Alert.alert("ত্রুটি", "নাম খালি রাখা যাবে না।");
       return;
     }
     const cigs = parseInt(formData.cigarettesPerDay, 10);
     if (isNaN(cigs) || cigs <= 0) {
-      Alert.alert('ত্রুটি', 'দৈনিক সিগারেট সংখ্যা সঠিকভাবে দিন।');
+      Alert.alert("ত্রুটি", "দৈনিক সিগারেট সংখ্যা সঠিকভাবে দিন।");
       return;
     }
     const years = parseInt(formData.smokingYears, 10);
     if (isNaN(years) || years <= 0) {
-      Alert.alert('ত্রুটি', 'ধূমপানের বছর সঠিকভাবে দিন।');
+      Alert.alert("ত্রুটি", "ধূমপানের বছর সঠিকভাবে দিন।");
       return;
     }
     const price = parseFloat(formData.cigarettePricePerPack);
     if (isNaN(price) || price <= 0) {
-      Alert.alert('ত্রুটি', 'প্রতি প্যাকের মূল্য সঠিক ধনাত্মক সংখ্যা দিন।');
+      Alert.alert("ত্রুটি", "প্রতি প্যাকের মূল্য সঠিক ধনাত্মক সংখ্যা দিন।");
       return;
     }
     const packSize = parseInt(formData.cigarettesPerPack, 10);
-    if (isNaN(packSize) || packSize < 1 || packSize > 100 || !Number.isInteger(packSize)) {
-      Alert.alert('ত্রুটি', 'প্যাকে সিগারেট সংখ্যা ১ থেকে ১০০-এর মধ্যে পূর্ণ সংখ্যা হতে হবে।');
+    if (
+      isNaN(packSize) ||
+      packSize < 1 ||
+      packSize > 100 ||
+      !Number.isInteger(packSize)
+    ) {
+      Alert.alert(
+        "ত্রুটি",
+        "প্যাকে সিগারেট সংখ্যা ১ থেকে ১০০-এর মধ্যে পূর্ণ সংখ্যা হতে হবে।",
+      );
       return;
     }
 
@@ -108,12 +136,12 @@ function ProfileForm({
 
   const INPUT_ROWS = [
     [
-      { key: 'cigarettesPerDay', label: 'দৈনিক সিগারেট' },
-      { key: 'smokingYears', label: 'ধূমপানের বছর' },
+      { key: "cigarettesPerDay", label: "দৈনিক সিগারেট" },
+      { key: "smokingYears", label: "ধূমপানের বছর" },
     ],
     [
-      { key: 'cigarettePricePerPack', label: 'প্যাকের মূল্য (৳)' },
-      { key: 'cigarettesPerPack', label: 'প্যাকে সংখ্যা' },
+      { key: "cigarettePricePerPack", label: "প্যাকের মূল্য (৳)" },
+      { key: "cigarettesPerPack", label: "প্যাকে সংখ্যা" },
     ],
   ] as const;
 
@@ -122,7 +150,7 @@ function ProfileForm({
       <FormInput
         label="নাম"
         value={formData.name}
-        onChangeText={(text) => handleChange('name', text)}
+        onChangeText={(text) => handleChange("name", text)}
         placeholder="আপনার নাম"
         autoCapitalize="words"
       />
@@ -133,7 +161,9 @@ function ProfileForm({
             <FormInput
               label={row[0].label}
               value={formData[row[0].key]}
-              onChangeText={(text) => handleChange(row[0].key as keyof typeof formData, text)}
+              onChangeText={(text) =>
+                handleChange(row[0].key as keyof typeof formData, text)
+              }
               keyboardType="numeric"
             />
           </View>
@@ -141,7 +171,9 @@ function ProfileForm({
             <FormInput
               label={row[1].label}
               value={formData[row[1].key]}
-              onChangeText={(text) => handleChange(row[1].key as keyof typeof formData, text)}
+              onChangeText={(text) =>
+                handleChange(row[1].key as keyof typeof formData, text)
+              }
               keyboardType="numeric"
             />
           </View>
@@ -150,13 +182,19 @@ function ProfileForm({
 
       <View style={styles.editActions}>
         <TouchableOpacity
-          style={[styles.editSaveBtn, { backgroundColor: theme.colors.primary }]}
+          style={[
+            styles.editSaveBtn,
+            { backgroundColor: theme.colors.primary },
+          ]}
           onPress={handleSave}
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel="প্রোফাইল সংরক্ষণ করুন"
         >
-          <Typography variant="body" style={{ color: theme.colors.onPrimary, fontWeight: '700' }}>
+          <Typography
+            variant="body"
+            style={{ color: theme.colors.onPrimary, fontWeight: "700" }}
+          >
             সংরক্ষণ করুন
           </Typography>
         </TouchableOpacity>
@@ -167,7 +205,10 @@ function ProfileForm({
           accessibilityRole="button"
           accessibilityLabel="সম্পাদনা বাতিল করুন"
         >
-          <Typography variant="body" style={{ color: theme.colors.textSecondary, fontWeight: '600' }}>
+          <Typography
+            variant="body"
+            style={{ color: theme.colors.textSecondary, fontWeight: "600" }}
+          >
             বাতিল
           </Typography>
         </TouchableOpacity>
@@ -176,19 +217,23 @@ function ProfileForm({
   );
 }
 
-export default function ProfileEditor({ profile, planState, onSave }: ProfileEditorProps) {
+export default function ProfileEditor({
+  profile,
+  planState,
+  onSave,
+}: ProfileEditorProps) {
   const { theme } = useTheme();
   const [editingProfile, setEditingProfile] = useState(false);
 
   const handleSaveProfile = (updated: Partial<UserProfile>) => {
     onSave(updated);
     setEditingProfile(false);
-    Alert.alert('সংরক্ষিত', 'প্রোফাইল আপডেট হয়েছে।');
+    Alert.alert("সংরক্ষিত", "প্রোফাইল আপডেট হয়েছে।");
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={[
         styles.card,
         {
@@ -204,14 +249,17 @@ export default function ProfileEditor({ profile, planState, onSave }: ProfileEdi
         style={[
           styles.cardHeader,
           {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: theme.spacing.md,
           },
         ]}
       >
-        <Typography variant="subheading" style={{ color: theme.colors.text, fontWeight: '800' }}>
+        <Typography
+          variant="subheading"
+          style={{ color: theme.colors.text, fontWeight: "800" }}
+        >
           প্রোফাইল তথ্য
         </Typography>
         {!editingProfile && (
@@ -220,7 +268,10 @@ export default function ProfileEditor({ profile, planState, onSave }: ProfileEdi
             accessibilityRole="button"
             accessibilityLabel="প্রোফাইল সম্পাদনা করুন"
           >
-            <Typography variant="body" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+            <Typography
+              variant="body"
+              style={{ color: theme.colors.primary, fontWeight: "700" }}
+            >
               সম্পাদনা
             </Typography>
           </TouchableOpacity>
@@ -228,7 +279,11 @@ export default function ProfileEditor({ profile, planState, onSave }: ProfileEdi
       </View>
 
       {editingProfile ? (
-        <ProfileForm profile={profile} onSave={handleSaveProfile} onCancel={() => setEditingProfile(false)} />
+        <ProfileForm
+          profile={profile}
+          onSave={handleSaveProfile}
+          onCancel={() => setEditingProfile(false)}
+        />
       ) : (
         <ProfileDisplay profile={profile} planState={planState} />
       )}
@@ -241,10 +296,10 @@ const styles = StyleSheet.create({
   cardHeader: {},
   formContent: {},
   inputRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   editActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginTop: 8,
   },
@@ -252,26 +307,26 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   editCancelBtn: {
     flex: 1,
     borderRadius: 12,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1.5,
   },
   infoContent: {
     gap: 8,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   infoLabel: {
-    fontWeight: '500',
+    fontWeight: "500",
   },
   infoValue: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

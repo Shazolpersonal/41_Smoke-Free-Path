@@ -1,8 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, AccessibilityInfo, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/hooks/useTheme';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  AccessibilityInfo,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "@/hooks/useTheme";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function FloatingCravingButton() {
   const router = useRouter();
@@ -43,8 +49,8 @@ export default function FloatingCravingButton() {
             useNativeDriver: true,
           }),
         ]),
-        { iterations: 3 }
-      )
+        { iterations: 3 },
+      ),
     ]).start();
   }, [reduceMotion, scaleAnim]);
 
@@ -60,7 +66,7 @@ export default function FloatingCravingButton() {
       ]}
     >
       <TouchableOpacity
-        onPress={() => router.push('/craving')}
+        onPress={() => router.push("/craving")}
         style={styles.touchable}
         activeOpacity={0.8}
         accessibilityLabel="ক্র্যাভিং সহায়তা"
@@ -74,7 +80,7 @@ export default function FloatingCravingButton() {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 80,
     right: 20,
     width: 56,
@@ -85,8 +91,8 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   icon: {
     fontSize: 24,

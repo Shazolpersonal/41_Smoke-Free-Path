@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme } from '../theme';
-import type { TriggerType } from '@/types';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useTheme } from "../theme";
+import type { TriggerType } from "@/types";
 
 interface TriggerSelectorProps {
   selected: TriggerType | null;
@@ -10,20 +10,23 @@ interface TriggerSelectorProps {
 
 export function computeNextSelection(
   currentSelected: string | null,
-  tapped: string
+  tapped: string,
 ): string | null {
   return tapped === currentSelected ? null : tapped;
 }
 
 const TRIGGERS: { type: TriggerType; label: string }[] = [
-  { type: 'stress', label: 'মানসিক চাপ' },
-  { type: 'social', label: 'সামাজিক' },
-  { type: 'boredom', label: 'একঘেয়েমি' },
-  { type: 'environmental', label: 'পরিবেশগত' },
-  { type: 'habitual', label: 'অভ্যাসগত' },
+  { type: "stress", label: "মানসিক চাপ" },
+  { type: "social", label: "সামাজিক" },
+  { type: "boredom", label: "একঘেয়েমি" },
+  { type: "environmental", label: "পরিবেশগত" },
+  { type: "habitual", label: "অভ্যাসগত" },
 ];
 
-export default function TriggerSelector({ selected, onSelect }: TriggerSelectorProps) {
+export default function TriggerSelector({
+  selected,
+  onSelect,
+}: TriggerSelectorProps) {
   const { theme } = useTheme();
 
   return (
@@ -39,14 +42,27 @@ export default function TriggerSelector({ selected, onSelect }: TriggerSelectorP
                 backgroundColor: theme.colors.chipBackground,
                 borderColor: theme.colors.chipBorder,
               },
-              isSelected && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+              isSelected && {
+                backgroundColor: theme.colors.primary,
+                borderColor: theme.colors.primary,
+              },
             ]}
-            onPress={() => onSelect(computeNextSelection(selected, type) as TriggerType | null)}
+            onPress={() =>
+              onSelect(
+                computeNextSelection(selected, type) as TriggerType | null,
+              )
+            }
             activeOpacity={0.75}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isSelected }}
           >
-            <Text style={[styles.chipText, { color: theme.colors.chipBorder }, isSelected && { color: theme.colors.onPrimary }]}>
+            <Text
+              style={[
+                styles.chipText,
+                { color: theme.colors.chipBorder },
+                isSelected && { color: theme.colors.onPrimary },
+              ]}
+            >
               {label}
             </Text>
           </TouchableOpacity>
@@ -58,8 +74,8 @@ export default function TriggerSelector({ selected, onSelect }: TriggerSelectorP
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   chip: {
@@ -70,6 +86,6 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

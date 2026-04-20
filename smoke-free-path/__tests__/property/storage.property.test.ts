@@ -8,16 +8,18 @@
 // timestamps, saving and loading the state should preserve all timestamp fields exactly.
 // Validates: Requirements 3.7
 
-import * as fc from 'fast-check';
-import { saveAppState, loadAppState } from '@/services/StorageService';
-import { INITIAL_APP_STATE } from '@/context/AppContext';
-import type { AppState, UserProfile, StepProgress } from '@/types';
+import * as fc from "fast-check";
+import { saveAppState, loadAppState } from "@/services/StorageService";
+import { INITIAL_APP_STATE } from "@/context/AppContext";
+import type { AppState, UserProfile, StepProgress } from "@/types";
 
 // ─── Arbitraries ──────────────────────────────────────────────────────────────
 
 const isoDateArb = fc
   .integer({ min: 0, max: 365 * 5 * 24 * 60 * 60 * 1000 })
-  .map((offset) => new Date(new Date('2020-01-01').getTime() + offset).toISOString());
+  .map((offset) =>
+    new Date(new Date("2020-01-01").getTime() + offset).toISOString(),
+  );
 
 const userProfileArb = fc.record<UserProfile>({
   id: fc.uuid(),
@@ -27,15 +29,17 @@ const userProfileArb = fc.record<UserProfile>({
   cigarettePricePerPack: fc.integer({ min: 1, max: 500 }),
   cigarettesPerPack: fc.integer({ min: 1, max: 40 }),
   notificationsEnabled: fc.boolean(),
-  morningNotificationTime: fc.constant('08:00'),
-  eveningNotificationTime: fc.constant('21:00'),
+  morningNotificationTime: fc.constant("08:00"),
+  eveningNotificationTime: fc.constant("21:00"),
   onboardingCompleted: fc.boolean(),
   createdAt: isoDateArb,
 });
 
 const stepProgressArb = fc.record<StepProgress>({
   step: fc.integer({ min: 1, max: 41 }),
-  completedItems: fc.array(fc.string({ minLength: 1, maxLength: 20 }), { maxLength: 10 }),
+  completedItems: fc.array(fc.string({ minLength: 1, maxLength: 20 }), {
+    maxLength: 10,
+  }),
   isComplete: fc.boolean(),
   completedAt: fc.option(isoDateArb, { nil: null }),
   startedAt: fc.option(isoDateArb, { nil: null }),
@@ -43,7 +47,7 @@ const stepProgressArb = fc.record<StepProgress>({
 
 // ─── Property 1: UserProfile LocalStorage Round-Trip ─────────────────────────
 
-test('Property 1: UserProfile LocalStorage Round-Trip', async () => {
+test("Property 1: UserProfile LocalStorage Round-Trip", async () => {
   await fc.assert(
     fc.asyncProperty(userProfileArb, async (profile) => {
       const state: AppState = {
@@ -60,13 +64,13 @@ test('Property 1: UserProfile LocalStorage Round-Trip', async () => {
       // Ensure no quitDate field leaks in
       expect((loaded!.userProfile as any)?.quitDate).toBeUndefined();
     }),
-    { numRuns: 100 }
+    { numRuns: 100 },
   );
 });
 
 // ─── Property 7: StepProgress Persistence Round-Trip ─────────────────────────
 
-test('Property 7: StepProgress Persistence Round-Trip', async () => {
+test("Property 7: StepProgress Persistence Round-Trip", async () => {
   await fc.assert(
     fc.asyncProperty(
       fc.array(stepProgressArb, { minLength: 1, maxLength: 10 }),
@@ -97,8 +101,8 @@ test('Property 7: StepProgress Persistence Round-Trip', async () => {
           expect(loadedEntry.isComplete).toBe(entry.isComplete);
           expect(loadedEntry.completedItems).toEqual(entry.completedItems);
         }
-      }
+      },
     ),
-    { numRuns: 100 }
+    { numRuns: 100 },
   );
 });

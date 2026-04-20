@@ -1,24 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, AccessibilityInfo } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring, 
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, AccessibilityInfo } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
   ZoomIn,
-  FadeIn
-} from 'react-native-reanimated';
-import { useTheme } from '../theme';
-import Typography from './Typography';
+  FadeIn,
+} from "react-native-reanimated";
+import { useTheme } from "../theme";
+import Typography from "./Typography";
 
 interface MilestoneAnimationProps {
   milestoneStep: number;
   onComplete: () => void;
 }
 
-export default function MilestoneAnimation({ milestoneStep, onComplete }: MilestoneAnimationProps) {
+export default function MilestoneAnimation({
+  milestoneStep,
+  onComplete,
+}: MilestoneAnimationProps) {
   const { theme } = useTheme();
   const [reduceMotion, setReduceMotion] = useState(false);
-  
+
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
 
@@ -60,10 +63,16 @@ export default function MilestoneAnimation({ milestoneStep, onComplete }: Milest
           ]}
         >
           <Typography style={styles.badgeEmoji}>🏆</Typography>
-          <Typography variant="heading" style={[styles.badgeDays, { color: theme.colors.onPrimary }]}>
+          <Typography
+            variant="heading"
+            style={[styles.badgeDays, { color: theme.colors.onPrimary }]}
+          >
             {milestoneStep}
           </Typography>
-          <Typography variant="small" style={[styles.badgeDaysLabel, { color: theme.colors.onPrimary }]}>
+          <Typography
+            variant="small"
+            style={[styles.badgeDaysLabel, { color: theme.colors.onPrimary }]}
+          >
             ধাপ সম্পন্ন
           </Typography>
         </View>
@@ -74,31 +83,41 @@ export default function MilestoneAnimation({ milestoneStep, onComplete }: Milest
   return (
     <View style={styles.container}>
       <Animated.View entering={FadeIn.delay(300).duration(800)}>
-        <Typography variant="display" style={styles.confetti}>🎉 ✨ 🌟 ✨ 🎉</Typography>
+        <Typography variant="display" style={styles.confetti}>
+          🎉 ✨ 🌟 ✨ 🎉
+        </Typography>
       </Animated.View>
-      
+
       <Animated.View
         entering={ZoomIn.duration(800).springify()}
         style={[
           styles.badge,
-          { 
-            backgroundColor: theme.colors.primary, 
+          {
+            backgroundColor: theme.colors.primary,
             shadowColor: theme.colors.primary,
           },
           animatedBadgeStyle,
         ]}
       >
         <Typography style={styles.badgeEmoji}>🏆</Typography>
-        <Typography variant="heading" style={[styles.badgeDays, { color: theme.colors.onPrimary }]}>
+        <Typography
+          variant="heading"
+          style={[styles.badgeDays, { color: theme.colors.onPrimary }]}
+        >
           {milestoneStep}
         </Typography>
-        <Typography variant="small" style={[styles.badgeDaysLabel, { color: theme.colors.onPrimary }]}>
+        <Typography
+          variant="small"
+          style={[styles.badgeDaysLabel, { color: theme.colors.onPrimary }]}
+        >
           ধাপ সম্পন্ন
         </Typography>
       </Animated.View>
 
       <Animated.View entering={FadeIn.delay(600).duration(800)}>
-        <Typography variant="display" style={styles.confetti}>⭐ 💚 🌙 💚 ⭐</Typography>
+        <Typography variant="display" style={styles.confetti}>
+          ⭐ 💚 🌙 💚 ⭐
+        </Typography>
       </Animated.View>
     </View>
   );
@@ -107,28 +126,28 @@ export default function MilestoneAnimation({ milestoneStep, onComplete }: Milest
 const styles = StyleSheet.create({
   container: {
     height: 250,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   confetti: {
     fontSize: 22,
     marginVertical: 12,
     letterSpacing: 4,
-    textAlign: 'center',
+    textAlign: "center",
   },
   badge: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
     elevation: 8,
   },
   badgeEmoji: { fontSize: 32, marginBottom: 4 },
-  badgeDays: { fontWeight: '800', lineHeight: 36 },
-  badgeDaysLabel: { fontWeight: '600', opacity: 0.9 },
+  badgeDays: { fontWeight: "800", lineHeight: 36 },
+  badgeDaysLabel: { fontWeight: "600", opacity: 0.9 },
 });

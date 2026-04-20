@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
-import { isStepAccessible } from '@/utils/trackerUtils';
-import Typography from '@/components/Typography';
-import type { PlanState } from '@/types';
+import React from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { useTheme } from "@/hooks/useTheme";
+import { isStepAccessible } from "@/utils/trackerUtils";
+import Typography from "@/components/Typography";
+import type { PlanState } from "@/types";
 
 interface StepNavigationBarProps {
   stepNum: number;
@@ -31,7 +31,12 @@ export default function StepNavigationBar({
           accessibilityLabel="পূর্ববর্তী ধাপ"
           accessibilityRole="button"
         >
-          <Typography variant="body" style={{ fontWeight: '600', color: theme.colors.primary }}>← পূর্ববর্তী ধাপ</Typography>
+          <Typography
+            variant="body"
+            style={{ fontWeight: "600", color: theme.colors.primary }}
+          >
+            ← পূর্ববর্তী ধাপ
+          </Typography>
         </TouchableOpacity>
       ) : (
         <View style={styles.navBtnPlaceholder} />
@@ -48,11 +53,29 @@ export default function StepNavigationBar({
           accessibilityLabel="পরবর্তী ধাপ"
           accessibilityRole="button"
         >
-          <Typography variant="body" style={{ fontWeight: '600', color: theme.colors.primary }}>পরবর্তী ধাপ →</Typography>
+          <Typography
+            variant="body"
+            style={{ fontWeight: "600", color: theme.colors.primary }}
+          >
+            পরবর্তী ধাপ →
+          </Typography>
         </TouchableOpacity>
       ) : isStepComplete ? (
-        <View style={[styles.journeyCompleteTag, { backgroundColor: theme.colors.warning + '22', borderColor: theme.colors.warning }]}>
-          <Typography variant="body" style={{ fontWeight: '700', color: theme.colors.warning }}>যাত্রা সম্পূর্ণ 🌟</Typography>
+        <View
+          style={[
+            styles.journeyCompleteTag,
+            {
+              backgroundColor: theme.colors.warning + "22",
+              borderColor: theme.colors.warning,
+            },
+          ]}
+        >
+          <Typography
+            variant="body"
+            style={{ fontWeight: "700", color: theme.colors.warning }}
+          >
+            যাত্রা সম্পূর্ণ 🌟
+          </Typography>
         </View>
       ) : (
         <View style={styles.navBtnPlaceholder} />
@@ -63,8 +86,8 @@ export default function StepNavigationBar({
 
 const styles = StyleSheet.create({
   navRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 20,
     gap: 12,
   },
@@ -72,8 +95,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 10,
     paddingVertical: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 3,
@@ -83,7 +106,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   navBtnText: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
   navBtnPlaceholder: {
     flex: 1,
@@ -92,10 +115,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 10,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
   },
   journeyCompleteText: {
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

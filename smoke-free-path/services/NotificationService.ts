@@ -1,13 +1,13 @@
-import { Platform, LogBox } from 'react-native';
-import type { IslamicContent } from '@/types';
+import { Platform, LogBox } from "react-native";
+import type { IslamicContent } from "@/types";
 
 // Suppress expo-notifications warnings in Expo Go
-LogBox.ignoreLogs(['expo-notifications']);
+LogBox.ignoreLogs(["expo-notifications"]);
 
 let Notifications: any = null;
 
 try {
-  Notifications = require('expo-notifications');
+  Notifications = require("expo-notifications");
 } catch (e) {
   // Ignore
 }
@@ -15,14 +15,14 @@ try {
 if (!Notifications || !Notifications.scheduleNotificationAsync) {
   // Mock it to prevent crashes if it truly fails to load
   Notifications = {
-    getPermissionsAsync: async () => ({ status: 'denied' }),
-    requestPermissionsAsync: async () => ({ status: 'denied' }),
+    getPermissionsAsync: async () => ({ status: "denied" }),
+    requestPermissionsAsync: async () => ({ status: "denied" }),
     setNotificationChannelAsync: async () => {},
     scheduleNotificationAsync: async () => {},
     cancelAllScheduledNotificationsAsync: async () => {},
     cancelScheduledNotificationAsync: async () => {},
     AndroidImportance: { DEFAULT: 3 },
-    SchedulableTriggerInputTypes: { DAILY: 1, TIME_INTERVAL: 2 }
+    SchedulableTriggerInputTypes: { DAILY: 1, TIME_INTERVAL: 2 },
   };
 }
 
@@ -32,10 +32,10 @@ export async function requestPermission(): Promise<boolean> {
   if (!Notifications) return false;
   try {
     const { status: existing } = await Notifications.getPermissionsAsync();
-    if (existing === 'granted') return true;
+    if (existing === "granted") return true;
 
     const { status } = await Notifications.requestPermissionsAsync();
-    return status === 'granted';
+    return status === "granted";
   } catch {
     return false;
   }
@@ -44,10 +44,10 @@ export async function requestPermission(): Promise<boolean> {
 // ─── Android Channel ──────────────────────────────────────────────────────────
 
 export async function setupAndroidChannel(): Promise<void> {
-  if (Platform.OS !== 'android') return;
+  if (Platform.OS !== "android") return;
   try {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'ধোঁয়া-মুক্ত পথ',
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "ধোঁয়া-মুক্ত পথ",
       importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 250, 250, 250],
     });
@@ -59,7 +59,7 @@ export async function setupAndroidChannel(): Promise<void> {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseTime(time: string): { hour: number; minute: number } {
-  const [h, m] = time.split(':').map(Number);
+  const [h, m] = time.split(":").map(Number);
   return { hour: isNaN(h) ? 8 : h, minute: isNaN(m) ? 0 : m };
 }
 
@@ -72,20 +72,20 @@ function parseTime(time: string): { hour: number; minute: number } {
  */
 export async function scheduleMorningNotification(
   content: IslamicContent,
-  time: string = '08:00',
+  time: string = "08:00",
 ): Promise<void> {
   try {
     // Cancel existing morning notification before rescheduling
-    await cancelByIdentifier('morning_notification');
+    await cancelByIdentifier("morning_notification");
 
     const { hour, minute } = parseTime(time);
 
     await Notifications.scheduleNotificationAsync({
-      identifier: 'morning_notification',
+      identifier: "morning_notification",
       content: {
-        title: '🌅 সকালের অনুপ্রেরণা',
+        title: "🌅 সকালের অনুপ্রেরণা",
         body: content.banglaTranslation,
-        data: { type: 'morning_inspiration', contentId: content.id },
+        data: { type: "morning_inspiration", contentId: content.id },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -109,19 +109,19 @@ export async function scheduleMorningNotification(
 export async function scheduleEveningNotification(
   smokeFreeDay: number,
   completedSteps: number,
-  time: string = '21:00',
+  time: string = "21:00",
 ): Promise<void> {
   try {
-    await cancelByIdentifier('evening_notification');
+    await cancelByIdentifier("evening_notification");
 
     const { hour, minute } = parseTime(time);
 
     await Notifications.scheduleNotificationAsync({
-      identifier: 'evening_notification',
+      identifier: "evening_notification",
       content: {
-        title: '🌙 সন্ধ্যার অগ্রগতি',
+        title: "🌙 সন্ধ্যার অগ্রগতি",
         body: `আলহামদুলিল্লাহ! আপনি ${smokeFreeDay} দিন ধূমপান-মুক্ত এবং ${completedSteps}টি ধাপ সম্পূর্ণ করেছেন।`,
-        data: { type: 'evening_progress', smokeFreeDay },
+        data: { type: "evening_progress", smokeFreeDay },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -150,7 +150,7 @@ export async function scheduleMilestoneNotification(
       content: {
         title: `🏆 ${titleBangla}`,
         body: `মাশাআল্লাহ! আপনি ${milestoneStep}তম ধাপ সম্পূর্ণ করেছেন!`,
-        data: { type: 'milestone', milestoneStep },
+        data: { type: "milestone", milestoneStep },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -170,16 +170,16 @@ export async function scheduleMilestoneNotification(
  */
 export async function scheduleReEngagementNotification(): Promise<void> {
   try {
-    await cancelByIdentifier('reengagement_notification');
+    await cancelByIdentifier("reengagement_notification");
 
     const threeDaysInSeconds = 3 * 24 * 60 * 60;
 
     await Notifications.scheduleNotificationAsync({
-      identifier: 'reengagement_notification',
+      identifier: "reengagement_notification",
       content: {
-        title: '🤲 আপনাকে মিস করছি',
-        body: 'আপনার ধূমপান-মুক্ত যাত্রা কেমন চলছে? আল্লাহর উপর ভরসা রাখুন এবং এগিয়ে যান।',
-        data: { type: 're_engagement' },
+        title: "🤲 আপনাকে মিস করছি",
+        body: "আপনার ধূমপান-মুক্ত যাত্রা কেমন চলছে? আল্লাহর উপর ভরসা রাখুন এবং এগিয়ে যান।",
+        data: { type: "re_engagement" },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,

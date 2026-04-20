@@ -1,32 +1,38 @@
-import React from 'react';
-import { Text, TextProps, StyleSheet } from 'react-native';
-import { useTheme } from '../theme';
+import React from "react";
+import { Text, TextProps, StyleSheet } from "react-native";
+import { useTheme } from "../theme";
 
-export type TypographyVariant = 'display' | 'heading' | 'title' | 'subheading' | 'body' | 'small';
-export type TypographyColor = 
-  | 'text' 
-  | 'textSecondary' 
-  | 'textDisabled' 
-  | 'primary' 
-  | 'primaryDark' 
-  | 'success' 
-  | 'error' 
-  | 'warning' 
-  | 'onPrimary'
-  | 'accent'
-  | 'infoText';
+export type TypographyVariant =
+  | "display"
+  | "heading"
+  | "title"
+  | "subheading"
+  | "body"
+  | "small";
+export type TypographyColor =
+  | "text"
+  | "textSecondary"
+  | "textDisabled"
+  | "primary"
+  | "primaryDark"
+  | "success"
+  | "error"
+  | "warning"
+  | "onPrimary"
+  | "accent"
+  | "infoText";
 
 interface TypographyProps extends TextProps {
   variant?: TypographyVariant;
   color?: TypographyColor;
-  align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
+  align?: "auto" | "left" | "right" | "center" | "justify";
   isArabic?: boolean;
 }
 
 export default function Typography({
-  variant = 'body',
-  color = 'text',
-  align = 'auto',
+  variant = "body",
+  color = "text",
+  align = "auto",
   isArabic = false,
   style,
   children,
@@ -40,11 +46,11 @@ export default function Typography({
   const fw = (variantStyle as any).fontWeight;
   const fontFamilyValue = isArabic
     ? theme.typography.fontFamily.arabic
-    : (fw === '800' || fw === '700')
-    ? theme.typography.fontFamily.bengaliBold
-    : fw === '600'
-    ? theme.typography.fontFamily.bengaliSemiBold
-    : theme.typography.fontFamily.bengali;
+    : fw === "800" || fw === "700"
+      ? theme.typography.fontFamily.bengaliBold
+      : fw === "600"
+        ? theme.typography.fontFamily.bengaliSemiBold
+        : theme.typography.fontFamily.bengali;
 
   return (
     <Text

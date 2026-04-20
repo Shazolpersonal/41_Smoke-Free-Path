@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../theme';
-import { getMilestoneContent } from '@/services/ContentService';
-import { MILESTONE_BADGES } from '@/constants';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useTheme } from "../theme";
+import { getMilestoneContent } from "@/services/ContentService";
+import { MILESTONE_BADGES } from "@/constants";
 
 interface MilestoneListProps {
   milestones: Record<number, string>;
@@ -30,13 +30,15 @@ export default function MilestoneList({ milestones }: MilestoneListProps) {
     >
       {achievedMilestones.map(({ steps, content }) => (
         <View key={steps} style={styles.row}>
-          <Text style={styles.emoji}>{MILESTONE_BADGES[steps] ?? '🏆'}</Text>
+          <Text style={styles.emoji}>{MILESTONE_BADGES[steps] ?? "🏆"}</Text>
           <View style={styles.info}>
             <Text style={[styles.title, { color: theme.colors.text }]}>
               {content?.titleBangla ?? `${steps} ধাপ`}
             </Text>
             {content?.healthBenefit ? (
-              <Text style={[styles.benefit, { color: theme.colors.textSecondary }]}>
+              <Text
+                style={[styles.benefit, { color: theme.colors.textSecondary }]}
+              >
                 {content.healthBenefit}
               </Text>
             ) : null}
@@ -53,8 +55,8 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   emoji: {
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 2,
   },
   benefit: {

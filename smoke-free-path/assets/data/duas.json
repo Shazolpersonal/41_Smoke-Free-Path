@@ -8,10 +8,7 @@
     "source": "কুরআন কারিম",
     "duaCategory": "morning_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_001",
-      "ic_003"
-    ],
+    "relatedContentIds": ["ic_001", "ic_003"],
     "stepAssignment": null
   },
   {
@@ -23,10 +20,7 @@
     "source": "আবু দাউদ, হাদিস ৫০৭৬",
     "duaCategory": "morning_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_002",
-      "ic_004"
-    ],
+    "relatedContentIds": ["ic_002", "ic_004"],
     "stepAssignment": null
   },
   {
@@ -38,10 +32,7 @@
     "source": "তিরমিযি, হাদিস ৩৩৯১",
     "duaCategory": "morning_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_001",
-      "ic_005"
-    ],
+    "relatedContentIds": ["ic_001", "ic_005"],
     "stepAssignment": null
   },
   {
@@ -53,10 +44,7 @@
     "source": "ইবনে মাজাহ, হাদিস ৯২৫",
     "duaCategory": "morning_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_003",
-      "ic_005"
-    ],
+    "relatedContentIds": ["ic_003", "ic_005"],
     "stepAssignment": null
   },
   {
@@ -68,10 +56,7 @@
     "source": "আবু দাউদ, হাদিস ৫০৭৬",
     "duaCategory": "evening_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_004",
-      "ic_006"
-    ],
+    "relatedContentIds": ["ic_004", "ic_006"],
     "stepAssignment": null
   },
   {
@@ -83,10 +68,7 @@
     "source": "তিরমিযি, হাদিস ৩৩৯১",
     "duaCategory": "evening_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_002",
-      "ic_005"
-    ],
+    "relatedContentIds": ["ic_002", "ic_005"],
     "stepAssignment": null
   },
   {
@@ -98,10 +80,7 @@
     "source": "সহিহ মুসলিম, হাদিস ২৭০৯",
     "duaCategory": "evening_adhkar",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_001",
-      "ic_004"
-    ],
+    "relatedContentIds": ["ic_001", "ic_004"],
     "stepAssignment": null
   },
   {
@@ -113,10 +92,7 @@
     "source": "আবু দাউদ, হাদিস ৫০৯০",
     "duaCategory": "evening_adhkar",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_022",
-      "ic_026"
-    ],
+    "relatedContentIds": ["ic_022", "ic_026"],
     "stepAssignment": null
   },
   {
@@ -128,10 +104,7 @@
     "source": "কুরআন কারিম, সূরা নাহল, আয়াত ৯৮",
     "duaCategory": "craving_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_015",
-      "ic_019"
-    ],
+    "relatedContentIds": ["ic_015", "ic_019"],
     "stepAssignment": 3
   },
   {
@@ -143,10 +116,7 @@
     "source": "সহিহ বুখারি, হাদিস ৭৩৮৬",
     "duaCategory": "craving_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_016",
-      "ic_021"
-    ],
+    "relatedContentIds": ["ic_016", "ic_021"],
     "stepAssignment": 3
   },
   {
@@ -158,10 +128,7 @@
     "source": "সহিহ বুখারি, হাদিস ২৮৯৩",
     "duaCategory": "craving_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_017",
-      "ic_020"
-    ],
+    "relatedContentIds": ["ic_017", "ic_020"],
     "stepAssignment": 3
   },
   {
@@ -173,10 +140,7 @@
     "source": "সূরা আরাফ, আয়াত ২৩",
     "duaCategory": "tawbah_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_031",
-      "ic_036"
-    ],
+    "relatedContentIds": ["ic_031", "ic_036"],
     "stepAssignment": 33
   },
   {
@@ -188,10 +152,7 @@
     "source": "সহিহ বুখারি, হাদিস ৬৩০৬",
     "duaCategory": "tawbah_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_033",
-      "ic_037"
-    ],
+    "relatedContentIds": ["ic_033", "ic_037"],
     "stepAssignment": 33
   },
   {
@@ -203,10 +164,7 @@
     "source": "তিরমিযি, হাদিস ৩৪৩৪",
     "duaCategory": "tawbah_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_032",
-      "ic_038"
-    ],
+    "relatedContentIds": ["ic_032", "ic_038"],
     "stepAssignment": 33
   },
   {
@@ -218,10 +176,7 @@
     "source": "ইবনে মাজাহ, হাদিস ৩৮০৩",
     "duaCategory": "shukr_dua",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_022",
-      "ic_030"
-    ],
+    "relatedContentIds": ["ic_022", "ic_030"],
     "stepAssignment": 25
   },
   {
@@ -233,10 +188,7 @@
     "source": "আবু দাউদ, হাদিস ৭৬০",
     "duaCategory": "shukr_dua",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_023",
-      "ic_028"
-    ],
+    "relatedContentIds": ["ic_023", "ic_028"],
     "stepAssignment": 25
   },
   {
@@ -248,10 +200,7 @@
     "source": "আবু দাউদ, হাদিস ১৫২২",
     "duaCategory": "shukr_dua",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_024",
-      "ic_029"
-    ],
+    "relatedContentIds": ["ic_024", "ic_029"],
     "stepAssignment": 25
   },
   {
@@ -263,10 +212,7 @@
     "source": "ইবনে মাজাহ, হাদিস ৩৮০৩",
     "duaCategory": "milestone_dua",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_022",
-      "ic_030"
-    ],
+    "relatedContentIds": ["ic_022", "ic_030"],
     "stepAssignment": null
   },
   {
@@ -278,10 +224,7 @@
     "source": "তিরমিযি, হাদিস ৩৫৫৫",
     "duaCategory": "milestone_dua",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_001",
-      "ic_006"
-    ],
+    "relatedContentIds": ["ic_001", "ic_006"],
     "stepAssignment": null
   },
   {
@@ -293,10 +236,7 @@
     "source": "সহিহ বুখারি, হাদিস ৮৪৪",
     "duaCategory": "milestone_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_031",
-      "ic_037"
-    ],
+    "relatedContentIds": ["ic_031", "ic_037"],
     "stepAssignment": null
   },
   {
@@ -308,10 +248,7 @@
     "source": "সূরা যুমার, আয়াত ৫৩",
     "duaCategory": "slip_up_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_036",
-      "ic_033"
-    ],
+    "relatedContentIds": ["ic_036", "ic_033"],
     "stepAssignment": null
   },
   {
@@ -323,10 +260,7 @@
     "source": "সহিহ মুসলিম, হাদিস ২৬৯৭",
     "duaCategory": "slip_up_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_034",
-      "ic_031"
-    ],
+    "relatedContentIds": ["ic_034", "ic_031"],
     "stepAssignment": null
   },
   {
@@ -338,10 +272,7 @@
     "source": "ইবনে মাজাহ, হাদিস ৪২৫০",
     "duaCategory": "slip_up_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_037",
-      "ic_033"
-    ],
+    "relatedContentIds": ["ic_037", "ic_033"],
     "stepAssignment": null
   },
   {
@@ -353,10 +284,7 @@
     "source": "নাসাই, হাদিস ১৩০৪",
     "duaCategory": "craving_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_016",
-      "ic_017"
-    ],
+    "relatedContentIds": ["ic_016", "ic_017"],
     "stepAssignment": 3
   },
   {
@@ -368,10 +296,7 @@
     "source": "তিরমিযি, হাদিস ৩৫৫১",
     "duaCategory": "craving_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_015",
-      "ic_019"
-    ],
+    "relatedContentIds": ["ic_015", "ic_019"],
     "stepAssignment": 2
   },
   {
@@ -383,10 +308,7 @@
     "source": "সূরা তাওবা, আয়াত ১২৯",
     "duaCategory": "social_pressure_dua",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_001",
-      "ic_006"
-    ],
+    "relatedContentIds": ["ic_001", "ic_006"],
     "stepAssignment": 3,
     "practicalPhrase": "ভাই, আমি এখন ধূমপান ছাড়ার চেষ্টা করছি — একটু সাহায্য করুন।"
   },
@@ -399,10 +321,7 @@
     "source": "সহিহ মুসলিম, হাদিস ২৭২৩",
     "duaCategory": "social_pressure_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_019",
-      "ic_015"
-    ],
+    "relatedContentIds": ["ic_019", "ic_015"],
     "stepAssignment": 4,
     "practicalPhrase": "না ভাই, আমি এখন ছাড়ার চেষ্টায় আছি — আপনি দোয়া করুন আমার জন্য।"
   },
@@ -415,10 +334,7 @@
     "source": "কুরআন কারিম, সূরা নাহল, আয়াত ৯৮",
     "duaCategory": "social_pressure_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_016",
-      "ic_021"
-    ],
+    "relatedContentIds": ["ic_016", "ic_021"],
     "stepAssignment": 5,
     "practicalPhrase": "আমি এখন সিগারেট খাই না — আল্লাহর সাহায্যে ছেড়ে দিয়েছি।"
   },
@@ -431,10 +347,7 @@
     "source": "সূরা ফুরকান, আয়াত ৭৪",
     "duaCategory": "family_dua",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_024",
-      "ic_026"
-    ],
+    "relatedContentIds": ["ic_024", "ic_026"],
     "stepAssignment": null
   },
   {
@@ -446,10 +359,7 @@
     "source": "সহিহ মুসলিম, হাদিস ২৭২০",
     "duaCategory": "family_dua",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_007",
-      "ic_002"
-    ],
+    "relatedContentIds": ["ic_007", "ic_002"],
     "stepAssignment": null
   },
   {
@@ -461,10 +371,7 @@
     "source": "সূরা ইব্রাহিম, আয়াত ৪০",
     "duaCategory": "family_dua",
     "topic": "health",
-    "relatedContentIds": [
-      "ic_022",
-      "ic_024"
-    ],
+    "relatedContentIds": ["ic_022", "ic_024"],
     "stepAssignment": null
   },
   {
@@ -476,10 +383,7 @@
     "source": "সহিহ মুসলিম, হাদিস ৪৮৬",
     "duaCategory": "night_craving_dua",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_004",
-      "ic_001"
-    ],
+    "relatedContentIds": ["ic_004", "ic_001"],
     "stepAssignment": 5
   },
   {
@@ -491,10 +395,7 @@
     "source": "সহিহ বুখারি, হাদিস ৭৩৮৩",
     "duaCategory": "night_craving_dua",
     "topic": "tawakkul",
-    "relatedContentIds": [
-      "ic_003",
-      "ic_005"
-    ],
+    "relatedContentIds": ["ic_003", "ic_005"],
     "stepAssignment": 7
   },
   {
@@ -506,10 +407,7 @@
     "source": "তিরমিযি, হাদিস ৩৫১৩",
     "duaCategory": "ramadan_dua",
     "topic": "tawbah",
-    "relatedContentIds": [
-      "ic_036",
-      "ic_032"
-    ],
+    "relatedContentIds": ["ic_036", "ic_032"],
     "stepAssignment": null
   },
   {
@@ -521,10 +419,7 @@
     "source": "ইবনে খুয়াইমা, হাদিস ১৮৮৭",
     "duaCategory": "ramadan_dua",
     "topic": "self_control",
-    "relatedContentIds": [
-      "ic_018",
-      "ic_015"
-    ],
+    "relatedContentIds": ["ic_018", "ic_015"],
     "stepAssignment": null
   }
 ]

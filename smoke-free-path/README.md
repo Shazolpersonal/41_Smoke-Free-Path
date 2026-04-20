@@ -1,6 +1,7 @@
 <div align="center">
 
 # 🌿 Smoke-Free Path
+
 **Your Islamic companion to break free from smoking.**
 
 [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
@@ -9,7 +10,7 @@
 [![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)]()
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)]()
 
-*Smoke-Free Path is a comprehensive React Native mobile application designed to guide users through a 41-day structured journey to quit smoking. It uniquely integrates behavioral science tracking with profound Islamic spirituality.*
+_Smoke-Free Path is a comprehensive React Native mobile application designed to guide users through a 41-day structured journey to quit smoking. It uniquely integrates behavioral science tracking with profound Islamic spirituality._
 
 </div>
 
@@ -17,12 +18,12 @@
 
 ## 📸 2. Feature Preview
 
-| Dashboard | 41-Day Tracker | Craving Timer | Islamic Content |
-| :---: | :---: | :---: | :---: |
+|                                    Dashboard                                     |                                  41-Day Tracker                                   |                                   Craving Timer                                    |                                      Islamic Content                                      |
+| :------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------: |
 | ![Dashboard Placeholder](https://via.placeholder.com/250x500.png?text=Dashboard) | ![Tracker Placeholder](https://via.placeholder.com/250x500.png?text=Step+Tracker) | ![Craving Placeholder](https://via.placeholder.com/250x500.png?text=Craving+Timer) | ![Islamic Content Placeholder](https://via.placeholder.com/250x500.png?text=Islamic+Duas) |
-| *View your daily progress, money saved, and quick actions.* | *Step-by-step guidance unlocking daily.* | *Breathing exercises and coping strategies.* | *Daily Duas and reminders for spiritual strength.* |
+|           _View your daily progress, money saved, and quick actions._            |                     _Step-by-step guidance unlocking daily._                      |                    _Breathing exercises and coping strategies._                    |                    _Daily Duas and reminders for spiritual strength._                     |
 
-*(Note: Add actual screenshots to the repository and update the links above.)*
+_(Note: Add actual screenshots to the repository and update the links above.)_
 
 ---
 
@@ -76,6 +77,7 @@ smoke-free-path/
 ## 🚀 6. Getting Started
 
 ### Prerequisites
+
 - Node.js (>= 18.x)
 - npm or yarn
 - Expo CLI (`npm install -g expo-cli`)
@@ -84,12 +86,14 @@ smoke-free-path/
 ### Installation Steps
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Shazolpersonal/41_Smoke-Free-Path.git
    cd 41_Smoke-Free-Path/smoke-free-path
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -100,6 +104,7 @@ smoke-free-path/
    ```
 
 ### Running on Devices/Emulators
+
 - Press **`i`** in the terminal to open in the iOS Simulator.
 - Press **`a`** to open in the Android Emulator.
 - Press **`w`** to run the web version in a browser.
@@ -117,11 +122,13 @@ Currently, **Smoke-Free Path** does not require a complex `.env` configuration. 
 The codebase is heavily tested to ensure reliability, specifically the core progress calculations and state updates.
 
 **To run all tests:**
+
 ```bash
 npm test
 ```
 
 **Types of Tests Included:**
+
 - **Unit Tests**: Verify the behavior of context reducers and utility functions.
 - **Integration Tests**: Verify interactions across multiple functions.
 - **Property-based Tests**: Uses `fast-check` (in `__tests__/property/`) to throw thousands of randomized, valid, and invalid edge cases at the logic engine to ensure it never crashes (e.g., handling extreme dates, negative values, and ensuring `NaN` doesn't propagate).
@@ -131,12 +138,13 @@ npm test
 ## 🧠 9. How It Works (App Logic)
 
 ### The User Journey
+
 1. **Onboarding**: The user inputs their current habit data (cigarettes smoked per day, pack price, years smoked) and sets a firm quit date.
 2. **The 41-Day Tracker**: The app enforces a "one step per calendar day" rule. Using `Date.UTC` calculations against `planState.activatedAt`, the app ensures users cannot skip ahead, promoting genuine habit building.
 3. **Daily Routine**: Users interact with the daily step to check off tasks, read Islamic content, and review their progress statistics (calculated dynamically).
 4. **Craving & Slip-up Workflows**:
-   - When a user logs a *Craving*, they identify the trigger and utilize a breathing timer.
-   - If a *Slip-up* occurs, the app calculates whether to reset the current streak while maintaining total cumulative progress, preventing a total loss of motivation.
+   - When a user logs a _Craving_, they identify the trigger and utilize a breathing timer.
+   - If a _Slip-up_ occurs, the app calculates whether to reset the current streak while maintaining total cumulative progress, preventing a total loss of motivation.
 
 Data is stored locally using `AsyncStorage`. The app features a resilient hydration system in `AppContext.tsx` that restores state upon launch and gracefully defaults to safety if the storage is missing.
 
@@ -145,6 +153,7 @@ Data is stored locally using `AsyncStorage`. The app features a resilient hydrat
 ## 🤝 10. Contributing
 
 Contributions are welcome! Please follow these steps:
+
 1. Fork the repository.
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
 3. Ensure you follow standard React Native and TypeScript conventions. Use `npx prettier --write .` for formatting.
@@ -161,4 +170,4 @@ Contributions are welcome! Please follow these steps:
 This project is open source. (Refer to the repository's main branch for the specific LICENSE file).
 
 **Acknowledgements**
-*Smoke-Free Path* is deeply inspired by Islamic principles. It was created with the belief that tying behavioral change to spiritual purpose—relying on Sabr (patience) and seeking help through Duas—provides profound strength to overcome addiction. May Allah make it easy for everyone embarking on this journey.
+_Smoke-Free Path_ is deeply inspired by Islamic principles. It was created with the belief that tying behavioral change to spiritual purpose—relying on Sabr (patience) and seeking help through Duas—provides profound strength to overcome addiction. May Allah make it easy for everyone embarking on this journey.

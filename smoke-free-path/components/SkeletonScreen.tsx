@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, AccessibilityInfo } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withRepeat, 
-  withSequence, 
-  withTiming, 
-  Easing 
-} from 'react-native-reanimated';
-import { useTheme } from '../hooks/useTheme';
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, AccessibilityInfo } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+import { useTheme } from "../hooks/useTheme";
 
 interface SkeletonScreenProps {
   lines?: number;
   cardHeight?: number;
 }
 
-export default function SkeletonScreen({ lines = 4, cardHeight = 120 }: SkeletonScreenProps) {
+export default function SkeletonScreen({
+  lines = 4,
+  cardHeight = 120,
+}: SkeletonScreenProps) {
   const { theme } = useTheme();
   const opacity = useSharedValue(0.3);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -29,14 +32,14 @@ export default function SkeletonScreen({ lines = 4, cardHeight = 120 }: Skeleton
       opacity.value = 0.5; // static placeholder
       return;
     }
-    
+
     opacity.value = withRepeat(
       withSequence(
         withTiming(0.8, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.3, { duration: 800, easing: Easing.inOut(Easing.ease) })
+        withTiming(0.3, { duration: 800, easing: Easing.inOut(Easing.ease) }),
       ),
       -1, // infinite
-      true // reverse
+      true, // reverse
     );
   }, [reduceMotion]);
 
@@ -59,7 +62,7 @@ export default function SkeletonScreen({ lines = 4, cardHeight = 120 }: Skeleton
             styles.line,
             {
               backgroundColor: theme.colors.border,
-              width: i % 3 === 2 ? '60%' : '100%',
+              width: i % 3 === 2 ? "60%" : "100%",
             },
           ]}
         />

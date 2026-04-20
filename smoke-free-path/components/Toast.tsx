@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, Text, AccessibilityInfo } from 'react-native';
-import { useTheme } from '../theme';
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet, Text, AccessibilityInfo } from "react-native";
+import { useTheme } from "../theme";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ToastVariant = 'success' | 'error' | 'info';
+type ToastVariant = "success" | "error" | "info";
 
 interface ToastProps {
   message: string;
@@ -70,11 +70,11 @@ export default function Toast({
   if (!visible) return null;
 
   const bgColor =
-    variant === 'success'
+    variant === "success"
       ? theme.colors.primary
-      : variant === 'error'
-      ? theme.colors.error
-      : theme.colors.info;
+      : variant === "error"
+        ? theme.colors.error
+        : theme.colors.info;
 
   return (
     <Animated.View
@@ -94,23 +94,23 @@ export default function Toast({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 100,
     left: 16,
     right: 16,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 6,
   },
   message: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
+    fontWeight: "500",
+    textAlign: "center",
   },
 });

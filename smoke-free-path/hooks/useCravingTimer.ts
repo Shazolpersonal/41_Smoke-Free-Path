@@ -1,6 +1,12 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSharedValue, withTiming, Easing, runOnJS, cancelAnimation } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
+import { useEffect, useState, useCallback, useRef } from "react";
+import {
+  useSharedValue,
+  withTiming,
+  Easing,
+  runOnJS,
+  cancelAnimation,
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 interface UseCravingTimerProps {
   totalSeconds: number;
@@ -8,7 +14,11 @@ interface UseCravingTimerProps {
   onComplete: () => void;
 }
 
-export function useCravingTimer({ totalSeconds, remainingSeconds, onComplete }: UseCravingTimerProps) {
+export function useCravingTimer({
+  totalSeconds,
+  remainingSeconds,
+  onComplete,
+}: UseCravingTimerProps) {
   const [remaining, setRemaining] = useState(remainingSeconds ?? totalSeconds);
   const [running, setRunning] = useState(false);
   const completedRef = useRef(false);
@@ -16,7 +26,9 @@ export function useCravingTimer({ totalSeconds, remainingSeconds, onComplete }: 
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const initialRemainingRef = useRef(remainingSeconds ?? totalSeconds);
-  const progress = useSharedValue(remainingSeconds !== undefined ? (remainingSeconds / totalSeconds) : 1);
+  const progress = useSharedValue(
+    remainingSeconds !== undefined ? remainingSeconds / totalSeconds : 1,
+  );
 
   useEffect(() => {
     if (remainingSeconds !== undefined && !running) {
@@ -38,20 +50,26 @@ export function useCravingTimer({ totalSeconds, remainingSeconds, onComplete }: 
   const start = useCallback(() => {
     if (running) return;
     setRunning(true);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
 
     startTimeRef.current = Date.now();
     initialRemainingRef.current = remaining;
 
     // Animate smoothly to 0 over the remaining duration
-    progress.value = withTiming(0, {
-      duration: remaining * 1000,
-      easing: Easing.linear,
-    }, (finished) => {
-      if (finished) {
-        runOnJS(handleComplete)();
-      }
-    });
+    progress.value = withTiming(
+      0,
+      {
+        duration: remaining * 1000,
+        easing: Easing.linear,
+      },
+      (finished) => {
+        if (finished) {
+          runOnJS(handleComplete)();
+        }
+      },
+    );
 
     // Use 250ms interval with absolute time to prevent drift
     tick.current = setInterval(() => {
@@ -69,7 +87,9 @@ export function useCravingTimer({ totalSeconds, remainingSeconds, onComplete }: 
     if (tick.current) clearInterval(tick.current);
     // Halt the animation
     cancelAnimation(progress);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
   }, [progress]);
 
   const reset = useCallback(() => {

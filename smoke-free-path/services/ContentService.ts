@@ -6,7 +6,7 @@ import type {
   DuaCategory,
   LibraryTopic,
   TriggerType,
-} from '@/types';
+} from "@/types";
 
 // ─── Module-level cache variables ─────────────────────────────────────────────
 
@@ -22,7 +22,7 @@ let _healthTimeline: HealthTimelineEntry[] | null = null;
 function getStepPlans(): StepPlan[] {
   if (_stepPlans === null) {
     try {
-      _stepPlans = require('../assets/data/step_plans.json');
+      _stepPlans = require("../assets/data/step_plans.json");
     } catch {
       return [];
     }
@@ -33,7 +33,7 @@ function getStepPlans(): StepPlan[] {
 function getIslamicContentData(): IslamicContent[] {
   if (_islamicContent === null) {
     try {
-      _islamicContent = require('../assets/data/islamic_content.json');
+      _islamicContent = require("../assets/data/islamic_content.json");
     } catch {
       return [];
     }
@@ -44,7 +44,7 @@ function getIslamicContentData(): IslamicContent[] {
 function getDuasData(): IslamicContent[] {
   if (_duas === null) {
     try {
-      _duas = require('../assets/data/duas.json');
+      _duas = require("../assets/data/duas.json");
     } catch {
       return [];
     }
@@ -55,7 +55,7 @@ function getDuasData(): IslamicContent[] {
 function getMilestonesData(): Milestone[] {
   if (_milestones === null) {
     try {
-      _milestones = require('../assets/data/milestones.json');
+      _milestones = require("../assets/data/milestones.json");
     } catch {
       return [];
     }
@@ -66,7 +66,7 @@ function getMilestonesData(): Milestone[] {
 function getHealthTimelineData(): HealthTimelineEntry[] {
   if (_healthTimeline === null) {
     try {
-      _healthTimeline = require('../assets/data/health_timeline.json');
+      _healthTimeline = require("../assets/data/health_timeline.json");
     } catch {
       return [];
     }
@@ -137,26 +137,26 @@ export function getHealthTimeline(): HealthTimelineEntry[] {
 const TRIGGER_COPING_STRATEGIES: Record<TriggerType, string[]> = {
   stress: [
     'আস্তাগফিরুল্লাহ পড়ুন এবং গভীর শ্বাস নিন — আল্লাহ বলেন: "নিশ্চয়ই কষ্টের সাথে স্বস্তি আছে।" (সূরা ইনশিরাহ)',
-    'দুই রাকাত নফল নামাজ পড়ুন — নামাজ মানসিক চাপ কমানোর সর্বোত্তম উপায়।',
+    "দুই রাকাত নফল নামাজ পড়ুন — নামাজ মানসিক চাপ কমানোর সর্বোত্তম উপায়।",
     '"লা হাওলা ওয়ালা কুওয়াতা ইল্লা বিল্লাহ" ১০ বার পড়ুন — এটি কঠিন পরিস্থিতিতে শক্তি দেয়।',
   ],
   social: [
     'সঙ্গীদের আপনার সিদ্ধান্তের কথা জানান এবং সাহায্য চান — "তোমরা সৎকাজে একে অপরকে সাহায্য করো।" (সূরা মায়িদা)',
-    'ধূমপানের পরিবেশ থেকে সরে গিয়ে অজু করুন এবং দোয়া পড়ুন।',
+    "ধূমপানের পরিবেশ থেকে সরে গিয়ে অজু করুন এবং দোয়া পড়ুন।",
     '"রাব্বি ইন্নি মাগলুবুন ফানতাসির" পড়ুন — আল্লাহর কাছে সাহায্য চান।',
   ],
   boredom: [
-    'কুরআন তিলাওয়াত করুন — এটি মন ও আত্মাকে প্রশান্ত করে এবং সময় কাটানোর সর্বোত্তম উপায়।',
-    'তাসবিহ পড়ুন: সুবহানাল্লাহ, আলহামদুলিল্লাহ, আল্লাহু আকবার — প্রতিটি ১০০ বার।',
-    'হাঁটতে বের হন এবং আল্লাহর সৃষ্টি নিয়ে চিন্তা করুন — এটি একঘেয়েমি দূর করে।',
+    "কুরআন তিলাওয়াত করুন — এটি মন ও আত্মাকে প্রশান্ত করে এবং সময় কাটানোর সর্বোত্তম উপায়।",
+    "তাসবিহ পড়ুন: সুবহানাল্লাহ, আলহামদুলিল্লাহ, আল্লাহু আকবার — প্রতিটি ১০০ বার।",
+    "হাঁটতে বের হন এবং আল্লাহর সৃষ্টি নিয়ে চিন্তা করুন — এটি একঘেয়েমি দূর করে।",
   ],
   environmental: [
     'পরিবেশ পরিবর্তন করুন — অন্য ঘরে যান বা বাইরে বের হন এবং "বিসমিল্লাহ" বলুন।',
-    'অজু করুন — পানির স্পর্শ মন শান্ত করে এবং ধূমপানের ইচ্ছা কমায়।',
+    "অজু করুন — পানির স্পর্শ মন শান্ত করে এবং ধূমপানের ইচ্ছা কমায়।",
     '"আউজু বিল্লাহি মিনাশ শাইতানির রাজিম" পড়ুন — শয়তানের প্ররোচনা থেকে আল্লাহর আশ্রয় নিন।',
   ],
   habitual: [
-    'অভ্যাসের সময়টিতে বিকল্প ইবাদত করুন — যেমন ফজরের পর কুরআন পড়া বা যিকির করা।',
+    "অভ্যাসের সময়টিতে বিকল্প ইবাদত করুন — যেমন ফজরের পর কুরআন পড়া বা যিকির করা।",
     'নিয়ত নবায়ন করুন: "আমি আল্লাহর সন্তুষ্টির জন্য এই অভ্যাস ত্যাগ করছি।"',
     '"ইন্নামাল আ\'মালু বিন্নিয়্যাত" — নিয়তের শক্তি দিয়ে পুরনো অভ্যাস ভাঙুন।',
   ],
