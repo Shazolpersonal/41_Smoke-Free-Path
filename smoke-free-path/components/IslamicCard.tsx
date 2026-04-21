@@ -77,6 +77,7 @@ export default React.memo(function IslamicCard({
       ]}
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
+      accessibilityRole={onPress ? "button" : "none"}
     >
       {/* Type badge */}
       <View
@@ -161,6 +162,10 @@ export default React.memo(function IslamicCard({
               onBookmark();
             }}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isBookmarked ? "বুকমার্ক সরান" : "বুকমার্ক করুন"
+            }
           >
             <Animated.Text
               style={[
