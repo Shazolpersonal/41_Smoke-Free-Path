@@ -1,11 +1,11 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet, Share } from 'react-native';
-import Typography from '@/components/Typography';
-import { useTheme } from '@/theme';
-import type { Milestone } from '@/types';
+import React from "react";
+import { TouchableOpacity, StyleSheet, Share } from "react-native";
+import Typography from "@/components/Typography";
+import { useTheme } from "@/theme";
+import type { Milestone } from "@/types";
 
 export function composeShareMessage(milestone: Milestone): string {
-  const badge = milestone.achievementBadge ?? '🏆';
+  const badge = milestone.achievementBadge ?? "🏆";
   return (
     `${badge} ${milestone.titleBangla}!\n\n` +
     `${milestone.islamicMessage}\n\n` +
@@ -17,7 +17,9 @@ interface MilestoneShareButtonProps {
   milestone: Milestone;
 }
 
-export default function MilestoneShareButton({ milestone }: MilestoneShareButtonProps) {
+export default function MilestoneShareButton({
+  milestone,
+}: MilestoneShareButtonProps) {
   const { theme } = useTheme();
 
   async function handleShare() {
@@ -58,7 +60,7 @@ const styles = StyleSheet.create({
   shareBtn: {
     borderRadius: 14,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 12,
     borderWidth: 1.5,
   },

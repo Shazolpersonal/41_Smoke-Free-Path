@@ -1,8 +1,8 @@
-import { useMemo, useEffect, useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import { computeProgressStats } from '@/utils/trackerUtils';
-import { STATS_REFRESH_INTERVAL_MS } from '@/constants/calculations';
-import type { ProgressStats } from '@/types';
+import { useMemo, useEffect, useState } from "react";
+import { useAppContext } from "@/context/AppContext";
+import { computeProgressStats } from "@/utils/trackerUtils";
+import { STATS_REFRESH_INTERVAL_MS } from "@/constants/calculations";
+import type { ProgressStats } from "@/types";
 
 const ZERO_STATS: ProgressStats = {
   smokeFreeDays: 0,
@@ -26,7 +26,10 @@ export function useProgressStats(): ProgressStats {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), STATS_REFRESH_INTERVAL_MS);
+    const interval = setInterval(
+      () => setTick((t) => t + 1),
+      STATS_REFRESH_INTERVAL_MS,
+    );
     return () => clearInterval(interval);
   }, []);
 

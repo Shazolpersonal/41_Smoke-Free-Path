@@ -1,8 +1,17 @@
-import React, { useEffect, useRef } from 'react';
-import { TouchableOpacity, View, StyleSheet, Animated, AccessibilityInfo } from 'react-native';
-import { useTheme } from '../theme';
-import Typography from './Typography';
-import type { ChecklistItem as ChecklistItemType, ChecklistItemType as ItemType } from '@/types';
+import React, { useEffect, useRef } from "react";
+import {
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Animated,
+  AccessibilityInfo,
+} from "react-native";
+import { useTheme } from "../theme";
+import Typography from "./Typography";
+import type {
+  ChecklistItem as ChecklistItemType,
+  ChecklistItemType as ItemType,
+} from "@/types";
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
@@ -11,13 +20,17 @@ interface ChecklistItemProps {
 }
 
 const TYPE_ICONS: Record<ItemType, string> = {
-  prayer: '🕌',
-  dhikr: '📿',
-  activity: '🏃',
-  reflection: '💭',
+  prayer: "🕌",
+  dhikr: "📿",
+  activity: "🏃",
+  reflection: "💭",
 };
 
-export default React.memo(function ChecklistItem({ item, isCompleted, onToggle }: ChecklistItemProps) {
+export default React.memo(function ChecklistItem({
+  item,
+  isCompleted,
+  onToggle,
+}: ChecklistItemProps) {
   const { theme } = useTheme();
   const scaleAnim = useRef(new Animated.Value(isCompleted ? 1 : 0)).current;
 
@@ -38,7 +51,15 @@ export default React.memo(function ChecklistItem({ item, isCompleted, onToggle }
 
   return (
     <TouchableOpacity
-      style={[styles.row, { paddingVertical: theme.spacing.sm, paddingHorizontal: 4, flexDirection: 'row', alignItems: 'center' }]}
+      style={[
+        styles.row,
+        {
+          paddingVertical: theme.spacing.sm,
+          paddingHorizontal: 4,
+          flexDirection: "row",
+          alignItems: "center",
+        },
+      ]}
       onPress={onToggle}
       activeOpacity={0.7}
       accessibilityRole="checkbox"
@@ -46,23 +67,61 @@ export default React.memo(function ChecklistItem({ item, isCompleted, onToggle }
       accessibilityLabel={item.text}
     >
       {/* Checkbox */}
-      <View style={[
-        styles.checkbox,
-        { borderColor: theme.colors.primary, width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center', marginRight: theme.spacing.sm },
-        isCompleted && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
-      ]}>
+      <View
+        style={[
+          styles.checkbox,
+          {
+            borderColor: theme.colors.primary,
+            width: 22,
+            height: 22,
+            borderRadius: 11,
+            borderWidth: 2,
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: theme.spacing.sm,
+          },
+          isCompleted && {
+            backgroundColor: theme.colors.primary,
+            borderColor: theme.colors.primary,
+          },
+        ]}
+      >
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-          <Typography variant="small" style={[styles.checkmark, { color: theme.colors.onPrimary, fontWeight: '700' }]}>
+          <Typography
+            variant="small"
+            style={[
+              styles.checkmark,
+              { color: theme.colors.onPrimary, fontWeight: "700" },
+            ]}
+          >
             ✓
           </Typography>
         </Animated.View>
       </View>
 
       {/* Type icon */}
-      <Typography variant="title" style={[styles.typeIcon, { marginRight: theme.spacing.xs, fontSize: 18 }]}>{TYPE_ICONS[item.type]}</Typography>
+      <Typography
+        variant="title"
+        style={[
+          styles.typeIcon,
+          { marginRight: theme.spacing.xs, fontSize: 18 },
+        ]}
+      >
+        {TYPE_ICONS[item.type]}
+      </Typography>
 
       {/* Item text */}
-      <Typography variant="body" style={[styles.text, { color: theme.colors.text, flex: 1, lineHeight: 21 }, isCompleted && { color: theme.colors.textDisabled, textDecorationLine: 'line-through' }]}>
+      <Typography
+        variant="body"
+        style={[
+          styles.text,
+          { color: theme.colors.text, flex: 1, lineHeight: 21 },
+          isCompleted && {
+            color: theme.colors.textDisabled,
+            textDecorationLine: "line-through",
+          },
+        ]}
+      >
         {item.text}
       </Typography>
     </TouchableOpacity>
@@ -70,9 +129,9 @@ export default React.memo(function ChecklistItem({ item, isCompleted, onToggle }
 });
 
 const styles = StyleSheet.create({
-  row: { },
-  checkbox: { },
-  checkmark: { },
-  typeIcon: { },
-  text: { },
+  row: {},
+  checkbox: {},
+  checkmark: {},
+  typeIcon: {},
+  text: {},
 });

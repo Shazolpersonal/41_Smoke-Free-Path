@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { AppState, CravingSession, TriggerLog } from '@/types';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { AppState, CravingSession, TriggerLog } from "@/types";
 
-const APP_STATE_KEY = '@smokefree_app_state';
-const ONBOARDING_KEY = '@smokefree_onboarding';
+const APP_STATE_KEY = "@smokefree_app_state";
+const ONBOARDING_KEY = "@smokefree_onboarding";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -83,5 +83,10 @@ export function clearOldTriggerLogs(
     return state; // no changes — return same reference
   }
 
-  return { ...state, triggerLogs: filteredLogs, cravingSessions: filteredSessions, slipUps: filteredSlipUps };
+  return {
+    ...state,
+    triggerLogs: filteredLogs,
+    cravingSessions: filteredSessions,
+    slipUps: filteredSlipUps,
+  };
 }

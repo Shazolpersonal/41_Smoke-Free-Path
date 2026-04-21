@@ -1,10 +1,10 @@
-import { Tabs } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { AccessibilityInfo, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../theme';
-import FloatingCravingButton from '@/components/FloatingCravingButton';
-import MilestoneDetector from '@/components/MilestoneDetector';
+import { Tabs } from "expo-router";
+import { useEffect, useState } from "react";
+import { AccessibilityInfo, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../../theme";
+import FloatingCravingButton from "@/components/FloatingCravingButton";
+import MilestoneDetector from "@/components/MilestoneDetector";
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -19,7 +19,7 @@ export default function TabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          animation: reduceMotion ? 'none' : 'fade',
+          animation: reduceMotion ? "none" : "fade",
           tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.textDisabled,
           tabBarStyle: {
@@ -37,13 +37,15 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'হোম',
-            tabBarAccessibilityLabel: 'হোম',
+            title: "হোম",
+            tabBarAccessibilityLabel: "হোম",
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? 'home' : 'home-outline'}
+                name={focused ? "home" : "home-outline"}
                 size={22}
-                color={focused ? theme.colors.primary : theme.colors.textDisabled}
+                color={
+                  focused ? theme.colors.primary : theme.colors.textDisabled
+                }
               />
             ),
           }}
@@ -51,13 +53,15 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="tracker"
           options={{
-            title: 'ট্র্যাকার',
-            tabBarAccessibilityLabel: 'ট্র্যাকার',
+            title: "ট্র্যাকার",
+            tabBarAccessibilityLabel: "ট্র্যাকার",
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? 'calendar' : 'calendar-outline'}
+                name={focused ? "calendar" : "calendar-outline"}
                 size={22}
-                color={focused ? theme.colors.primary : theme.colors.textDisabled}
+                color={
+                  focused ? theme.colors.primary : theme.colors.textDisabled
+                }
               />
             ),
           }}
@@ -65,13 +69,15 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="progress"
           options={{
-            title: 'অগ্রগতি',
-            tabBarAccessibilityLabel: 'অগ্রগতি',
+            title: "অগ্রগতি",
+            tabBarAccessibilityLabel: "অগ্রগতি",
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? 'bar-chart' : 'bar-chart-outline'}
+                name={focused ? "bar-chart" : "bar-chart-outline"}
                 size={22}
-                color={focused ? theme.colors.primary : theme.colors.textDisabled}
+                color={
+                  focused ? theme.colors.primary : theme.colors.textDisabled
+                }
               />
             ),
           }}
@@ -79,13 +85,15 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="dua"
           options={{
-            title: 'ইসলামিক',
-            tabBarAccessibilityLabel: 'ইসলামিক কন্টেন্ট',
+            title: "ইসলামিক",
+            tabBarAccessibilityLabel: "ইসলামিক কন্টেন্ট",
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? 'book' : 'book-outline'}
+                name={focused ? "book" : "book-outline"}
                 size={22}
-                color={focused ? theme.colors.primary : theme.colors.textDisabled}
+                color={
+                  focused ? theme.colors.primary : theme.colors.textDisabled
+                }
               />
             ),
           }}
@@ -99,13 +107,15 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'সেটিংস',
-            tabBarAccessibilityLabel: 'সেটিংস',
+            title: "সেটিংস",
+            tabBarAccessibilityLabel: "সেটিংস",
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? 'settings' : 'settings-outline'}
+                name={focused ? "settings" : "settings-outline"}
                 size={22}
-                color={focused ? theme.colors.primary : theme.colors.textDisabled}
+                color={
+                  focused ? theme.colors.primary : theme.colors.textDisabled
+                }
               />
             ),
           }}

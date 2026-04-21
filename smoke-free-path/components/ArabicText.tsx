@@ -1,6 +1,6 @@
-import React from 'react';
-import { Text, TextStyle, StyleSheet, Platform } from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
+import React from "react";
+import { Text, TextStyle, StyleSheet, Platform } from "react-native";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ArabicTextProps {
   text: string;
@@ -9,7 +9,12 @@ interface ArabicTextProps {
   color?: string;
 }
 
-export default function ArabicText({ text, fontSize = 24, style, color }: ArabicTextProps) {
+export default function ArabicText({
+  text,
+  fontSize = 24,
+  style,
+  color,
+}: ArabicTextProps) {
   const { theme } = useTheme();
 
   return (
@@ -32,13 +37,13 @@ export default function ArabicText({ text, fontSize = 24, style, color }: Arabic
 
 const styles = StyleSheet.create({
   base: {
-    textAlign: 'right',
+    textAlign: "right",
     // Fallback to system fonts that handle Arabic well
     fontFamily: Platform.select({
-      ios: 'Traditional Arabic',
-      android: 'serif', 
-      default: 'Amiri',
+      ios: "Traditional Arabic",
+      android: "serif",
+      default: "Amiri",
     }),
-    writingDirection: 'rtl',
+    writingDirection: "rtl",
   },
 });

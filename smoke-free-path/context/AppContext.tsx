@@ -6,8 +6,8 @@ import React, {
   useEffect,
   useRef,
   ReactNode,
-} from 'react';
-import { AppState as RNAppState } from 'react-native';
+} from "react";
+import { AppState as RNAppState } from "react-native";
 import type {
   AppState,
   UserProfile,
@@ -16,9 +16,13 @@ import type {
   SlipUp,
   PlanState,
   StepProgress,
-} from '@/types';
-import { loadAppState, saveAppState, clearOldTriggerLogs } from '@/services/StorageService';
-import { scheduleReEngagementNotification } from '@/services/NotificationService';
+} from "@/types";
+import {
+  loadAppState,
+  saveAppState,
+  clearOldTriggerLogs,
+} from "@/services/StorageService";
+import { scheduleReEngagementNotification } from "@/services/NotificationService";
 
 // ─── Initial State ────────────────────────────────────────────────────────────
 
@@ -41,7 +45,7 @@ export const INITIAL_APP_STATE: AppState = {
   slipUps: [],
   bookmarks: [],
   milestones: {},
-  lastOpenedAt: '',
+  lastOpenedAt: "",
   dailyStreak: 0,
   lastStreakDate: null,
 };
@@ -49,20 +53,26 @@ export const INITIAL_APP_STATE: AppState = {
 // ─── Action Types ─────────────────────────────────────────────────────────────
 
 export type AppAction =
-  | { type: 'SET_USER_PROFILE'; payload: UserProfile }
-  | { type: 'ACTIVATE_PLAN' }
-  | { type: 'ACTIVATE_PLAN_WITH_DATE'; payload: string } // ISO datetime — quit date from onboarding
-  | { type: 'RESET_PLAN' }
-  | { type: 'COMPLETE_STEP'; payload: number }
-  | { type: 'TOGGLE_CHECKLIST_ITEM'; payload: { step: number; itemId: string } }
-  | { type: 'ADD_TRIGGER_LOG'; payload: TriggerLog }
-  | { type: 'ADD_CRAVING_SESSION'; payload: CravingSession }
-  | { type: 'RECORD_SLIP_UP'; payload: SlipUp }
-  | { type: 'ACHIEVE_MILESTONE'; payload: { steps: number; achievedAt: string } }
-  | { type: 'TOGGLE_BOOKMARK'; payload: string }
-  | { type: 'UPDATE_LAST_OPENED'; payload: string }
-  | { type: 'HYDRATE'; payload: AppState }
-  | { type: 'CLEANUP_OLD_DATA'; payload: Pick<AppState, 'triggerLogs' | 'cravingSessions' | 'slipUps'> };
+  | { type: "SET_USER_PROFILE"; payload: UserProfile }
+  | { type: "ACTIVATE_PLAN" }
+  | { type: "ACTIVATE_PLAN_WITH_DATE"; payload: string } // ISO datetime — quit date from onboarding
+  | { type: "RESET_PLAN" }
+  | { type: "COMPLETE_STEP"; payload: number }
+  | { type: "TOGGLE_CHECKLIST_ITEM"; payload: { step: number; itemId: string } }
+  | { type: "ADD_TRIGGER_LOG"; payload: TriggerLog }
+  | { type: "ADD_CRAVING_SESSION"; payload: CravingSession }
+  | { type: "RECORD_SLIP_UP"; payload: SlipUp }
+  | {
+      type: "ACHIEVE_MILESTONE";
+      payload: { steps: number; achievedAt: string };
+    }
+  | { type: "TOGGLE_BOOKMARK"; payload: string }
+  | { type: "UPDATE_LAST_OPENED"; payload: string }
+  | { type: "HYDRATE"; payload: AppState }
+  | {
+      type: "CLEANUP_OLD_DATA";
+      payload: Pick<AppState, "triggerLogs" | "cravingSessions" | "slipUps">;
+    };
 
 // ─── Migration ────────────────────────────────────────────────────────────────
 
@@ -86,7 +96,7 @@ function migrateAppState(raw: any): AppState {
   let planState: PlanState = raw.planState ?? INITIAL_PLAN_STATE;
   if (!raw.planState && raw.userProfile?.quitDate) {
     const completedStepsFromOld = Object.entries(
-      raw.stepProgress ?? stepProgress
+      raw.stepProgress ?? stepProgress,
     )
       .filter(([, v]: [string, any]) => v.isComplete)
       .map(([k]) => Number(k));
@@ -106,7 +116,7 @@ function migrateAppState(raw: any): AppState {
 
   // ─── Remove quitDate from userProfile ─────────────────────
   let userProfile = raw.userProfile ?? null;
-  if (userProfile && 'quitDate' in userProfile) {
+  if (userProfile && "quitDate" in userProfile) {
     const { quitDate, ...rest } = userProfile;
     userProfile = rest;
   }
@@ -115,7 +125,8 @@ function migrateAppState(raw: any): AppState {
   // Migration: If the price is unrealistically low (<= 50), it's likely a single cigarette price.
   // Convert it to a pack price based on cigarettesPerPack.
   if (userProfile && userProfile.cigarettePricePerPack <= 50) {
-    const packSize = userProfile.cigarettesPerPack > 0 ? userProfile.cigarettesPerPack : 20;
+    const packSize =
+      userProfile.cigarettesPerPack > 0 ? userProfile.cigarettesPerPack : 20;
     userProfile = {
       ...userProfile,
       cigarettePricePerPack: userProfile.cigarettePricePerPack * packSize,
@@ -126,7 +137,8 @@ function migrateAppState(raw: any): AppState {
     ? planState.completedSteps
     : [];
   const validCompletedSteps = rawCompletedSteps.filter(
-    (step) => typeof step === 'number' && !isNaN(step) && step >= 1 && step <= 41
+    (step) =>
+      typeof step === "number" && !isNaN(step) && step >= 1 && step <= 41,
   );
 
   return {
@@ -141,7 +153,7 @@ function migrateAppState(raw: any): AppState {
     slipUps: raw.slipUps ?? [],
     bookmarks: raw.bookmarks ?? [],
     milestones: raw.milestones ?? {},
-    lastOpenedAt: raw.lastOpenedAt ?? '',
+    lastOpenedAt: raw.lastOpenedAt ?? "",
     dailyStreak: raw.dailyStreak ?? 0,
     lastStreakDate: raw.lastStreakDate ?? null,
   };
@@ -157,8 +169,12 @@ function handleCompleteStep(state: AppState, step: number): AppState {
 
   const now = new Date().toISOString();
   const isJourneyComplete = step === 41;
-  const newCompletedSteps = Array.from(new Set([...state.planState.completedSteps, step]));
-  const nextStep = isJourneyComplete ? 41 : Math.max(state.planState.currentStep, step + 1);
+  const newCompletedSteps = Array.from(
+    new Set([...state.planState.completedSteps, step]),
+  );
+  const nextStep = isJourneyComplete
+    ? 41
+    : Math.max(state.planState.currentStep, step + 1);
 
   return {
     ...state,
@@ -183,7 +199,10 @@ function handleCompleteStep(state: AppState, step: number): AppState {
   };
 }
 
-function handleToggleChecklistItem(state: AppState, payload: { step: number; itemId: string }): AppState {
+function handleToggleChecklistItem(
+  state: AppState,
+  payload: { step: number; itemId: string },
+): AppState {
   const { step, itemId } = payload;
   const existing = state.stepProgress[step] ?? {
     step,
@@ -208,7 +227,7 @@ function handleToggleChecklistItem(state: AppState, payload: { step: number; ite
 function handleUpdateLastOpened(state: AppState, payload: string): AppState {
   // Get local date carefully to avoid UTC timezone issues
   const d = payload ? new Date(payload) : new Date();
-  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const last = state.lastStreakDate;
 
   let dailyStreak = state.dailyStreak;
@@ -222,12 +241,12 @@ function handleUpdateLastOpened(state: AppState, payload: string): AppState {
     // Already counted today — idempotent
     // no change
   } else {
-    const [lastYear, lastMonth, lastDay] = last.split('-').map(Number);
-    const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
+    const [lastYear, lastMonth, lastDay] = last.split("-").map(Number);
+    const [todayYear, todayMonth, todayDay] = today.split("-").map(Number);
     const lastDateUtc = Date.UTC(lastYear, lastMonth - 1, lastDay);
     const todayDateUtc = Date.UTC(todayYear, todayMonth - 1, todayDay);
     const diffDays = Math.floor(
-      (todayDateUtc - lastDateUtc) / (24 * 60 * 60 * 1000)
+      (todayDateUtc - lastDateUtc) / (24 * 60 * 60 * 1000),
     );
 
     if (diffDays === 1) {
@@ -247,10 +266,10 @@ function handleUpdateLastOpened(state: AppState, payload: string): AppState {
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
-    case 'SET_USER_PROFILE':
+    case "SET_USER_PROFILE":
       return { ...state, userProfile: action.payload };
 
-    case 'ACTIVATE_PLAN': {
+    case "ACTIVATE_PLAN": {
       if (state.planState.isActive) return state; // idempotent
       return {
         ...state,
@@ -263,7 +282,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'ACTIVATE_PLAN_WITH_DATE': {
+    case "ACTIVATE_PLAN_WITH_DATE": {
       if (state.planState.isActive) return state; // idempotent
       return {
         ...state,
@@ -276,7 +295,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'RESET_PLAN': {
+    case "RESET_PLAN": {
       return {
         ...state,
         planState: {
@@ -289,32 +308,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'COMPLETE_STEP':
+    case "COMPLETE_STEP":
       return handleCompleteStep(state, action.payload);
 
-    case 'TOGGLE_CHECKLIST_ITEM':
+    case "TOGGLE_CHECKLIST_ITEM":
       return handleToggleChecklistItem(state, action.payload);
 
-    case 'ADD_TRIGGER_LOG':
+    case "ADD_TRIGGER_LOG":
       return { ...state, triggerLogs: [...state.triggerLogs, action.payload] };
 
-    case 'ADD_CRAVING_SESSION':
+    case "ADD_CRAVING_SESSION":
       return {
         ...state,
         cravingSessions: [...state.cravingSessions, action.payload],
       };
 
-    case 'RECORD_SLIP_UP':
-      return { 
-        ...state, 
+    case "RECORD_SLIP_UP":
+      return {
+        ...state,
         slipUps: [...state.slipUps, action.payload],
         planState: {
           ...state.planState,
-          lastSlipUpAt: action.payload.reportedAt
-        }
+          lastSlipUpAt: action.payload.reportedAt,
+        },
       };
 
-    case 'ACHIEVE_MILESTONE': {
+    case "ACHIEVE_MILESTONE": {
       const { steps, achievedAt } = action.payload;
       return {
         ...state,
@@ -322,7 +341,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    case 'TOGGLE_BOOKMARK': {
+    case "TOGGLE_BOOKMARK": {
       const contentId = action.payload;
       const isBookmarked = state.bookmarks.includes(contentId);
       const bookmarks = isBookmarked
@@ -331,18 +350,18 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, bookmarks };
     }
 
-    case 'UPDATE_LAST_OPENED':
+    case "UPDATE_LAST_OPENED":
       return handleUpdateLastOpened(state, action.payload);
 
-    case 'HYDRATE':
+    case "HYDRATE":
       try {
         return migrateAppState(action.payload);
       } catch (error) {
-        console.error('State migration failed:', error);
+        console.error("State migration failed:", error);
         return state;
       }
 
-    case 'CLEANUP_OLD_DATA':
+    case "CLEANUP_OLD_DATA":
       return {
         ...state,
         triggerLogs: action.payload.triggerLogs,
@@ -384,19 +403,22 @@ export function AppProvider({ children }: AppProviderProps) {
 
   // AppState lifecycle: flush on background, refresh on active
   useEffect(() => {
-    const subscription = RNAppState.addEventListener('change', (nextState) => {
-      if (nextState === 'background' || nextState === 'inactive') {
+    const subscription = RNAppState.addEventListener("change", (nextState) => {
+      if (nextState === "background" || nextState === "inactive") {
         // Immediate flush — cancel pending debounce and save now
         if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
         saveAppState(stateRef.current);
-      } else if (nextState === 'active') {
-        dispatch({ type: 'UPDATE_LAST_OPENED', payload: new Date().toISOString() });
+      } else if (nextState === "active") {
+        dispatch({
+          type: "UPDATE_LAST_OPENED",
+          payload: new Date().toISOString(),
+        });
         scheduleReEngagementNotification();
         // Cleanup old data
         const cleaned = clearOldTriggerLogs(stateRef.current, 90);
         if (cleaned !== stateRef.current) {
           dispatch({
-            type: 'CLEANUP_OLD_DATA',
+            type: "CLEANUP_OLD_DATA",
             payload: {
               triggerLogs: cleaned.triggerLogs,
               cravingSessions: cleaned.cravingSessions,
@@ -413,8 +435,11 @@ export function AppProvider({ children }: AppProviderProps) {
   useEffect(() => {
     loadAppState()
       .then((saved) => {
-        if (saved) dispatch({ type: 'HYDRATE', payload: saved });
-        dispatch({ type: 'UPDATE_LAST_OPENED', payload: new Date().toISOString() });
+        if (saved) dispatch({ type: "HYDRATE", payload: saved });
+        dispatch({
+          type: "UPDATE_LAST_OPENED",
+          payload: new Date().toISOString(),
+        });
       })
       .catch(() => {
         // Error → treat as new user
@@ -427,8 +452,13 @@ export function AppProvider({ children }: AppProviderProps) {
   // ─── Fix old incorrect cigarettePricePerPack default ──────
   useEffect(() => {
     if (state.userProfile && state.userProfile.cigarettePricePerPack === 15) {
-      console.log('🔄 Fixing incorrect cigarettePricePerPack default from 15 to 300');
-      dispatch({ type: 'SET_USER_PROFILE', payload: { ...state.userProfile, cigarettePricePerPack: 300 } });
+      console.log(
+        "🔄 Fixing incorrect cigarettePricePerPack default from 15 to 300",
+      );
+      dispatch({
+        type: "SET_USER_PROFILE",
+        payload: { ...state.userProfile, cigarettePricePerPack: 300 },
+      });
     }
   }, [state.userProfile?.cigarettePricePerPack]);
 
@@ -444,11 +474,11 @@ export function AppProvider({ children }: AppProviderProps) {
       } else {
         saveFailureCountRef.current += 1;
         if (saveFailureCountRef.current >= 3) {
-          if (RNAppState.currentState === 'active') {
-            const { Alert } = require('react-native');
+          if (RNAppState.currentState === "active") {
+            const { Alert } = require("react-native");
             Alert.alert(
-              'সতর্কতা',
-              'আপনার অগ্রগতি সংরক্ষণ করতে সমস্যা হচ্ছে। ডিভাইসের স্টোরেজ পরীক্ষা করুন।',
+              "সতর্কতা",
+              "আপনার অগ্রগতি সংরক্ষণ করতে সমস্যা হচ্ছে। ডিভাইসের স্টোরেজ পরীক্ষা করুন।",
             );
           }
           saveFailureCountRef.current = 0; // reset to avoid repeated alerts
@@ -472,7 +502,7 @@ export function AppProvider({ children }: AppProviderProps) {
 export function useAppContext(): AppContextValue {
   const ctx = useContext(AppContext);
   if (!ctx) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error("useAppContext must be used within an AppProvider");
   }
   return ctx;
 }

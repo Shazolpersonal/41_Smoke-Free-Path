@@ -17,10 +17,12 @@ const AsyncStorage = {
   }),
   getAllKeys: jest.fn(() => Promise.resolve(Object.keys(store))),
   multiGet: jest.fn((keys) =>
-    Promise.resolve(keys.map((k) => [k, store[k] ?? null]))
+    Promise.resolve(keys.map((k) => [k, store[k] ?? null])),
   ),
   multiSet: jest.fn((pairs) => {
-    pairs.forEach(([k, v]) => { store[k] = v; });
+    pairs.forEach(([k, v]) => {
+      store[k] = v;
+    });
     return Promise.resolve();
   }),
 };

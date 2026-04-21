@@ -1,15 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { useFonts } from 'expo-font';
-import { HindSiliguri_400Regular, HindSiliguri_600SemiBold, HindSiliguri_700Bold } from '@expo-google-fonts/hind-siliguri';
-import * as SplashScreen from 'expo-splash-screen';
-import { AccessibilityInfo, I18nManager } from 'react-native';
-import { AppProvider, useAppContext } from '@/context/AppContext';
-import { loadOnboardingStep } from '@/services/StorageService';
-import { scheduleReEngagementNotification } from '@/services/NotificationService';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { ThemeProvider, useTheme } from '../theme';
-import { ToastProvider } from '@/context/ToastContext';
+import { useEffect, useRef, useState } from "react";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { useFonts } from "expo-font";
+import {
+  HindSiliguri_400Regular,
+  HindSiliguri_600SemiBold,
+  HindSiliguri_700Bold,
+} from "@expo-google-fonts/hind-siliguri";
+import * as SplashScreen from "expo-splash-screen";
+import { AccessibilityInfo, I18nManager } from "react-native";
+import { AppProvider, useAppContext } from "@/context/AppContext";
+import { loadOnboardingStep } from "@/services/StorageService";
+import { scheduleReEngagementNotification } from "@/services/NotificationService";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { ThemeProvider, useTheme } from "../theme";
+import { ToastProvider } from "@/context/ToastContext";
 
 SplashScreen.preventAutoHideAsync();
 I18nManager.forceRTL(false);
@@ -22,21 +26,21 @@ function NavigationGuard() {
   useEffect(() => {
     if (!hydrated) return;
 
-    const inOnboarding = segments[0] === '(onboarding)';
-    const inTabs = segments[0] === '(tabs)';
+    const inOnboarding = segments[0] === "(onboarding)";
+    const inTabs = segments[0] === "(tabs)";
 
     if (!state.userProfile?.onboardingCompleted) {
       if (!inOnboarding) {
         loadOnboardingStep().then((savedStep) => {
           if (savedStep === 1) {
-            router.replace('/(onboarding)/profile-setup');
+            router.replace("/(onboarding)/profile-setup");
           } else {
-            router.replace('/(onboarding)/welcome');
+            router.replace("/(onboarding)/welcome");
           }
         });
       }
     } else if (!inTabs && !inOnboarding) {
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     }
   }, [hydrated, state.userProfile?.onboardingCompleted, router, segments]);
 
@@ -47,7 +51,7 @@ function RootLayoutInner() {
   const { theme } = useTheme();
   const [reduceMotion, setReduceMotion] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
-    'Amiri': require('../assets/fonts/Amiri-Regular.ttf'),
+    Amiri: require("../assets/fonts/Amiri-Regular.ttf"),
     HindSiliguri_400Regular,
     HindSiliguri_600SemiBold,
     HindSiliguri_700Bold,
@@ -74,21 +78,55 @@ function RootLayoutInner() {
       <NavigationGuard />
       <Stack
         screenOptions={{
-          animation: reduceMotion ? 'none' : 'ios_from_right',
+          animation: reduceMotion ? "none" : "ios_from_right",
           headerStyle: { backgroundColor: theme.colors.primary },
           headerTintColor: theme.colors.onPrimary,
-          headerTitleStyle: { fontWeight: 'bold' },
+          headerTitleStyle: { fontWeight: "bold" },
           gestureEnabled: true,
         }}
       >
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="craving/index" options={{ title: 'ক্র্যাভিং টুল', presentation: 'modal', animation: reduceMotion ? 'none' : 'slide_from_bottom' }} />
-        <Stack.Screen name="tracker/[step]" options={{ title: 'ধাপের পরিকল্পনা', headerShown: false }} />
-        <Stack.Screen name="milestone/[id]" options={{ title: 'মাইলস্টোন', presentation: 'modal', animation: reduceMotion ? 'none' : 'slide_from_bottom' }} />
-        <Stack.Screen name="slip-up/index" options={{ title: 'স্লিপ-আপ', presentation: 'modal', animation: reduceMotion ? 'none' : 'slide_from_bottom' }} />
-        <Stack.Screen name="trigger-log/index" options={{ title: 'ট্রিগার লগ', presentation: 'modal', animation: reduceMotion ? 'none' : 'slide_from_bottom' }} />
-        <Stack.Screen name="privacy-policy" options={{ title: 'গোপনীয়তা নীতি', headerShown: false }} />
+        <Stack.Screen
+          name="craving/index"
+          options={{
+            title: "ক্র্যাভিং টুল",
+            presentation: "modal",
+            animation: reduceMotion ? "none" : "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="tracker/[step]"
+          options={{ title: "ধাপের পরিকল্পনা", headerShown: false }}
+        />
+        <Stack.Screen
+          name="milestone/[id]"
+          options={{
+            title: "মাইলস্টোন",
+            presentation: "modal",
+            animation: reduceMotion ? "none" : "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="slip-up/index"
+          options={{
+            title: "স্লিপ-আপ",
+            presentation: "modal",
+            animation: reduceMotion ? "none" : "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="trigger-log/index"
+          options={{
+            title: "ট্রিগার লগ",
+            presentation: "modal",
+            animation: reduceMotion ? "none" : "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="privacy-policy"
+          options={{ title: "গোপনীয়তা নীতি", headerShown: false }}
+        />
       </Stack>
     </>
   );

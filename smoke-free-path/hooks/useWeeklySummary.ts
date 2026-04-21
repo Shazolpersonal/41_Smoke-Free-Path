@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import { getWeeklyTriggerSummary } from '@/utils/trackerUtils';
-import type { WeeklyTriggerSummary } from '@/types';
+import { useMemo } from "react";
+import { useAppContext } from "@/context/AppContext";
+import { getWeeklyTriggerSummary } from "@/utils/trackerUtils";
+import type { WeeklyTriggerSummary } from "@/types";
 
 /**
  * Filters trigger logs from the last 7 days and returns the top trigger summary.

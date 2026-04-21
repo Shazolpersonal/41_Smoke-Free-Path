@@ -1,10 +1,16 @@
-import React, { useRef, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Animated, AccessibilityInfo } from 'react-native';
-import * as Haptics from 'expo-haptics';
-import ArabicText from '@/components/ArabicText';
-import Typography from '@/components/Typography';
-import { useTheme } from '@/hooks/useTheme';
-import type { IslamicContent, ContentType } from '@/types';
+import React, { useRef, useEffect } from "react";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  AccessibilityInfo,
+} from "react-native";
+import * as Haptics from "expo-haptics";
+import ArabicText from "@/components/ArabicText";
+import Typography from "@/components/Typography";
+import { useTheme } from "@/hooks/useTheme";
+import type { IslamicContent, ContentType } from "@/types";
 
 interface IslamicCardProps {
   content: IslamicContent;
@@ -14,10 +20,10 @@ interface IslamicCardProps {
 }
 
 const TYPE_LABELS: Record<ContentType, string> = {
-  ayah: 'আয়াত',
-  hadith: 'হাদিস',
-  dua: 'দোয়া',
-  dhikr: 'জিকির',
+  ayah: "আয়াত",
+  hadith: "হাদিস",
+  dua: "দোয়া",
+  dhikr: "জিকির",
 };
 
 export default React.memo(function IslamicCard({
@@ -59,46 +65,110 @@ export default React.memo(function IslamicCard({
 
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: theme.colors.surface, padding: theme.spacing.md, marginVertical: theme.spacing.sm, ...theme.shadows.card, borderRadius: 12 }]}
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.colors.surface,
+          padding: theme.spacing.md,
+          marginVertical: theme.spacing.sm,
+          ...theme.shadows.card,
+          borderRadius: 12,
+        },
+      ]}
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
     >
       {/* Type badge */}
-      <View style={[styles.badge, { backgroundColor: TYPE_COLORS[content.type], marginBottom: theme.spacing.sm, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 }]}>
-        <Typography variant="small" color="onPrimary" style={{ fontWeight: '600' }}>{TYPE_LABELS[content.type]}</Typography>
+      <View
+        style={[
+          styles.badge,
+          {
+            backgroundColor: TYPE_COLORS[content.type],
+            marginBottom: theme.spacing.sm,
+            alignSelf: "flex-start",
+            paddingHorizontal: 10,
+            paddingVertical: 3,
+            borderRadius: 12,
+          },
+        ]}
+      >
+        <Typography
+          variant="small"
+          color="onPrimary"
+          style={{ fontWeight: "600" }}
+        >
+          {TYPE_LABELS[content.type]}
+        </Typography>
       </View>
 
       {/* Arabic text */}
-      <ArabicText text={content.arabicText} fontSize={22} style={{ marginBottom: theme.spacing.sm }} />
+      <ArabicText
+        text={content.arabicText}
+        fontSize={22}
+        style={{ marginBottom: theme.spacing.sm }}
+      />
 
       {/* Bangla transliteration */}
-      <Typography variant="body" color="textSecondary" style={{ fontStyle: 'italic', marginBottom: theme.spacing.sm }}>
+      <Typography
+        variant="body"
+        color="textSecondary"
+        style={{ fontStyle: "italic", marginBottom: theme.spacing.sm }}
+      >
         {content.banglaTransliteration}
       </Typography>
 
       {/* Divider */}
-      <View style={[styles.divider, { backgroundColor: theme.colors.border, marginVertical: theme.spacing.sm, height: 1 }]} />
+      <View
+        style={[
+          styles.divider,
+          {
+            backgroundColor: theme.colors.border,
+            marginVertical: theme.spacing.sm,
+            height: 1,
+          },
+        ]}
+      />
 
       {/* Bangla translation */}
-      <Typography variant="subheading" color="text" style={{ marginBottom: theme.spacing.md, fontWeight: '600' }}>
+      <Typography
+        variant="subheading"
+        color="text"
+        style={{ marginBottom: theme.spacing.md, fontWeight: "600" }}
+      >
         {content.banglaTranslation}
       </Typography>
 
       {/* Source + bookmark row */}
-      <View style={[styles.footer, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.footer,
+          {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          },
+        ]}
+      >
         <Typography variant="small" color="textSecondary" style={{ flex: 1 }}>
           {content.source}
         </Typography>
         {onBookmark && (
           <TouchableOpacity
             onPress={() => {
-              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+              try {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              } catch {}
               onBookmark();
             }}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Animated.Text style={[styles.bookmark, { transform: [{ scale: bookmarkScale }], fontSize: 20 }]}>
-              {isBookmarked ? '🔖' : '📄'}
+            <Animated.Text
+              style={[
+                styles.bookmark,
+                { transform: [{ scale: bookmarkScale }], fontSize: 20 },
+              ]}
+            >
+              {isBookmarked ? "🔖" : "📄"}
             </Animated.Text>
           </TouchableOpacity>
         )}
@@ -108,9 +178,9 @@ export default React.memo(function IslamicCard({
 });
 
 const styles = StyleSheet.create({
-  card: { },
-  badge: { },
-  divider: { },
-  footer: { },
-  bookmark: { },
+  card: {},
+  badge: {},
+  divider: {},
+  footer: {},
+  bookmark: {},
 });

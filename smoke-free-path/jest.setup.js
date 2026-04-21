@@ -1,4 +1,4 @@
-jest.mock('react-native-reanimated', () => {
+jest.mock("react-native-reanimated", () => {
   return {
     useSharedValue: jest.fn(() => ({ value: 0 })),
     useAnimatedStyle: jest.fn(() => ({})),
@@ -14,7 +14,7 @@ jest.mock('react-native-reanimated', () => {
     Layout: { springify: jest.fn() },
   };
 });
-jest.mock('react-native-worklets', () => {
+jest.mock("react-native-worklets", () => {
   return {
     useSharedValue: jest.fn(() => ({ value: 0 })),
     useAnimatedStyle: jest.fn(() => ({})),

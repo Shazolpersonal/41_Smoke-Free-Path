@@ -1,23 +1,50 @@
-import { appReducer, INITIAL_APP_STATE } from '../../context/AppContext';
-import { AppState } from '../../types';
+import { appReducer, INITIAL_APP_STATE } from "../../context/AppContext";
+import { AppState } from "../../types";
 
-describe('AppContext Reducer', () => {
-  it('should clean up old data on CLEANUP_OLD_DATA', () => {
+describe("AppContext Reducer", () => {
+  it("should clean up old data on CLEANUP_OLD_DATA", () => {
     const initialState: AppState = {
       ...INITIAL_APP_STATE,
-      triggerLogs: [{ id: '1', type: 'STRESS', timestamp: 'old', note: null, cravingSessionId: null, isSlipUp: false }],
-      cravingSessions: [{ id: '1', startTime: 'old', endTime: null, intensity: 5, outcome: null, strategiesUsed: [], triggerId: null }],
-      slipUps: [{ id: '1', reportedAt: 'old', triggerId: null, decision: 'STAY_STRONG', trackerStep: 1 }],
-      bookmarks: ['bookmark1']
+      triggerLogs: [
+        {
+          id: "1",
+          type: "stress",
+          timestamp: "old",
+          note: null,
+          cravingSessionId: null,
+          isSlipUp: false,
+        },
+      ],
+      cravingSessions: [
+        {
+          id: "1",
+          startTime: "old",
+          endTime: null,
+          intensity: 5,
+          outcome: null,
+          strategiesUsed: [],
+          triggerId: null,
+        },
+      ],
+      slipUps: [
+        {
+          id: "1",
+          reportedAt: "old",
+          triggerId: null,
+          decision: "continue",
+          trackerStep: 1,
+        },
+      ],
+      bookmarks: ["bookmark1"],
     };
 
     const action = {
-      type: 'CLEANUP_OLD_DATA',
+      type: "CLEANUP_OLD_DATA",
       payload: {
         triggerLogs: [],
         cravingSessions: [],
-        slipUps: []
-      }
+        slipUps: [],
+      },
     } as any;
 
     const newState = appReducer(initialState, action);
@@ -25,21 +52,21 @@ describe('AppContext Reducer', () => {
     expect(newState.triggerLogs).toEqual([]);
     expect(newState.cravingSessions).toEqual([]);
     expect(newState.slipUps).toEqual([]);
-    expect(newState.bookmarks).toEqual(['bookmark1']); // unchanged
+    expect(newState.bookmarks).toEqual(["bookmark1"]); // unchanged
   });
 
-  it('should filter malformed completedSteps on HYDRATE', () => {
+  it("should filter malformed completedSteps on HYDRATE", () => {
     const malformedState = {
       ...INITIAL_APP_STATE,
       planState: {
         ...INITIAL_APP_STATE.planState,
-        completedSteps: [99, -1, 'abc', 5, NaN]
-      }
+        completedSteps: [99, -1, "abc", 5, NaN],
+      },
     };
 
     const action = {
-      type: 'HYDRATE',
-      payload: malformedState
+      type: "HYDRATE",
+      payload: malformedState,
     } as any;
 
     const newState = appReducer(INITIAL_APP_STATE, action);

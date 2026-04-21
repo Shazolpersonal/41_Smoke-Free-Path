@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import { MILESTONE_STEPS } from '@/utils/trackerUtils';
-import { getMilestoneContent } from '@/services/ContentService';
-import type { Milestone } from '@/types';
+import { useMemo } from "react";
+import { useAppContext } from "@/context/AppContext";
+import { MILESTONE_STEPS } from "@/utils/trackerUtils";
+import { getMilestoneContent } from "@/services/ContentService";
+import type { Milestone } from "@/types";
 
 export interface MilestoneEntry {
   steps: number;

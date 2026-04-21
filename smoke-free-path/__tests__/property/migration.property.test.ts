@@ -6,19 +6,23 @@
 // (c) planState.isActive is true.
 // Validates: Requirements 14.1, 14.2
 
-import * as fc from 'fast-check';
-import { appReducer, INITIAL_APP_STATE } from '@/context/AppContext';
+import * as fc from "fast-check";
+import { appReducer, INITIAL_APP_STATE } from "@/context/AppContext";
 
 // ─── Arbitraries ──────────────────────────────────────────────────────────────
 
 const isoDateArb = fc
   .integer({ min: 0, max: 365 * 5 * 24 * 60 * 60 * 1000 })
-  .map((offset) => new Date(new Date('2020-01-01').getTime() + offset).toISOString());
+  .map((offset) =>
+    new Date(new Date("2020-01-01").getTime() + offset).toISOString(),
+  );
 
 // Legacy dailyProgress entry (old format)
 const legacyDailyEntryArb = fc.record({
   day: fc.integer({ min: 1, max: 41 }),
-  completedItems: fc.array(fc.string({ minLength: 1, maxLength: 20 }), { maxLength: 5 }),
+  completedItems: fc.array(fc.string({ minLength: 1, maxLength: 20 }), {
+    maxLength: 5,
+  }),
   isComplete: fc.boolean(),
   completedAt: fc.option(isoDateArb, { nil: null }),
 });
@@ -39,15 +43,15 @@ const legacyAppStateArb = fc
       return {
         // No planState — triggers migration
         userProfile: {
-          id: 'legacy-user',
-          name: 'Test User',
+          id: "legacy-user",
+          name: "Test User",
           cigarettesPerDay: 10,
           smokingYears: 5,
           cigarettePricePerPack: 15,
           cigarettesPerPack: 20,
           notificationsEnabled: false,
-          morningNotificationTime: '08:00',
-          eveningNotificationTime: '21:00',
+          morningNotificationTime: "08:00",
+          eveningNotificationTime: "21:00",
           onboardingCompleted: true,
           createdAt: quitDate,
           quitDate, // legacy field
@@ -58,23 +62,23 @@ const legacyAppStateArb = fc
         slipUps: [],
         bookmarks: [],
         milestones: {},
-        lastOpenedAt: '',
+        lastOpenedAt: "",
         entries, // carry along for assertions
         quitDate,
       };
-    })
+    }),
   );
 
 // ─── Property 10: Data Migration from Old Format ──────────────────────────────
 
-test('Property 10: Data Migration from Old Format', () => {
+test("Property 10: Data Migration from Old Format", () => {
   fc.assert(
     fc.property(legacyAppStateArb, (legacy) => {
       const { entries, quitDate, ...legacyPayload } = legacy;
 
       // Dispatch HYDRATE with legacy-shaped payload
       const migrated = appReducer(INITIAL_APP_STATE, {
-        type: 'HYDRATE',
+        type: "HYDRATE",
         payload: legacyPayload as any,
       });
 
@@ -89,7 +93,9 @@ test('Property 10: Data Migration from Old Format', () => {
       }
 
       // (b) planState.activatedAt must equal the old quitDate as ISO datetime
-      expect(migrated.planState.activatedAt).toBe(new Date(quitDate).toISOString());
+      expect(migrated.planState.activatedAt).toBe(
+        new Date(quitDate).toISOString(),
+      );
 
       // (c) planState.isActive must be true
       expect(migrated.planState.isActive).toBe(true);
@@ -97,6 +103,6 @@ test('Property 10: Data Migration from Old Format', () => {
       // (d) quitDate must be stripped from userProfile
       expect((migrated.userProfile as any)?.quitDate).toBeUndefined();
     }),
-    { numRuns: 100 }
+    { numRuns: 100 },
   );
 });

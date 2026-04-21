@@ -3,10 +3,10 @@
 // m.achievementBadge and m.titleBangla.
 // Validates: Requirements 17.2, 17.3
 
-import * as fc from 'fast-check';
+import * as fc from "fast-check";
 
-import { composeShareMessage } from '@/components/MilestoneShareButton';
-import type { Milestone } from '@/types';
+import { composeShareMessage } from "@/components/MilestoneShareButton";
+import type { Milestone } from "@/types";
 
 // ─── Arbitrary: Milestone ─────────────────────────────────────────────────────
 
@@ -18,17 +18,24 @@ const milestoneArb = fc.record<Milestone>({
   healthBenefit: fc.string({ minLength: 1, maxLength: 200 }),
   achievedAt: fc.option(fc.constant(new Date().toISOString()), { nil: null }),
   achievementBadge: fc.option(
-    fc.constantFrom('🌱', '⭐', '🏆', '👑', '🎯', '💪', '🌟'),
-    { nil: undefined }
+    fc.constantFrom("🌱", "⭐", "🏆", "👑", "🎯", "💪", "🌟"),
+    { nil: undefined },
   ),
-  completionMessage: fc.option(fc.string({ minLength: 1, maxLength: 100 }), { nil: undefined }),
-  nextMilestoneMotivation: fc.option(fc.string({ minLength: 1, maxLength: 100 }), { nil: undefined }),
-  duaId: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: undefined }),
+  completionMessage: fc.option(fc.string({ minLength: 1, maxLength: 100 }), {
+    nil: undefined,
+  }),
+  nextMilestoneMotivation: fc.option(
+    fc.string({ minLength: 1, maxLength: 100 }),
+    { nil: undefined },
+  ),
+  duaId: fc.option(fc.string({ minLength: 1, maxLength: 20 }), {
+    nil: undefined,
+  }),
 });
 
 // ─── Property 4: Milestone Share Message Invariant ───────────────────────────
 
-test('Property 4: Milestone Share Message Invariant', () => {
+test("Property 4: Milestone Share Message Invariant", () => {
   fc.assert(
     fc.property(milestoneArb, (milestone) => {
       const message = composeShareMessage(milestone);
@@ -37,15 +44,17 @@ test('Property 4: Milestone Share Message Invariant', () => {
       expect(message).toContain(milestone.titleBangla);
 
       // The message must always contain achievementBadge (or fallback '🏆')
-      const expectedBadge = milestone.achievementBadge ?? '🏆';
+      const expectedBadge = milestone.achievementBadge ?? "🏆";
       expect(message).toContain(expectedBadge);
 
       // The message must always contain islamicMessage
       expect(message).toContain(milestone.islamicMessage);
 
       // The message must always end with the motivational phrase
-      expect(message).toContain('ধোঁয়া-মুক্ত পথ অ্যাপ দিয়ে আমার যাত্রা চলছে। 🌿');
+      expect(message).toContain(
+        "ধোঁয়া-মুক্ত পথ অ্যাপ দিয়ে আমার যাত্রা চলছে। 🌿",
+      );
     }),
-    { numRuns: 100 }
+    { numRuns: 100 },
   );
 });

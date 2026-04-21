@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useTheme } from '../theme';
-import { getHealthTimeline } from '@/services/ContentService';
-import Typography from '@/components/Typography';
+import React, { useMemo } from "react";
+import { View, StyleSheet } from "react-native";
+import { useTheme } from "../theme";
+import { getHealthTimeline } from "@/services/ContentService";
+import Typography from "@/components/Typography";
 
 interface HealthTimelineProps {
   smokeFreeDays: number;
@@ -54,10 +54,22 @@ export default function HealthTimeline({ smokeFreeDays }: HealthTimelineProps) {
             />
             {/* Content */}
             <View style={styles.content}>
-              <Typography variant="body" style={{ fontWeight: '600', marginBottom: 2, color: isAchieved ? theme.colors.primaryDark : theme.colors.textSecondary }}>
+              <Typography
+                variant="body"
+                style={{
+                  fontWeight: "600",
+                  marginBottom: 2,
+                  color: isAchieved
+                    ? theme.colors.primaryDark
+                    : theme.colors.textSecondary,
+                }}
+              >
                 {entry.icon} {entry.timeLabel}
               </Typography>
-              <Typography variant="small" style={{ color: theme.colors.textSecondary }}>
+              <Typography
+                variant="small"
+                style={{ color: theme.colors.textSecondary }}
+              >
                 {entry.benefit}
               </Typography>
             </View>
@@ -74,15 +86,15 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   entryRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 14,
-    position: 'relative',
+    position: "relative",
   },
   connectingLine: {
-    position: 'absolute',
+    position: "absolute",
     left: 11, // center of dot (dot width/2 - line width/2 = 12/2 - 2/2 = 5, but offset by dot's own left = 0, so 12/2 - 1 = 5... using 11 to align with dot center accounting for padding)
-    top: 24,  // below the dot
+    top: 24, // below the dot
     bottom: -8, // extends toward next entry
     width: 2,
   },
@@ -98,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   desc: {
