@@ -42,3 +42,4 @@ yarn-error.*
 
 # vim swap files
 *.swp
+node_modules/

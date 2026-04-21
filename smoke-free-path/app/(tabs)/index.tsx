@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -6,18 +6,27 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
+  AccessibilityInfo,
 } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
 import { useRouter } from "expo-router";
-import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppContext } from "@/context/AppContext";
 import { useTheme } from "@/hooks/useTheme";
 import { useProgressStats } from "@/hooks/useProgressStats";
 import IslamicCard from "@/components/IslamicCard";
-import Card from "@/components/Card";
-import SkeletonScreen from "@/components/SkeletonScreen";
 import Typography from "@/components/Typography";
+import Shimmer from "@/components/Shimmer";
+import AnimatedCountUp from "@/components/AnimatedCountUp";
 import { getStepContent } from "@/services/ContentService";
 import { loadAppState } from "@/services/StorageService";
 
@@ -25,7 +34,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { state, dispatch, hydrated } = useAppContext();
   const { theme } = useTheme();
-  const { userProfile, planState, bookmarks, dailyStreak } = state;
+  const { userProfile, planState, bookmarks } = state;
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -60,506 +69,379 @@ export default function HomeScreen() {
     router.push("/(onboarding)/profile-setup");
   }
 
+  // --- Spring Animation for Action Button ---
+  const scale = useSharedValue(1);
+  const animatedButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  function handleCravingPressIn() {
+    scale.value = withSpring(0.95);
+  }
+
+  function handleCravingPressOut() {
+    scale.value = withSpring(1);
+  }
+
+  function handleCravingPress() {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    router.push("/craving");
+  }
+
+  // --- Helpers for Dashboard logic ---
+
+  const isMilestone = stats
+    ? [1, 3, 7, 14, 30, 60, 90].includes(stats.totalSmokeFreeDays)
+    : false;
+  const isEmptyState = !stats || stats.totalSmokeFreeDays === 0;
+
+  // Calculate hours if activated
+  const hoursSinceActivation = planState.activatedAt
+    ? Math.floor(
+        (Date.now() - new Date(planState.activatedAt).getTime()) /
+          (1000 * 60 * 60),
+      ) % 24
+    : 0;
+
   if (!hydrated) {
     return (
       <SafeAreaView
         style={{
           flex: 1,
           backgroundColor: theme.colors.background,
-          padding: theme.spacing.md,
         }}
       >
-        <SkeletonScreen lines={5} cardHeight={140} />
+        <View style={styles.loadingContainer}>
+          {/* Zone 1 Shimmer */}
+          <Shimmer
+            style={{
+              width: "100%",
+              height: 200,
+              borderRadius: 0,
+              marginBottom: theme.spacing.lg,
+            }}
+          />
+
+          <View style={{ paddingHorizontal: theme.spacing.md }}>
+            {/* Zone 2 Shimmer */}
+            <Shimmer
+              style={{
+                width: "100%",
+                height: 56,
+                borderRadius: 14,
+                marginBottom: theme.spacing.xl,
+              }}
+            />
+
+            {/* Zone 3 Shimmer */}
+            <View
+              style={{
+                flexDirection: "row",
+                gap: theme.spacing.md,
+                marginBottom: theme.spacing.xl,
+              }}
+            >
+              <Shimmer
+                style={{ flex: 1, height: 100, borderRadius: theme.radius.lg }}
+              />
+              <Shimmer
+                style={{ flex: 1, height: 100, borderRadius: theme.radius.lg }}
+              />
+            </View>
+
+            {/* Zone 4 Shimmer */}
+            <Shimmer style={{ width: "100%", height: 180, borderRadius: 12 }} />
+          </View>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["top"]}
+    >
       <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(600)}>
-        {/* Green header */}
-        <View
-          style={[
-            styles.header,
-            {
-              backgroundColor: theme.colors.primary,
-              paddingHorizontal: theme.spacing.lg,
-              paddingTop: theme.spacing.md,
-              paddingBottom: theme.spacing.xl,
-            },
-          ]}
-        >
-          <Typography
-            variant="heading"
-            color="onPrimary"
-            style={{ marginBottom: theme.spacing.xs }}
-          >
-            ধোঁয়া-মুক্ত পথ
-          </Typography>
-          <Typography
-            variant="body"
-            color="onPrimary"
-            style={{ opacity: 0.85, marginBottom: theme.spacing.md }}
-          >
-            {userProfile?.name
-              ? `আস-সালামু আলাইকুম, ${userProfile.name}`
-              : "আস-সালামু আলাইকুম"}
-          </Typography>
-
-          {planState.isActive ? (
-            <BlurView
-              intensity={30}
-              tint="prominent"
-              style={[
-                styles.statsRow,
-                {
-                  paddingVertical: theme.spacing.md,
-                  paddingHorizontal: theme.spacing.lg,
-                  overflow: "hidden",
-                },
-              ]}
-            >
-              <View
-                style={[styles.statBadge, { flex: 1, alignItems: "center" }]}
-              >
-                <Typography variant="display" color="onPrimary">
-                  {planState.currentStep}
-                </Typography>
-                <Typography
-                  variant="small"
-                  color="onPrimary"
-                  style={{ opacity: 0.8, marginTop: theme.spacing.xs }}
-                >
-                  পরিকল্পনার ধাপ
-                </Typography>
-              </View>
-              <View
-                style={[
-                  styles.statDivider,
-                  {
-                    backgroundColor: theme.colors.overlay,
-                    marginHorizontal: theme.spacing.md,
-                    width: 1,
-                    height: 40,
-                  },
-                ]}
-              />
-              <View
-                style={[styles.statBadge, { flex: 1, alignItems: "center" }]}
-              >
-                <Typography variant="display" color="onPrimary">
-                  {stats?.smokeFreeDays ?? 0}
-                </Typography>
-                <Typography
-                  variant="small"
-                  color="onPrimary"
-                  style={{ opacity: 0.8, marginTop: theme.spacing.xs }}
-                >
-                  ধূমপান-মুক্ত দিন
-                </Typography>
-              </View>
-              <View
-                style={[
-                  styles.statDivider,
-                  {
-                    backgroundColor: theme.colors.overlay,
-                    marginHorizontal: theme.spacing.md,
-                    width: 1,
-                    height: 40,
-                  },
-                ]}
-              />
-              <View
-                style={[styles.statBadge, { flex: 1, alignItems: "center" }]}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Ionicons
-                    name="flame"
-                    size={24}
-                    color={theme.colors.warning}
-                  />
-                  <Typography
-                    variant="display"
-                    color="onPrimary"
-                    style={{ marginLeft: theme.spacing.xs }}
-                  >
-                    {dailyStreak}
-                  </Typography>
-                </View>
-                <Typography
-                  variant="small"
-                  color="onPrimary"
-                  style={{ opacity: 0.8, marginTop: theme.spacing.xs }}
-                >
-                  টানা লগ-ইন
-                </Typography>
-              </View>
-            </BlurView>
-          ) : (
-            <BlurView
-              intensity={30}
-              tint="prominent"
-              style={[
-                styles.statsRow,
-                {
-                  paddingVertical: theme.spacing.md,
-                  paddingHorizontal: theme.spacing.lg,
-                  overflow: "hidden",
-                },
-              ]}
-            >
-              <View
-                style={[styles.statBadge, { flex: 1, alignItems: "center" }]}
-              >
-                <Typography variant="display" color="onPrimary">
-                  ০
-                </Typography>
-                <Typography
-                  variant="small"
-                  color="onPrimary"
-                  style={{ opacity: 0.8, marginTop: theme.spacing.xs }}
-                >
-                  ধূমপান-মুক্ত দিন
-                </Typography>
-              </View>
-            </BlurView>
-          )}
-        </View>
-
         <ScrollView
-          style={[
-            styles.scroll,
-            {
-              backgroundColor: theme.colors.background,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              marginTop: -8,
-            },
-          ]}
-          contentContainerStyle={{
-            padding: theme.spacing.md,
-            paddingBottom: theme.spacing.xl,
-          }}
-          showsVerticalScrollIndicator={false}
+          style={styles.scroll}
+          contentContainerStyle={{ paddingBottom: theme.spacing.xxxl }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
               tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
             />
           }
         >
-          {/* Activate plan button when inactive */}
-          {!planState.isActive && (
-            <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-              <TouchableOpacity
-                style={[
-                  styles.activateButton,
-                  {
-                    backgroundColor: theme.colors.primary,
-                    shadowColor: theme.colors.primary,
-                    paddingVertical: theme.spacing.lg,
-                    paddingHorizontal: theme.spacing.md,
-                    marginBottom: theme.spacing.md,
-                    borderRadius: 14,
-                    alignItems: "center",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 8,
-                    elevation: 5,
-                  },
-                ]}
-                onPress={handleActivatePlan}
-                activeOpacity={0.85}
-                accessibilityLabel="যাত্রা শুরু করুন"
-                accessibilityRole="button"
-              >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Ionicons
-                    name="leaf"
-                    size={24}
-                    color={theme.colors.onPrimary}
-                    style={{ marginRight: theme.spacing.sm }}
-                  />
+          {/* ZONE 1 — HERO */}
+          <Animated.View entering={FadeInDown.delay(0).duration(400)}>
+            <LinearGradient
+              colors={[theme.tokens.primary.soft, "transparent"]}
+              style={[
+                styles.heroContainer,
+                {
+                  paddingHorizontal: theme.spacing.lg,
+                  paddingVertical: theme.spacing.xl,
+                },
+                isMilestone && {
+                  borderWidth: 1.5,
+                  borderColor: theme.tokens.primary.base,
+                  shadowColor: theme.tokens.primary.base,
+                  shadowOpacity: 0.4,
+                  shadowRadius: 12,
+                  elevation: 8,
+                },
+              ]}
+            >
+              {isEmptyState ? (
+                <View style={{ alignItems: "center" }}>
+                  <Typography
+                    variant="heading"
+                    color="primaryDark"
+                    align="center"
+                    style={{ marginBottom: theme.spacing.sm }}
+                  >
+                    আজ থেকেই শুরু হলো তোমার যাত্রা! 🌱
+                  </Typography>
+                  <Typography
+                    variant="subheading"
+                    color="textSecondary"
+                    align="center"
+                  >
+                    প্রথম পদক্ষেপটাই সবচেয়ে সাহসী।
+                  </Typography>
+                </View>
+              ) : (
+                <View style={{ alignItems: "center" }}>
+                  <Typography
+                    variant="display"
+                    color="primaryDark"
+                    numberOfLines={1}
+                    adjustsFontSizeToFit={true}
+                    style={{
+                      fontSize: 48,
+                      fontWeight: "700",
+                      marginBottom: theme.spacing.xs,
+                    }}
+                  >
+                    {stats?.totalSmokeFreeDays || 0} দিন {hoursSinceActivation}{" "}
+                    ঘণ্টা
+                  </Typography>
+                  <Typography
+                    variant="small"
+                    color="textDisabled"
+                    style={{ fontWeight: "500" }}
+                  >
+                    ধূমপানমুক্ত জীবনের পথে
+                  </Typography>
+                  {isMilestone && (
+                    <Typography
+                      variant="subheading"
+                      color="primary"
+                      style={{ marginTop: theme.spacing.md, fontWeight: "600" }}
+                    >
+                      মাশাআল্লাহ! {stats?.totalSmokeFreeDays} দিন পূর্ণ হয়েছে!
+                    </Typography>
+                  )}
+                </View>
+              )}
+            </LinearGradient>
+          </Animated.View>
+
+          <View style={{ paddingHorizontal: theme.spacing.lg }}>
+            {/* INACTIVE PLAN FALLBACK */}
+            {!planState.isActive && (
+              <Animated.View entering={FadeInDown.delay(100).duration(500)}>
+                <TouchableOpacity
+                  style={[
+                    styles.activateButton,
+                    {
+                      backgroundColor: theme.colors.primary,
+                      paddingVertical: theme.spacing.xl,
+                      paddingHorizontal: theme.spacing.lg,
+                      marginTop: theme.spacing.xl,
+                      borderRadius: 16,
+                      alignItems: "center",
+                      shadowColor: theme.colors.primary,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 8,
+                      elevation: 4,
+                    },
+                  ]}
+                  onPress={handleActivatePlan}
+                  activeOpacity={0.8}
+                >
                   <Typography variant="title" color="onPrimary">
                     যাত্রা শুরু করুন
                   </Typography>
-                </View>
-                <Typography
-                  variant="small"
-                  color="onPrimary"
-                  style={{ opacity: 0.85, marginTop: theme.spacing.xs }}
-                >
-                  আপনার ৪১-ধাপের পরিকল্পনা সক্রিয় করুন
-                </Typography>
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-
-          {/* Current step summary when active */}
-          {planState.isActive && (
-            <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-              <Card
-                style={[
-                  {
-                    borderLeftColor: theme.colors.primary,
-                    borderLeftWidth: 4,
-                    marginBottom: theme.spacing.md,
-                  },
-                ]}
-              >
-                <Typography
-                  variant="small"
-                  color="textSecondary"
-                  style={{ marginBottom: theme.spacing.xs }}
-                >
-                  বর্তমান ধাপ
-                </Typography>
-                <Typography variant="heading" color="text">
-                  {planState.currentStep} / ৪১
-                </Typography>
-                <Typography variant="body" color="textSecondary">
-                  সম্পন্ন: {planState.completedSteps.length} / ৪১
-                </Typography>
-              </Card>
-            </Animated.View>
-          )}
-
-          {/* Savings row when active and has progress */}
-          {planState.isActive && stats && stats.totalSmokeFreeDays > 0 && (
-            <Animated.View entering={FadeInDown.delay(200).duration(500)}>
-              <View
-                style={[
-                  styles.savingsRow,
-                  {
-                    backgroundColor: theme.colors.surfaceVariant,
-                    borderColor: theme.colors.border,
-                    paddingVertical: theme.spacing.md,
-                    paddingHorizontal: theme.spacing.lg,
-                    marginBottom: theme.spacing.md,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderRadius: 12,
-                    borderWidth: 1,
-                  },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.savingsBadge,
-                    { flex: 1, alignItems: "center" },
-                  ]}
-                >
-                  <Typography variant="heading" color="primaryDark">
-                    {stats.totalSavedCigarettes}
-                  </Typography>
                   <Typography
                     variant="small"
-                    color="primary"
-                    style={{ marginTop: theme.spacing.xs }}
+                    color="onPrimary"
+                    style={{ opacity: 0.85, marginTop: theme.spacing.xs }}
                   >
-                    বাঁচানো সিগারেট
+                    আপনার ৪১-ধাপের পরিকল্পনা সক্রিয় করুন
                   </Typography>
-                </View>
-                <View
-                  style={[
-                    styles.savingsDivider,
-                    {
-                      backgroundColor: theme.colors.border,
-                      marginHorizontal: theme.spacing.md,
-                      width: 1,
-                      height: 36,
-                    },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.savingsBadge,
-                    { flex: 1, alignItems: "center" },
-                  ]}
-                >
-                  <Typography variant="heading" color="primaryDark">
-                    ৳{Math.round(stats.totalSavedMoney)}
-                  </Typography>
-                  <Typography
-                    variant="small"
-                    color="primary"
-                    style={{ marginTop: theme.spacing.xs }}
-                  >
-                    সাশ্রয়কৃত অর্থ
-                  </Typography>
-                </View>
-              </View>
-            </Animated.View>
-          )}
-
-          {/* Daily inspiration section */}
-          <Typography
-            variant="title"
-            color="text"
-            style={{
-              marginBottom: theme.spacing.sm,
-              marginTop: theme.spacing.xs,
-            }}
-          >
-            আজকের অনুপ্রেরণা
-          </Typography>
-
-          <Animated.View entering={FadeInDown.delay(300).duration(500)}>
-            {stepContent ? (
-              <IslamicCard
-                content={stepContent}
-                isBookmarked={isBookmarked}
-                onBookmark={handleBookmark}
-              />
-            ) : (
-              <View
-                style={[
-                  styles.emptyCard,
-                  {
-                    backgroundColor: theme.colors.surface,
-                    padding: theme.spacing.xl,
-                    marginVertical: theme.spacing.sm,
-                    borderRadius: 12,
-                    alignItems: "center",
-                  },
-                ]}
-              >
-                <Typography variant="body" color="textSecondary">
-                  আজকের কন্টেন্ট লোড হচ্ছে...
-                </Typography>
-              </View>
+                </TouchableOpacity>
+              </Animated.View>
             )}
-          </Animated.View>
 
-          {/* Craving button */}
-          <Animated.View entering={FadeInDown.delay(400).duration(500)}>
-            <TouchableOpacity
-              style={[
-                styles.cravingButton,
-                {
-                  backgroundColor: theme.colors.error,
-                  shadowColor: theme.colors.error,
-                  paddingVertical: theme.spacing.md,
-                  paddingHorizontal: theme.spacing.lg,
-                  marginTop: theme.spacing.md,
-                  marginBottom: theme.spacing.sm,
-                  borderRadius: 14,
-                  alignItems: "center",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 5,
-                },
-              ]}
-              onPress={() => router.push("/craving")}
-              activeOpacity={0.85}
-              accessibilityLabel="আকাঙ্ক্ষা দমন (Craving)"
-              accessibilityRole="button"
+            {/* ZONE 2 — ACTION */}
+            {planState.isActive && (
+              <Animated.View entering={FadeInUp.delay(100).duration(300)}>
+                <Animated.View style={animatedButtonStyle}>
+                  <TouchableOpacity
+                    style={[
+                      styles.cravingButton,
+                      {
+                        backgroundColor: theme.tokens.accent.base,
+                        paddingVertical: theme.spacing.md,
+                        paddingHorizontal: theme.spacing.lg,
+                        marginTop: theme.spacing.lg,
+                        marginBottom: theme.spacing.xl,
+                        borderRadius: 14,
+                        alignItems: "center",
+                        shadowColor: theme.tokens.accent.base,
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 8,
+                        elevation: 5,
+                      },
+                    ]}
+                    onPressIn={handleCravingPressIn}
+                    onPressOut={handleCravingPressOut}
+                    onPress={handleCravingPress}
+                    activeOpacity={1}
+                    accessibilityLabel="এখন কি কষ্ট লাগছে?"
+                    accessibilityRole="button"
+                  >
+                    <Typography
+                      variant="title"
+                      color="onPrimary"
+                      style={{ fontWeight: "600" }}
+                    >
+                      এখন কি কষ্ট লাগছে?
+                    </Typography>
+                  </TouchableOpacity>
+                </Animated.View>
+              </Animated.View>
+            )}
+
+            {/* ZONE 3 — PROGRESS SNAPSHOT */}
+            {planState.isActive && (
+              <Animated.View entering={FadeInUp.delay(200).duration(300)}>
+                <View style={styles.statsContainer}>
+                  <View
+                    style={[
+                      styles.statCard,
+                      {
+                        backgroundColor: theme.colors.surface,
+                        borderRadius: theme.radius.lg,
+                        padding: theme.spacing.md,
+                        ...theme.shadows.card,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: theme.spacing.xs,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Ionicons
+                        name="leaf"
+                        size={20}
+                        color={theme.colors.primary}
+                        style={{ marginRight: theme.spacing.xs }}
+                      />
+                      <Typography
+                        variant="small"
+                        color="textSecondary"
+                        align="center"
+                      >
+                        সিগারেট বাঁচানো
+                      </Typography>
+                    </View>
+                    <View style={{ alignItems: "center" }}>
+                      {isEmptyState ? (
+                        <Typography variant="heading" color="text">
+                          --
+                        </Typography>
+                      ) : (
+                        <AnimatedCountUp
+                          value={stats?.totalSavedCigarettes || 0}
+                          variant="heading"
+                          color="text"
+                        />
+                      )}
+                    </View>
+                  </View>
+
+                  <View style={{ width: theme.spacing.md }} />
+
+                  <View
+                    style={[
+                      styles.statCard,
+                      {
+                        backgroundColor: theme.colors.surface,
+                        borderRadius: theme.radius.lg,
+                        padding: theme.spacing.md,
+                        ...theme.shadows.card,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: theme.spacing.xs,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Typography
+                        variant="small"
+                        color="textSecondary"
+                        align="center"
+                      >
+                        টাকা বাঁচানো
+                      </Typography>
+                    </View>
+                    <View style={{ alignItems: "center" }}>
+                      {isEmptyState ? (
+                        <Typography variant="heading" color="text">
+                          --
+                        </Typography>
+                      ) : (
+                        <AnimatedCountUp
+                          value={stats?.totalSavedMoney || 0}
+                          variant="heading"
+                          color="text"
+                          prefix="৳"
+                        />
+                      )}
+                    </View>
+                  </View>
+                </View>
+              </Animated.View>
+            )}
+
+            {/* ZONE 4 — SPIRITUAL */}
+            <Animated.View
+              entering={FadeInUp.delay(300).duration(300)}
+              style={{ marginTop: theme.spacing.xl, opacity: 0.9 }}
             >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Ionicons
-                  name="alert-circle"
-                  size={24}
-                  color={theme.colors.onPrimary}
-                  style={{ marginRight: theme.spacing.sm }}
+              {stepContent && (
+                <IslamicCard
+                  content={stepContent}
+                  isBookmarked={isBookmarked}
+                  onBookmark={handleBookmark}
                 />
-                <Typography variant="title" color="onPrimary">
-                  আমার এখন তীব্র আকাঙ্ক্ষা হচ্ছে
-                </Typography>
-              </View>
-              <Typography
-                variant="small"
-                color="onPrimary"
-                style={{ opacity: 0.8, marginTop: theme.spacing.xs }}
-              >
-                তাৎক্ষণিক সহায়তা পান
-              </Typography>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Quick links */}
-          <Animated.View
-            entering={FadeInDown.delay(500).duration(500)}
-            style={[
-              styles.quickLinks,
-              {
-                gap: theme.spacing.sm,
-                marginTop: theme.spacing.sm,
-                flexDirection: "row",
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={[
-                styles.quickLink,
-                {
-                  backgroundColor: theme.colors.surface,
-                  paddingVertical: theme.spacing.md,
-                  flex: 1,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 3,
-                  elevation: 2,
-                },
-              ]}
-              onPress={() => router.push("/(tabs)/tracker")}
-              accessibilityRole="button"
-              accessibilityLabel="ধাপের পরিকল্পনা"
-            >
-              <Ionicons
-                name="calendar-outline"
-                size={28}
-                color={theme.colors.primary}
-                style={{ marginBottom: theme.spacing.xs }}
-              />
-              <Typography
-                variant="subheading"
-                color="text"
-                style={{ fontWeight: "600" }}
-              >
-                ধাপের পরিকল্পনা
-              </Typography>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.quickLink,
-                {
-                  backgroundColor: theme.colors.surface,
-                  paddingVertical: theme.spacing.md,
-                  flex: 1,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 3,
-                  elevation: 2,
-                },
-              ]}
-              onPress={() => router.push("/(tabs)/dua")}
-              accessibilityRole="button"
-              accessibilityLabel="দোয়া ও জিকির"
-            >
-              <Ionicons
-                name="book-outline"
-                size={28}
-                color={theme.colors.primary}
-                style={{ marginBottom: theme.spacing.xs }}
-              />
-              <Typography
-                variant="subheading"
-                color="text"
-                style={{ fontWeight: "600" }}
-              >
-                দোয়া ও জিকির
-              </Typography>
-            </TouchableOpacity>
-          </Animated.View>
+              )}
+            </Animated.View>
+          </View>
         </ScrollView>
       </Animated.View>
     </SafeAreaView>
@@ -567,23 +449,34 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {},
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
+  loadingContainer: {
+    flex: 1,
+    paddingTop: 0,
   },
-  statBadge: {},
-  statDivider: {},
   scroll: {
     flex: 1,
   },
-  activateButton: {},
-  emptyCard: {},
-  cravingButton: {},
-  quickLinks: {},
-  quickLink: {},
-  savingsRow: {},
-  savingsBadge: {},
-  savingsDivider: {},
+  heroContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    minHeight: 180,
+  },
+  cravingButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  statCard: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activateButton: {
+    alignItems: "center",
+  },
 });
