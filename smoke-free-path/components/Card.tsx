@@ -15,9 +15,15 @@ interface CardProps {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  accessibilityLabel?: string;
 }
 
-export default function Card({ children, style, onPress }: CardProps) {
+export default function Card({
+  children,
+  style,
+  onPress,
+  accessibilityLabel,
+}: CardProps) {
   const { theme } = useTheme();
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -72,6 +78,8 @@ export default function Card({ children, style, onPress }: CardProps) {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       activeOpacity={1}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
     >
       {content}
     </TouchableOpacity>
