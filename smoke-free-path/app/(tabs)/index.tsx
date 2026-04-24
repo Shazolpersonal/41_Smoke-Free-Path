@@ -272,6 +272,8 @@ export default function HomeScreen() {
                   ]}
                   onPress={handleActivatePlan}
                   activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="যাত্রা শুরু করুন, আপনার ৪১-ধাপের পরিকল্পনা সক্রিয় করুন"
                 >
                   <Typography variant="title" color="onPrimary">
                     যাত্রা শুরু করুন

@@ -380,6 +380,8 @@ export default function QuitDateScreen() {
                 ]}
                 onPress={() => setShowAndroidPicker(true)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="তারিখ পরিবর্তন করুন"
               >
                 <Typography
                   variant="body"
@@ -474,6 +476,8 @@ export default function QuitDateScreen() {
                 setSelectedDate(new Date(today));
                 setDateError("");
               }}
+              accessibilityRole="button"
+              accessibilityLabel="আজই"
             >
               <Typography
                 variant="small"
@@ -497,6 +501,8 @@ export default function QuitDateScreen() {
                 setSelectedDate(yesterday);
                 setDateError("");
               }}
+              accessibilityRole="button"
+              accessibilityLabel="গতকাল"
             >
               <Typography
                 variant="small"
