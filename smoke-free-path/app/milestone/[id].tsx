@@ -63,6 +63,8 @@ export default function MilestoneScreen() {
               styles.dismissBtn,
               { backgroundColor: theme.colors.primary },
             ]}
+            accessibilityRole="button"
+            accessibilityLabel="ফিরে যান"
           >
             <Typography variant="title" color="onPrimary">
               ফিরে যান
@@ -171,6 +173,8 @@ export default function MilestoneScreen() {
           style={[styles.dismissBtn, { backgroundColor: theme.colors.primary }]}
           onPress={() => router.back()}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="আলহামদুলিল্লাহ, ফিরে যান"
         >
           <Typography variant="title" color="onPrimary">
             আলহামদুলিল্লাহ 🤲
