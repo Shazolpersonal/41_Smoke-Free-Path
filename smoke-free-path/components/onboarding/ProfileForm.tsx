@@ -48,6 +48,8 @@ export default function ProfileForm({
         }}
         error={errors.name}
         autoCapitalize="words"
+        autoComplete="name"
+        textContentType="name"
         returnKeyType="next"
       />
 
@@ -62,7 +64,8 @@ export default function ProfileForm({
           if (errors.cigarettesPerDay) onClearError("cigarettesPerDay");
         }}
         error={errors.cigarettesPerDay}
-        keyboardType="numeric"
+        keyboardType="number-pad"
+        maxLength={3}
         returnKeyType="next"
       />
 
@@ -77,7 +80,8 @@ export default function ProfileForm({
           if (errors.smokingYears) onClearError("smokingYears");
         }}
         error={errors.smokingYears}
-        keyboardType="numeric"
+        keyboardType="number-pad"
+        maxLength={2}
         returnKeyType="next"
       />
 
@@ -93,7 +97,8 @@ export default function ProfileForm({
             onClearError("cigarettePricePerPack");
         }}
         error={errors.cigarettePricePerPack}
-        keyboardType="numeric"
+        keyboardType="number-pad"
+        maxLength={5}
         returnKeyType="done"
         onSubmitEditing={onSubmit}
       />

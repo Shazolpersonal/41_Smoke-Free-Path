@@ -1,7 +1,3 @@
-## 2024-04-19 - Back Button Accessibility Overreach
-**Learning:** Adding simple attributes like `accessibilityRole` to buttons is safe and necessary, but running an auto-formatter over untouched files creates excessive noise that obscures the PR's intent. When working in an unformatted repository, strictly format only the changed lines or avoid the auto-formatter completely.
-**Action:** When asked to make small, <50 line UX improvements, I will avoid global formatter commands (`prettier --write` or ESLint --fix) unless the project already enforces them via pre-commit hooks. I will use targeted diffs to insert accessibility props.
-
-## 2024-04-22 - Card Accessibility
-**Learning:** Reusable interactive wrapper components like `Card` built with `TouchableOpacity` need `accessibilityRole="button"` and `accessibilityLabel` propagation when they receive an `onPress` prop, to ensure screen readers don't just indiscriminately read child text.
-**Action:** When creating or modifying generic interactive wrappers, conditionally or explicitly add button roles if they map to touch actions.
+## 2024-04-26 - Mobile Form Input & Accessibility Polish
+**Learning:** Custom input wrappers (like `FormInput` in `FormElements.tsx`) in React Native do not implicitly link visual text labels to their underlying `TextInput` for screen readers (unlike HTML `label htmlFor`). Screen reader users would hear an input, but not know its purpose. Furthermore, numeric inputs often default to full keyboards or numeric keyboards with decimal keys, which can cause poor UX or data entry issues for strictly integer values (like days, years, item counts).
+**Action:** When updating React Native form wrappers, ensure an explicit `accessibilityLabel` is passed down to the internal `TextInput`. For strictly integer fields, use `keyboardType="number-pad"` instead of `"numeric"` to remove unnecessary punctuation keys on iOS and Android. Additionally, leverage `autoComplete="name"` and `textContentType="name"` for name fields to allow OS-level auto-fill.
