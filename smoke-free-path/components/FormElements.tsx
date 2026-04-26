@@ -71,6 +71,7 @@ export const FormInput = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholderTextColor={theme.colors.textDisabled}
+          accessibilityLabel={props.accessibilityLabel || label}
           {...props}
         />
       </View>
