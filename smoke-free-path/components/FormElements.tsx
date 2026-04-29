@@ -71,6 +71,7 @@ export const FormInput = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholderTextColor={theme.colors.textDisabled}
+          accessibilityLabel={props.accessibilityLabel || label}
           {...props}
         />
       </View>
@@ -113,6 +114,9 @@ export const FormSwitchRow = ({
   return (
     <Pressable
       onPress={() => onValueChange(!value)}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+      accessibilityLabel={label}
       style={[
         styles.switchRow,
         {
