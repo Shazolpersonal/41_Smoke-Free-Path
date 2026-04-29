@@ -171,6 +171,24 @@ export interface AppState {
   lastStreakDate: string | null; // ISO date 'YYYY-MM-DD', শেষ streak count-এর তারিখ, default: null
 }
 
+// ─── Backup Data ─────────────────────────────────────────────────────────────
+
+export interface BackupData {
+  userProfile: UserProfile | null;
+  planState: PlanState;
+  stepProgress: Record<number, StepProgress>;
+  milestones: Record<number, string>;
+  bookmarks: string[];
+  triggerLogs?: TriggerLog[];
+  cravingSessions?: CravingSession[];
+  slipUps?: SlipUp[];
+  exportedAt?: string | null;
+  version?: number;
+  lastOpenedAt?: string;
+  dailyStreak?: number;
+  lastStreakDate?: string | null;
+}
+
 // ─── Health Timeline ──────────────────────────────────────────────────────────
 
 export interface HealthTimelineEntry {
