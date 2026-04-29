@@ -5,3 +5,6 @@
 ## 2024-04-22 - Card Accessibility
 **Learning:** Reusable interactive wrapper components like `Card` built with `TouchableOpacity` need `accessibilityRole="button"` and `accessibilityLabel` propagation when they receive an `onPress` prop, to ensure screen readers don't just indiscriminately read child text.
 **Action:** When creating or modifying generic interactive wrappers, conditionally or explicitly add button roles if they map to touch actions.
+## 2026-04-29 - Custom Interactive Components React Native Accessibility
+**Learning:** Custom interactive components like switches built with `Pressable` or `TouchableOpacity` don't automatically announce their semantic role or state to screen readers in React Native, unlike native HTML elements. Form inputs also rely on explicit `accessibilityLabel` properties rather than nested HTML `<label>` associations.
+**Action:** Ensure all interactive wrappers manually implement `accessibilityRole`, `accessibilityState` (like `checked`), and an explicit `accessibilityLabel` to guarantee full accessibility.
