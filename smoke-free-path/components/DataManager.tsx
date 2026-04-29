@@ -5,7 +5,7 @@ import Typography from "@/components/Typography";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import type { AppState } from "@/types";
+import type { AppState, BackupData } from "@/types";
 
 function formatDate(isoString: string | null): string {
   if (!isoString) return "অজানা তারিখ";
@@ -18,8 +18,10 @@ function formatDate(isoString: string | null): string {
   });
 }
 
-function isValidBackupData(parsed: any): boolean {
+function isValidBackupData(parsed: unknown): parsed is BackupData {
   if (typeof parsed !== "object" || parsed === null) return false;
+
+  const p = parsed as Record<string, unknown>;
 
   const requiredFields = [
     "userProfile",
@@ -28,26 +30,30 @@ function isValidBackupData(parsed: any): boolean {
     "milestones",
     "bookmarks",
   ];
-  if (!requiredFields.every((field) => field in parsed)) return false;
+  if (!requiredFields.every((field) => field in p)) return false;
 
   // planState shape validation
-  if (typeof parsed.planState !== "object" || parsed.planState === null)
+  const planState = p.planState;
+  if (typeof planState !== "object" || planState === null) return false;
+  if (typeof (planState as Record<string, unknown>).isActive !== "boolean")
     return false;
-  if (typeof parsed.planState.isActive !== "boolean") return false;
 
   // stepProgress must be an object
-  if (typeof parsed.stepProgress !== "object" || parsed.stepProgress === null)
+  if (typeof p.stepProgress !== "object" || p.stepProgress === null)
     return false;
 
+  // milestones must be an object
+  if (typeof p.milestones !== "object" || p.milestones === null) return false;
+
   // bookmarks must be an array
-  if (!Array.isArray(parsed.bookmarks)) return false;
+  if (!Array.isArray(p.bookmarks)) return false;
 
   return true;
 }
 
 interface DataManagerProps {
   state: AppState;
-  onImport: (parsed: any) => void;
+  onImport: (parsed: BackupData) => void;
 }
 
 export default function DataManager({ state, onImport }: DataManagerProps) {
@@ -93,18 +99,9 @@ export default function DataManager({ state, onImport }: DataManagerProps) {
 
       const uri = result.assets[0].uri;
       const content = await FileSystem.readAsStringAsync(uri);
-      const parsed = JSON.parse(content);
+      const parsed: unknown = JSON.parse(content);
 
-      const requiredFields = [
-        "userProfile",
-        "planState",
-        "stepProgress",
-        "milestones",
-        "bookmarks",
-      ];
-      const isValid = isValidBackupData(parsed);
-
-      if (!isValid) {
+      if (!isValidBackupData(parsed)) {
         Alert.alert("ত্রুটি", "ফাইলটি সঠিক ব্যাকআপ ফাইল নয়।");
         return;
       }

@@ -16,6 +16,7 @@ import type {
   SlipUp,
   PlanState,
   StepProgress,
+  BackupData,
 } from "@/types";
 import {
   loadAppState,
@@ -68,7 +69,7 @@ export type AppAction =
     }
   | { type: "TOGGLE_BOOKMARK"; payload: string }
   | { type: "UPDATE_LAST_OPENED"; payload: string }
-  | { type: "HYDRATE"; payload: AppState }
+  | { type: "HYDRATE"; payload: BackupData }
   | {
       type: "CLEANUP_OLD_DATA";
       payload: Pick<AppState, "triggerLogs" | "cravingSessions" | "slipUps">;
@@ -76,11 +77,13 @@ export type AppAction =
 
 // ─── Migration ────────────────────────────────────────────────────────────────
 
-function migrateAppState(raw: any): AppState {
+function migrateAppState(raw: BackupData): AppState {
+  const data = raw as any; // Temporary cast for legacy fields handling
+
   // ─── dailyProgress → stepProgress migration ───────────────
   const stepProgress: Record<number, StepProgress> = {};
-  if (raw.dailyProgress && !raw.stepProgress) {
-    for (const [key, val] of Object.entries(raw.dailyProgress)) {
+  if (data.dailyProgress && !raw.stepProgress) {
+    for (const [key, val] of Object.entries(data.dailyProgress)) {
       const old = val as Record<string, unknown>;
       stepProgress[Number(key)] = {
         step: (old.day as number) ?? Number(key),
@@ -94,7 +97,7 @@ function migrateAppState(raw: any): AppState {
 
   // ─── quitDate → planActivatedAt migration ─────────────────
   let planState: PlanState = raw.planState ?? INITIAL_PLAN_STATE;
-  if (!raw.planState && raw.userProfile?.quitDate) {
+  if (!raw.planState && (raw.userProfile as any)?.quitDate) {
     const completedStepsFromOld = Object.entries(
       raw.stepProgress ?? stepProgress,
     )
@@ -102,7 +105,7 @@ function migrateAppState(raw: any): AppState {
       .map(([k]) => Number(k));
     planState = {
       isActive: true,
-      activatedAt: new Date(raw.userProfile.quitDate).toISOString(),
+      activatedAt: new Date((raw.userProfile as any).quitDate).toISOString(),
       currentStep:
         completedStepsFromOld.length > 0
           ? Math.min(Math.max(...completedStepsFromOld) + 1, 41)
@@ -110,14 +113,14 @@ function migrateAppState(raw: any): AppState {
       completedSteps: completedStepsFromOld,
       lastCompletedAt: null,
       totalResets: 0,
-      lastSlipUpAt: raw.planState?.lastSlipUpAt ?? null,
+      lastSlipUpAt: (raw.planState as any)?.lastSlipUpAt ?? null,
     };
   }
 
   // ─── Remove quitDate from userProfile ─────────────────────
   let userProfile = raw.userProfile ?? null;
   if (userProfile && "quitDate" in userProfile) {
-    const { quitDate, ...rest } = userProfile;
+    const { quitDate, ...rest } = userProfile as any;
     userProfile = rest;
   }
 
