@@ -26,6 +26,8 @@ export default function DecisionCard({ onDecision }: DecisionCardProps) {
         style={[styles.decisionBtn, { backgroundColor: theme.colors.primary }]}
         onPress={() => onDecision("continue")}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="বর্তমান ধাপ থেকে চালিয়ে যান"
       >
         <Typography
           variant="subheading"
@@ -68,6 +70,8 @@ export default function DecisionCard({ onDecision }: DecisionCardProps) {
           );
         }}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="প্ল্যান রিসেট করুন"
       >
         <Typography
           variant="subheading"
