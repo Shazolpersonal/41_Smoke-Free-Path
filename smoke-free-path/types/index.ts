@@ -29,7 +29,7 @@ export type {
 export interface UserProfile {
   id: string; // UUID
   name: string; // ব্যবহারকারীর নাম
-  cigarettesPerDay: number; // দৈনিক গড় সিগারেট সংখ্যা
+  cigarettesPerDay: number; // দৈনিক গড় সিগারেট সংখ্যা, minimum: 1
   smokingYears: number; // ধূমপানের বছর
   cigarettePricePerPack: number; // প্রতি প্যাকের মূল্য (টাকা), default: 300
   cigarettesPerPack: number; // প্যাকে সিগারেট সংখ্যা, default: 20

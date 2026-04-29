@@ -225,11 +225,10 @@ describe("1.3 Edge Case Bug Tests (will fail on unfixed code)", () => {
       lastSlipUpAt: null,
     };
 
-    const stats = computeProgressStats(profile, planState, []);
-
-    // EXPECTED TO FAIL: totalSavedCigarettes should be at least 5 (5 days * 1 minimum)
-    // But currently it's 0 because cigarettesPerDay = 0 is allowed through
-    expect(stats.totalSavedCigarettes).toBeGreaterThan(0); // This will FAIL on unfixed code
+    // EXPECTED TO PASS after fix: should throw error for invalid input
+    expect(() => computeProgressStats(profile, planState, [])).toThrow(
+      "Invalid cigarettesPerDay",
+    );
   });
 
   test("Bug 1.8: Step 41 completion sets planState.isActive to false", () => {
@@ -374,15 +373,16 @@ test("Property 1: Bug Condition - Comprehensive Audit Bugs", () => {
         fc.tuple(fc.constant(activatedAt), planStateArb(activatedAt)),
       ),
       (profile, [activatedAt, planState]) => {
-        // Test money calculation bugs
-        const stats = computeProgressStats(profile, planState, []);
-
         // Bug 1.7: cigarettesPerDay = 0 should be prevented
         if (profile.cigarettesPerDay === 0) {
-          // EXPECTED TO FAIL: totalSavedCigarettes should be > 0 even with cigarettesPerDay = 0
-          // because minimum should be enforced
-          expect(stats.totalSavedCigarettes).toBeGreaterThan(0);
+          expect(() => computeProgressStats(profile, planState, [])).toThrow(
+            "Invalid cigarettesPerDay",
+          );
+          return;
         }
+
+        // Test money calculation bugs
+        const stats = computeProgressStats(profile, planState, []);
 
         // Bug 1.2: totalSavedMoney should not have unnecessary decimal precision
         // (This is a soft check - the real bug is in the code structure)

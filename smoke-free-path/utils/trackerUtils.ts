@@ -118,7 +118,12 @@ export function computeProgressStats(
   const totalSmokeFreeDays = Math.floor(totalDiff / 86_400_000);
 
   // Guard against invalid profile values
-  const cigsPerDay = Math.max(MIN_CIGARETTES_PER_DAY, profile.cigarettesPerDay);
+  if (profile.cigarettesPerDay < MIN_CIGARETTES_PER_DAY) {
+    throw new Error(
+      `Invalid cigarettesPerDay: must be at least ${MIN_CIGARETTES_PER_DAY}`,
+    );
+  }
+  const cigsPerDay = profile.cigarettesPerDay;
   const cigsPerPack = Math.max(1, profile.cigarettesPerPack); // never 0
   const pricePerPack = Math.max(0, profile.cigarettePricePerPack);
 

@@ -17,6 +17,7 @@ import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
 import {
   DEFAULT_CIGARETTE_PRICE_PER_PACK,
+  MIN_CIGARETTES_PER_DAY,
   MAX_CIGARETTES_PER_DAY,
   MIN_SMOKING_YEARS,
   MAX_SMOKING_YEARS,
@@ -54,8 +55,8 @@ export default function ProfileSetupScreen() {
     const cigs = parseInt(form.cigarettesPerDay, 10);
     if (!form.cigarettesPerDay.trim()) {
       newErrors.cigarettesPerDay = "দৈনিক সিগারেট সংখ্যা প্রয়োজন";
-    } else if (isNaN(cigs) || cigs <= 0) {
-      newErrors.cigarettesPerDay = "সংখ্যাটি ধনাত্মক হতে হবে";
+    } else if (isNaN(cigs) || cigs < MIN_CIGARETTES_PER_DAY) {
+      newErrors.cigarettesPerDay = `দৈনিক সিগারেট সংখ্যা কমপক্ষে ${MIN_CIGARETTES_PER_DAY} হতে হবে`;
     } else if (cigs > MAX_CIGARETTES_PER_DAY) {
       newErrors.cigarettesPerDay = `দৈনিক সিগারেট সংখ্যা ${MAX_CIGARETTES_PER_DAY}-এর বেশি হতে পারে না`;
     }
