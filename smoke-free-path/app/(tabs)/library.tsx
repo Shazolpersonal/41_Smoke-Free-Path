@@ -49,7 +49,7 @@ const TOPICS: { key: LibraryTopic; label: string }[] = [
 
 type ActiveTab = LibraryTopic | "bookmarks";
 
-function AnimatedLibraryItem({
+const AnimatedLibraryItem = React.memo(function AnimatedLibraryItem({
   item,
   isBookmarked,
   onBookmark,
@@ -57,8 +57,8 @@ function AnimatedLibraryItem({
 }: {
   item: IslamicContent;
   isBookmarked: boolean;
-  onBookmark: () => void;
-  onPress: () => void;
+  onBookmark: (id: string) => void;
+  onPress: (item: IslamicContent) => void;
 }) {
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -83,12 +83,12 @@ function AnimatedLibraryItem({
       <IslamicCard
         content={item}
         isBookmarked={isBookmarked}
-        onBookmark={onBookmark}
-        onPress={onPress}
+        onBookmark={() => onBookmark(item.id)}
+        onPress={() => onPress(item)}
       />
     </Animated.View>
   );
-}
+});
 
 export default function LibraryScreen() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("tawakkul");
@@ -424,8 +424,8 @@ export default function LibraryScreen() {
           <AnimatedLibraryItem
             item={item}
             isBookmarked={bookmarks.includes(item.id)}
-            onBookmark={() => handleBookmark(item.id)}
-            onPress={() => setSelectedContent(item)}
+            onBookmark={handleBookmark}
+            onPress={setSelectedContent}
           />
         )}
       />
