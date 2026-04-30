@@ -1,0 +1,3 @@
+## 2024-04-30 - Custom Comparators in React.memo
+**Learning:** Custom `arePropsEqual` comparators in `React.memo` that explicitly ignore function props (like `onPress` or `onBookmark`) are an anti-pattern and can cause severe stale closure bugs, especially when those functions capture changing parent state. Since `ContentService` in this project returns stable object references, relying on the default shallow comparison is both safer and sufficient.
+**Action:** Always let `React.memo` use default shallow comparison unless profiling explicitly shows a need for a custom comparator, and never intentionally ignore callback props in a custom equality check without a guaranteed stable functional state update.

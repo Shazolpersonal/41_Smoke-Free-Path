@@ -41,13 +41,13 @@ export function getDefaultDuaCategory(hour: number): DuaCategory {
   return DEFAULT_CATEGORY;
 }
 
-function AnimatedDuaItem({
+const AnimatedDuaItem = React.memo(function AnimatedDuaItem({
   item,
   onPress,
   categoryLabel,
 }: {
   item: IslamicContent;
-  onPress: () => void;
+  onPress: (item: IslamicContent) => void;
   categoryLabel: string;
 }) {
   const opacity = useRef(new Animated.Value(0)).current;
@@ -72,10 +72,10 @@ function AnimatedDuaItem({
       accessible={true}
       accessibilityLabel={`${categoryLabel} — ${item.source}`}
     >
-      <IslamicCard content={item} onPress={onPress} />
+      <IslamicCard content={item} onPress={() => onPress(item)} />
     </Animated.View>
   );
-}
+});
 
 export default function DuaScreen() {
   const { theme } = useTheme();
@@ -243,7 +243,7 @@ export default function DuaScreen() {
         renderItem={({ item }) => (
           <AnimatedDuaItem
             item={item}
-            onPress={() => setSelectedDua(item)}
+            onPress={setSelectedDua}
             categoryLabel={activeCategoryLabel}
           />
         )}
