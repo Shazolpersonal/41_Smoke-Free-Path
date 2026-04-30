@@ -8,3 +8,7 @@
 ## 2026-04-29 - Custom Interactive Components React Native Accessibility
 **Learning:** Custom interactive components like switches built with `Pressable` or `TouchableOpacity` don't automatically announce their semantic role or state to screen readers in React Native, unlike native HTML elements. Form inputs also rely on explicit `accessibilityLabel` properties rather than nested HTML `<label>` associations.
 **Action:** Ensure all interactive wrappers manually implement `accessibilityRole`, `accessibilityState` (like `checked`), and an explicit `accessibilityLabel` to guarantee full accessibility.
+
+## 2024-05-18 - Missing ARIA attributes on Onboarding CTA
+**Learning:** The primary CTA (Call to Action) buttons built with React Native's `TouchableOpacity` frequently lack `accessibilityRole` and `accessibilityLabel` out-of-the-box unless specifically provided, which leaves screen readers with non-descriptive interaction targets. This is especially true on root onboarding screens like the Welcome screen.
+**Action:** Always ensure that structural CTA elements across crucial user flows, such as onboarding screens, have explicit accessibility props mapped.

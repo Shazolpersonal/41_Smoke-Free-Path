@@ -225,6 +225,8 @@ export default function WelcomeScreen() {
           ]}
           onPress={() => router.push("/(onboarding)/profile-setup")}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="শুরু করুন"
         >
           <Typography
             variant="title"
