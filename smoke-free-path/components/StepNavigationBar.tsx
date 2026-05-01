@@ -49,9 +49,14 @@ export default function StepNavigationBar({
             { backgroundColor: theme.colors.surface },
             !isStepAccessible(stepNum + 1, planState) && styles.navBtnDisabled,
           ]}
-          onPress={onNext}
-          accessibilityLabel="পরবর্তী ধাপ"
+          onPress={isStepAccessible(stepNum + 1, planState) ? onNext : undefined}
+          accessibilityLabel={
+            isStepAccessible(stepNum + 1, planState)
+              ? "পরবর্তী ধাপ"
+              : "পরবর্তী ধাপটি এখনও আনলক হয়নি"
+          }
           accessibilityRole="button"
+          accessibilityState={{ disabled: !isStepAccessible(stepNum + 1, planState) }}
         >
           <Typography
             variant="body"
