@@ -14,6 +14,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import * as Crypto from "expo-crypto";
 import { useAppContext } from "@/context/AppContext";
 import { saveOnboardingStep } from "@/services/StorageService";
 import type { UserProfile } from "@/types";
@@ -152,7 +153,7 @@ export default function QuitDateScreen() {
       const notificationsEnabled = await requestPermission();
 
       const profile: UserProfile = {
-        id: existingProfile?.id ?? Date.now().toString(),
+        id: existingProfile?.id ?? Crypto.randomUUID(),
         name: params.name ?? existingProfile?.name ?? "",
         cigarettesPerDay: parsedCigsPerDay,
         smokingYears: parsedSmokingYears,
