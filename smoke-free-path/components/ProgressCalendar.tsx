@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "../theme";
@@ -47,6 +47,16 @@ export default function ProgressCalendar({
     return map;
   }, [planState, stepProgress, currentStep]);
 
+  const handleStepPress = useCallback(
+    (step: number) => {
+      const { status } = cellStatuses[step];
+      if (status !== "future") {
+        router.push(`/tracker/${step}`);
+      }
+    },
+    [cellStatuses, router],
+  );
+
   return (
     <View
       style={[
@@ -67,9 +77,7 @@ export default function ProgressCalendar({
                 step={step}
                 status={status}
                 isCurrent={isCurrent}
-                onPress={() => {
-                  if (status !== "future") router.push(`/tracker/${step}`);
-                }}
+                onPress={handleStepPress}
               />
             );
           })}
