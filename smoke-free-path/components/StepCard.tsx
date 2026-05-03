@@ -10,11 +10,14 @@ import { useTheme } from "../theme";
 import Typography from "./Typography";
 import type { StepStatus } from "@/types";
 
+// ⚡ Bolt Optimization: onPress now receives the step number. This allows parent components
+// to pass a stable useCallback reference, preventing 41 unnecessary StepCard re-renders
+// on every parent state change (e.g., when currentStep or time changes).
 interface StepCardProps {
   step: number;
   status: StepStatus;
   isCurrent?: boolean;
-  onPress: () => void;
+  onPress: (step: number) => void;
 }
 
 export default React.memo(function StepCard({
@@ -80,7 +83,7 @@ export default React.memo(function StepCard({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => onPress(step)}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={status === "future"}
