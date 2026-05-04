@@ -10,6 +10,7 @@ import {
   AccessibilityInfo,
 } from "react-native";
 import * as Haptics from "expo-haptics";
+import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
 import { useAppContext } from "@/context/AppContext";
 import { useTheme } from "@/hooks/useTheme";
@@ -87,7 +88,7 @@ export default function TriggerLogScreen() {
       return;
     }
     const log = {
-      id: `tl_${Date.now()}`,
+      id: `tl_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
       type: selectedTrigger,
       timestamp: new Date().toISOString(),
       note: note.trim() || null,
