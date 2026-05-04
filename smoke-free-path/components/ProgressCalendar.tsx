@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "../theme";
@@ -31,6 +31,15 @@ export default function ProgressCalendar({
     }
     return result;
   }, []);
+
+  const handleStepPress = useCallback(
+    (step: number) => {
+      // The status check logic is no longer strictly necessary here if "future"
+      // is always disabled in StepCard, but we keep it just in case.
+      router.push(`/tracker/${step}`);
+    },
+    [router]
+  );
 
   const cellStatuses = useMemo(() => {
     const map: Record<
@@ -67,9 +76,7 @@ export default function ProgressCalendar({
                 step={step}
                 status={status}
                 isCurrent={isCurrent}
-                onPress={() => {
-                  if (status !== "future") router.push(`/tracker/${step}`);
-                }}
+                onPress={handleStepPress}
               />
             );
           })}

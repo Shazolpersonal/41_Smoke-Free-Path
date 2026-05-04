@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
@@ -43,11 +43,14 @@ export default function TrackerScreen() {
     return result;
   }, []);
 
-  function handleStepPress(step: number) {
-    if (isStepAccessible(step, planState)) {
-      router.push(`/tracker/${step}`);
-    }
-  }
+  const handleStepPress = useCallback(
+    (step: number) => {
+      if (isStepAccessible(step, planState)) {
+        router.push(`/tracker/${step}`);
+      }
+    },
+    [router, planState]
+  );
 
   if (!planState.isActive) {
     return (
@@ -184,7 +187,7 @@ export default function TrackerScreen() {
                     step={step}
                     status={status}
                     isCurrent={isCurrent}
-                    onPress={() => handleStepPress(step)}
+                    onPress={handleStepPress}
                   />
                 );
               })}
