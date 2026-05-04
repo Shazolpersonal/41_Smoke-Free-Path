@@ -16,6 +16,7 @@ import DateTimePicker, {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAppContext } from "@/context/AppContext";
 import { saveOnboardingStep } from "@/services/StorageService";
+import * as Crypto from "expo-crypto";
 import type { UserProfile } from "@/types";
 import {
   requestPermission,
@@ -152,7 +153,7 @@ export default function QuitDateScreen() {
       const notificationsEnabled = await requestPermission();
 
       const profile: UserProfile = {
-        id: existingProfile?.id ?? Date.now().toString(),
+        id: existingProfile?.id ?? Crypto.randomUUID(),
         name: params.name ?? existingProfile?.name ?? "",
         cigarettesPerDay: parsedCigsPerDay,
         smokingYears: parsedSmokingYears,
