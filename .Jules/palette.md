@@ -12,3 +12,7 @@
 ## 2024-05-18 - Missing ARIA attributes on Onboarding CTA
 **Learning:** The primary CTA (Call to Action) buttons built with React Native's `TouchableOpacity` frequently lack `accessibilityRole` and `accessibilityLabel` out-of-the-box unless specifically provided, which leaves screen readers with non-descriptive interaction targets. This is especially true on root onboarding screens like the Welcome screen.
 **Action:** Always ensure that structural CTA elements across crucial user flows, such as onboarding screens, have explicit accessibility props mapped.
+
+## 2024-05-02 - Disabled Button Accessibility
+**Learning:** Visually disabled buttons using opacity often lack programmatic disabled states in React Native, causing screen readers to present them as interactive. Moreover, a static label is confusing; the label should adapt to explain *why* it is disabled.
+**Action:** Always add `disabled={isDisabled}`, `accessibilityState={{ disabled: isDisabled }}`, and conditionally update the `accessibilityLabel` to provide reason/context.

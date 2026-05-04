@@ -22,6 +22,8 @@ export default function StepNavigationBar({
 }: StepNavigationBarProps) {
   const { theme } = useTheme();
 
+  const isNextAccessible = isStepAccessible(stepNum + 1, planState);
+
   return (
     <View style={styles.navRow}>
       {stepNum > 1 ? (
@@ -47,11 +49,13 @@ export default function StepNavigationBar({
           style={[
             styles.navBtn,
             { backgroundColor: theme.colors.surface },
-            !isStepAccessible(stepNum + 1, planState) && styles.navBtnDisabled,
+            !isNextAccessible && styles.navBtnDisabled,
           ]}
-          onPress={onNext}
-          accessibilityLabel="পরবর্তী ধাপ"
+          onPress={isNextAccessible ? onNext : undefined}
+          accessibilityLabel={isNextAccessible ? "পরবর্তী ধাপ" : "পরবর্তী ধাপ (লক করা আছে)"}
           accessibilityRole="button"
+          disabled={!isNextAccessible}
+          accessibilityState={{ disabled: !isNextAccessible }}
         >
           <Typography
             variant="body"
