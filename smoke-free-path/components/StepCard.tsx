@@ -14,7 +14,7 @@ interface StepCardProps {
   step: number;
   status: StepStatus;
   isCurrent?: boolean;
-  onPress: () => void;
+  onPress: (step: number) => void;
 }
 
 export default React.memo(function StepCard({
@@ -80,7 +80,7 @@ export default React.memo(function StepCard({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => onPress(step)}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={status === "future"}
