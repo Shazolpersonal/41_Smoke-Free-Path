@@ -16,3 +16,6 @@
 ## 2024-05-02 - Disabled Button Accessibility
 **Learning:** Visually disabled buttons using opacity often lack programmatic disabled states in React Native, causing screen readers to present them as interactive. Moreover, a static label is confusing; the label should adapt to explain *why* it is disabled.
 **Action:** Always add `disabled={isDisabled}`, `accessibilityState={{ disabled: isDisabled }}`, and conditionally update the `accessibilityLabel` to provide reason/context.
+## 2024-05-19 - Form Input Screen Reader Hints
+**Learning:** In React Native, custom text input wrappers (like those containing validation errors or helper text) require an explicit `accessibilityHint` on the `TextInput` element so that screen readers correctly read out error states or instructions upon input focus.
+**Action:** When reviewing custom form components, check that visual `helperText` or `error` prompts are passed down as `accessibilityHint` to the underlying native element.
