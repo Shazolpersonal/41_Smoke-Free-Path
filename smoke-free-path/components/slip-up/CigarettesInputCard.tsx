@@ -35,6 +35,8 @@ export default function CigarettesInputCard({
         placeholder="১"
         placeholderTextColor={theme.colors.textSecondary}
         maxLength={3}
+        accessibilityLabel="কতগুলো সিগারেট খেয়েছেন?"
+        accessibilityHint="এখানে সিগারেটের সংখ্যা লিখুন"
       />
       <Typography
         variant="small"
