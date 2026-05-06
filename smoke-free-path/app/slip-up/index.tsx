@@ -148,6 +148,7 @@ export default function SlipUpScreen() {
         ]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {firstDua && (
           <View style={styles.section}>

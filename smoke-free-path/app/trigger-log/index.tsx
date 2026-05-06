@@ -250,6 +250,7 @@ export default function TriggerLogScreen() {
           { padding: theme.spacing.md, paddingBottom: 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {weeklySummary && (
           <View
@@ -439,6 +440,8 @@ export default function TriggerLogScreen() {
             multiline
             numberOfLines={3}
             textAlignVertical="top"
+            accessibilityLabel="নোট (ঐচ্ছিক)"
+            accessibilityHint="কী ঘটেছিল তা সংক্ষেপে লিখুন"
           />
         </Card>
 
