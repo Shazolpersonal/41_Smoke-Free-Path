@@ -128,7 +128,7 @@ export default function CravingScreen() {
       setShowOutcomeModal(false);
 
       const session = {
-        id: `cs_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
+        id: `cs_${Crypto.randomUUID()}`,
         startTime: sessionStartTime,
         endTime: new Date().toISOString(),
         intensity,
@@ -144,7 +144,7 @@ export default function CravingScreen() {
         dispatch({
           type: "ADD_TRIGGER_LOG",
           payload: {
-            id: `tl_cr_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
+            id: `tl_cr_${Crypto.randomUUID()}`,
             type: selectedTrigger,
             timestamp: sessionStartTime,
             note: "ক্র্যাভিং সেশনের সাথে সম্পর্কিত",

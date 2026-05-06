@@ -88,7 +88,7 @@ export default function TriggerLogScreen() {
       return;
     }
     const log = {
-      id: `tl_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
+      id: `tl_${Crypto.randomUUID()}`,
       type: selectedTrigger,
       timestamp: new Date().toISOString(),
       note: note.trim() || null,
