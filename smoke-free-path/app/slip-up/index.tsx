@@ -78,7 +78,7 @@ export default function SlipUpScreen() {
       smokedCount = 100;
     }
     const slipUp = {
-      id: `su_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
+      id: `su_${Crypto.randomUUID()}`,
       reportedAt: new Date().toISOString(),
       triggerId: selectedTrigger,
       decision,
@@ -95,7 +95,7 @@ export default function SlipUpScreen() {
       dispatch({
         type: "ADD_TRIGGER_LOG",
         payload: {
-          id: `tl_su_${Date.now()}_${Crypto.randomUUID().slice(0, 8)}`,
+          id: `tl_su_${Crypto.randomUUID()}`,
           type: selectedTrigger,
           timestamp: new Date().toISOString(),
           note: "স্লিপ-আপের সাথে সম্পর্কিত",
