@@ -7,7 +7,7 @@ import StepCard from "@/components/StepCard";
 import Card from "@/components/Card";
 import ScreenHeader from "@/components/ScreenHeader";
 import Typography from "@/components/Typography";
-import { isStepAccessible, getStepStatus } from "@/utils/trackerUtils";
+import { isStepAccessible, getStepStatus, createAccessContext } from "@/utils/trackerUtils";
 import { TOTAL_STEPS } from "@/constants";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -51,6 +51,24 @@ export default function TrackerScreen() {
     },
     [router, planState]
   );
+
+  // Cache step statuses to prevent redundant Date instantiations
+  // and expensive recalculations during render for all 41 steps.
+  const cellStatuses = useMemo(() => {
+    const map: Record<
+      number,
+      { status: ReturnType<typeof getStepStatus>; isCurrent: boolean }
+    > = {};
+    const ctx = createAccessContext(planState);
+    for (let step = 1; step <= TOTAL_STEPS; step++) {
+      const status = getStepStatus(step, planState, stepProgress, ctx);
+      map[step] = {
+        status,
+        isCurrent: planState.currentStep === step && status === "incomplete",
+      };
+    }
+    return map;
+  }, [planState, stepProgress]);
 
   if (!planState.isActive) {
     return (
@@ -178,9 +196,7 @@ export default function TrackerScreen() {
               style={[styles.row, row.length < 7 && styles.rowCentered]}
             >
               {row.map((step) => {
-                const status = getStepStatus(step, planState, stepProgress);
-                const isCurrent =
-                  planState.currentStep === step && status === "incomplete";
+                const { status, isCurrent } = cellStatuses[step];
                 return (
                   <StepCard
                     key={step}

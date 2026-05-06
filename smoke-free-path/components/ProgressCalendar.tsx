@@ -2,7 +2,7 @@ import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "../theme";
-import { getStepStatus } from "@/utils/trackerUtils";
+import { getStepStatus, createAccessContext } from "@/utils/trackerUtils";
 import type { PlanState, StepProgress } from "@/types";
 import StepCard from "./StepCard";
 
@@ -41,13 +41,16 @@ export default function ProgressCalendar({
     [router]
   );
 
+  // Compute statuses for all cells in one pass using a cached
+  // AccessContext to avoid parsing Date objects 41+ times.
   const cellStatuses = useMemo(() => {
     const map: Record<
       number,
       { status: ReturnType<typeof getStepStatus>; isCurrent: boolean }
     > = {};
+    const ctx = createAccessContext(planState);
     for (let step = 1; step <= TOTAL_STEPS; step++) {
-      const status = getStepStatus(step, planState, stepProgress);
+      const status = getStepStatus(step, planState, stepProgress, ctx);
       map[step] = {
         status,
         isCurrent: currentStep === step && status === "incomplete",
