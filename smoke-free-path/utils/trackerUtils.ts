@@ -17,7 +17,42 @@ export const MILESTONE_STEPS = [1, 3, 7, 14, 21, 30, 41] as const;
 
 const MS_PER_DAY = 86_400_000;
 
-export function isStepAccessible(step: number, planState: PlanState): boolean {
+export interface AccessContext {
+  nowTime: number;
+  nowDateOnly: number;
+  todayDay: string;
+  actDateTime?: number;
+  actDateOnly?: number;
+  lastDay?: string;
+}
+
+export function createAccessContext(planState: PlanState): AccessContext {
+  const nowD = new Date();
+  const ctx: AccessContext = {
+    nowTime: nowD.getTime(),
+    nowDateOnly: Date.UTC(nowD.getFullYear(), nowD.getMonth(), nowD.getDate()),
+    todayDay: `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, "0")}-${String(nowD.getDate()).padStart(2, "0")}`,
+  };
+
+  if (planState.activatedAt) {
+    const actDate = new Date(planState.activatedAt);
+    ctx.actDateTime = actDate.getTime();
+    ctx.actDateOnly = Date.UTC(actDate.getFullYear(), actDate.getMonth(), actDate.getDate());
+  }
+
+  if (planState.lastCompletedAt) {
+    const d = new Date(planState.lastCompletedAt);
+    ctx.lastDay = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  return ctx;
+}
+
+export function isStepAccessible(
+  step: number,
+  planState: PlanState,
+  ctx?: AccessContext,
+): boolean {
   // Boundary check
   if (!Number.isInteger(step) || step < 1 || step > 41) return false;
   if (!planState.isActive) return false;
@@ -26,11 +61,12 @@ export function isStepAccessible(step: number, planState: PlanState): boolean {
   if (planState.completedSteps.includes(step)) return true;
 
   // Cannot access new steps if the start date is in the future
-  if (
-    planState.activatedAt &&
-    new Date(planState.activatedAt).getTime() > Date.now()
-  ) {
-    return false;
+  if (planState.activatedAt) {
+    const actDateTime = ctx?.actDateTime ?? new Date(planState.activatedAt).getTime();
+    const nowTime = ctx?.nowTime ?? Date.now();
+    if (actDateTime > nowTime) {
+      return false;
+    }
   }
 
   // To access a new step, the previous step must be completed
@@ -42,18 +78,18 @@ export function isStepAccessible(step: number, planState: PlanState): boolean {
   // This guards against device date manipulation and state migration issues
   // where lastCompletedAt might be null.
   if (planState.activatedAt) {
-    const actDate = new Date(planState.activatedAt);
-    const nowD = new Date();
-    const actDateOnly = Date.UTC(
-      actDate.getFullYear(),
-      actDate.getMonth(),
-      actDate.getDate(),
-    );
-    const nowDateOnly = Date.UTC(
-      nowD.getFullYear(),
-      nowD.getMonth(),
-      nowD.getDate(),
-    );
+    let actDateOnly = ctx?.actDateOnly;
+    if (actDateOnly === undefined) {
+      const actDate = new Date(planState.activatedAt);
+      actDateOnly = Date.UTC(actDate.getFullYear(), actDate.getMonth(), actDate.getDate());
+    }
+
+    let nowDateOnly = ctx?.nowDateOnly;
+    if (nowDateOnly === undefined) {
+      const nowD = new Date();
+      nowDateOnly = Date.UTC(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+    }
+
     const diffDays = Math.floor((nowDateOnly - actDateOnly) / MS_PER_DAY);
     if (step > diffDays + 1) {
       return false;
@@ -62,10 +98,18 @@ export function isStepAccessible(step: number, planState: PlanState): boolean {
 
   // 1-step-per-calendar-day rule: Prevent speedrunning
   if (planState.lastCompletedAt) {
-    const d = new Date(planState.lastCompletedAt);
-    const lastDay = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    const nowD = new Date();
-    const todayDay = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, "0")}-${String(nowD.getDate()).padStart(2, "0")}`;
+    let lastDay = ctx?.lastDay;
+    if (!lastDay) {
+      const d = new Date(planState.lastCompletedAt);
+      lastDay = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    let todayDay = ctx?.todayDay;
+    if (!todayDay) {
+      const nowD = new Date();
+      todayDay = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, "0")}-${String(nowD.getDate()).padStart(2, "0")}`;
+    }
+
     if (lastDay === todayDay) {
       return false;
     }
@@ -83,9 +127,10 @@ export function getStepStatus(
   step: number,
   planState: PlanState,
   stepProgress: Record<number, StepProgress>,
+  ctx?: AccessContext,
 ): StepStatus {
   if (stepProgress[step]?.isComplete) return "complete";
-  if (!isStepAccessible(step, planState)) return "future";
+  if (!isStepAccessible(step, planState, ctx)) return "future";
   return "incomplete";
 }
 
