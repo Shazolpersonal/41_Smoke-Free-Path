@@ -57,7 +57,7 @@ export default function Toast({
 
     const timer = setTimeout(onHide, duration);
     return () => clearTimeout(timer);
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible, duration, onHide, reduceMotion, opacity, translateY]);
 
   // Reset animation values when hidden
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function Toast({
       translateY.setValue(80);
       opacity.setValue(0);
     }
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible, opacity, translateY]);
 
   if (!visible) return null;
 
