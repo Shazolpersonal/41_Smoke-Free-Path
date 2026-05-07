@@ -42,8 +42,13 @@ export default React.memo(function IslamicCard({
   };
 
   const bookmarkScale = useRef(new Animated.Value(1)).current;
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) return;
       Animated.sequence([

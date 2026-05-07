@@ -39,9 +39,9 @@ function NavigationGuard() {
           }
         });
       }
-    } else if (!inTabs && !inOnboarding) {
-      router.replace("/(tabs)");
     }
+    // অনবোর্ডিং সম্পন্ন হলে ইউজারকে যেকোনো বৈধ রুটে থাকতে দিন
+    // (craving, tracker/[step], slip-up, trigger-log, milestone/[id], privacy-policy)
   }, [hydrated, state.userProfile?.onboardingCompleted, router, segments]);
 
   return null;

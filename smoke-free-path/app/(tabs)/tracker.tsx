@@ -147,7 +147,7 @@ export default function TrackerScreen() {
           >
             <Typography
               variant="body"
-              color="primaryDark"
+              color="onPrimary"
               style={{ fontWeight: "700", textAlign: "center" }}
             >
               🗓️ আপনার যাত্রা শুরু হবে {getDaysUntil(planState.activatedAt)} দিন

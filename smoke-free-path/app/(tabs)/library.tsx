@@ -380,46 +380,7 @@ export default function LibraryScreen() {
             </View>
           )
         }
-        ListFooterComponent={
-          selectedContent && relatedItems.length > 0 ? (
-            <View
-              style={[
-                styles.relatedSection,
-                {
-                  borderTopColor: theme.colors.border,
-                  marginTop: theme.spacing.sm,
-                  paddingTop: theme.spacing.sm,
-                  borderTopWidth: 2,
-                },
-              ]}
-            >
-              <Typography
-                variant="body"
-                style={[
-                  styles.relatedTitle,
-                  {
-                    color: theme.colors.primary,
-                    fontWeight: "700",
-                    marginBottom: theme.spacing.xs,
-                    marginTop: theme.spacing.xs,
-                  },
-                ]}
-                accessibilityRole="header"
-              >
-                সম্পর্কিত কন্টেন্ট
-              </Typography>
-              {relatedItems.map((item) => (
-                <IslamicCard
-                  key={item.id}
-                  content={item}
-                  isBookmarked={bookmarks.includes(item.id)}
-                  onBookmark={() => handleBookmark(item.id)}
-                  onPress={() => setSelectedContent(item)}
-                />
-              ))}
-            </View>
-          ) : null
-        }
+        ListFooterComponent={null}
         renderItem={({ item }) => (
           <AnimatedLibraryItem
             item={item}
@@ -533,6 +494,57 @@ export default function LibraryScreen() {
                   {bookmarks.includes(selectedContent.id) ? "🔖" : "📄"}
                 </Typography>
               </TouchableOpacity>
+
+              {/* BUG-16: Related content inside Modal instead of FlatList footer */}
+              {relatedItems.length > 0 && (
+                <View
+                  style={{
+                    marginTop: theme.spacing.xl,
+                    width: "100%",
+                    borderTopWidth: 1,
+                    borderTopColor: theme.colors.border,
+                    paddingTop: theme.spacing.lg,
+                  }}
+                >
+                  <Typography
+                    variant="subheading"
+                    style={{
+                      color: theme.colors.primary,
+                      fontWeight: "700",
+                      marginBottom: theme.spacing.md,
+                    }}
+                  >
+                    সম্পর্কিত কন্টেন্ট
+                  </Typography>
+                  {relatedItems.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={{
+                        backgroundColor: theme.colors.background,
+                        borderRadius: 12,
+                        padding: theme.spacing.md,
+                        marginBottom: theme.spacing.sm,
+                      }}
+                      onPress={() => setSelectedContent(item)}
+                      activeOpacity={0.7}
+                    >
+                      <Typography
+                        variant="body"
+                        style={{ color: theme.colors.text }}
+                        numberOfLines={2}
+                      >
+                        {item.banglaTranslation}
+                      </Typography>
+                      <Typography
+                        variant="small"
+                        style={{ color: theme.colors.textDisabled, marginTop: 4 }}
+                      >
+                        {item.source}
+                      </Typography>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </ScrollView>
           </SafeAreaView>
         )}

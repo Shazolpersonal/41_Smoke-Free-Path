@@ -29,6 +29,7 @@ import Shimmer from "@/components/Shimmer";
 import AnimatedCountUp from "@/components/AnimatedCountUp";
 import { getStepContent } from "@/services/ContentService";
 import { loadAppState } from "@/services/StorageService";
+import { isFutureDate, getTimeUntilStart, safeModulo } from "@/utils/trackerUtils";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -95,12 +96,23 @@ export default function HomeScreen() {
     : false;
   const isEmptyState = !stats || stats.totalSmokeFreeDays === 0;
 
-  // Calculate hours if activated
-  const hoursSinceActivation = planState.activatedAt
-    ? Math.floor(
-        (Date.now() - new Date(planState.activatedAt).getTime()) /
-          (1000 * 60 * 60),
-      ) % 24
+  // Check if quit date is in the future (BUG-09)
+  const isFutureQuitDate = planState.activatedAt
+    ? isFutureDate(planState.activatedAt)
+    : false;
+  const timeUntilStart = planState.activatedAt
+    ? getTimeUntilStart(planState.activatedAt)
+    : null;
+
+  // Calculate hours if activated (BUG-13: use safe modulo for non-negative hours)
+  const hoursSinceActivation = planState.activatedAt && !isFutureQuitDate
+    ? safeModulo(
+        Math.floor(
+          (Date.now() - new Date(planState.activatedAt).getTime()) /
+            (1000 * 60 * 60),
+        ),
+        24,
+      )
     : 0;
 
   if (!hydrated) {
@@ -212,6 +224,38 @@ export default function HomeScreen() {
                     প্রথম পদক্ষেপটাই সবচেয়ে সাহসী।
                   </Typography>
                 </View>
+              ) : isFutureQuitDate && timeUntilStart ? (
+                // BUG-09: Show countdown for future quit dates
+                <View style={{ alignItems: "center" }}>
+                  <Typography
+                    variant="heading"
+                    color="primaryDark"
+                    align="center"
+                    style={{ marginBottom: theme.spacing.sm }}
+                  >
+                    যাত্রা শুরু হতে বাকি 📅
+                  </Typography>
+                  <Typography
+                    variant="display"
+                    color="primaryDark"
+                    numberOfLines={1}
+                    adjustsFontSizeToFit={true}
+                    style={{
+                      fontSize: 48,
+                      fontWeight: "700",
+                      marginBottom: theme.spacing.xs,
+                    }}
+                  >
+                    {timeUntilStart.days} দিন {timeUntilStart.hours} ঘণ্টা
+                  </Typography>
+                  <Typography
+                    variant="small"
+                    color="textDisabled"
+                    style={{ fontWeight: "500" }}
+                  >
+                    যাত্রা শুরু হয়েছে
+                  </Typography>
+                </View>
               ) : (
                 <View style={{ alignItems: "center" }}>
                   <Typography
@@ -233,7 +277,7 @@ export default function HomeScreen() {
                     color="textDisabled"
                     style={{ fontWeight: "500" }}
                   >
-                    ধূমপানমুক্ত জীবনের পথে
+                    যাত্রা শুরু হয়েছে
                   </Typography>
                   {isMilestone && (
                     <Typography

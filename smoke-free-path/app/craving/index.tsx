@@ -275,7 +275,7 @@ export default function CravingScreen() {
                   variant="body"
                   style={[
                     styles.intensityText,
-                    { color: theme.colors.chipBorder },
+                    { color: theme.colors.textSecondary },
                     intensity === n && {
                       ...styles.intensityTextActive,
                       color: theme.colors.onPrimary,
@@ -342,7 +342,7 @@ export default function CravingScreen() {
                   variant="body"
                   style={[
                     styles.tabText,
-                    { color: theme.colors.chipBorder },
+                    { color: theme.colors.textSecondary },
                     activeTab === key && {
                       ...styles.tabTextActive,
                       color: theme.colors.onPrimary,

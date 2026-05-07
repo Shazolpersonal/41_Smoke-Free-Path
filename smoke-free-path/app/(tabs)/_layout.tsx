@@ -101,7 +101,17 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="library"
           options={{
-            href: null,
+            title: "লাইব্রেরি",
+            tabBarAccessibilityLabel: "লাইব্রেরি",
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? "library" : "library-outline"}
+                size={22}
+                color={
+                  focused ? theme.colors.primary : theme.colors.textDisabled
+                }
+              />
+            ),
           }}
         />
         <Tabs.Screen
