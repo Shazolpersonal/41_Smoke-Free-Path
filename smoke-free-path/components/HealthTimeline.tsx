@@ -27,6 +27,8 @@ export default function HealthTimeline({ smokeFreeDays }: HealthTimelineProps) {
           <View
             key={index}
             style={[styles.entryRow, !isAchieved && { opacity: 0.45 }]}
+            accessible={true}
+            accessibilityLabel={`${isAchieved ? "অর্জিত: " : "অর্জিত হয়নি: "}${entry.timeLabel}. ${entry.benefit}`}
           >
             {/* Vertical connecting line (not for last entry) */}
             {!isLast && (
