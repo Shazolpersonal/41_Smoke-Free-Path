@@ -6,23 +6,31 @@
 
 ## P1 — High
 - [x] BUG-04: Fix craving page chipBorder color used as text color
-- [ ] BUG-02: Library tab href:null — feature unreachable
+- [x] BUG-02: Library tab href:null — feature unreachable ✅ PR #76
 - [x] BUG-14: Privacy Policy page not using Typography component
 
 ## P2 — Medium
 - [ ] BUG-03: Dark mode primaryDark contrast issue
 - [x] BUG-06: Tracker countdown banner color clash
 - [ ] BUG-07: Dark mode primary.soft stays light
-- [ ] BUG-08: totalSmokeFreeDays misleading name/logic
-- [ ] BUG-11: Price auto-correction destroys valid values
-- [x] BUG-13: Future date shows negative hours
+- [x] BUG-08: totalSmokeFreeDays misleading name/logic ✅ PR #76
+- [x] BUG-11: Price auto-correction destroys valid values ✅ PR #76
+- [x] BUG-13: Future date shows negative hours ✅ PR #76
 
 ## P3 — Low
-- [ ] BUG-09: Future date shows 0
-- [ ] BUG-10: Reset requires full re-onboarding
+- [x] BUG-09: Future date shows 0 ✅ PR #76
+- [x] BUG-10: Reset requires full re-onboarding ✅ PR #76
 - [ ] BUG-12: Same-day next step inaccessible
 - [x] BUG-15: Bookmark animation runs on mount
-- [ ] BUG-16: Library footer in wrong place
+- [x] BUG-16: Library footer in wrong place ✅ PR #76
 
 ## ✅ Verification
 - [x] TypeScript compilation passes (`npx tsc --noEmit` — no errors)
+- [x] Property-based tests pass (8/8 tests)
+
+---
+## Summary
+
+**Total: 16 bugs**
+- ✅ Completed: 13 bugs
+- ⚠️ Remaining: 3 bugs (BUG-03, BUG-07, BUG-12)
