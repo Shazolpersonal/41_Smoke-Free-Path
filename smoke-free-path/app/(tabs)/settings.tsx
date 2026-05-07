@@ -127,7 +127,7 @@ export default function SettingsScreen() {
               style: "destructive",
               onPress: () => {
                 dispatch({ type: "RESET_PLAN" });
-                router.replace("/(tabs)");
+                router.replace("/(onboarding)/quit-date");
               },
             },
           ]),

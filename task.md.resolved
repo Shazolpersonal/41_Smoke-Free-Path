@@ -1,0 +1,28 @@
+# Bug Fix Task List
+
+## P0 — Critical
+- [x] BUG-01: Fix NavigationGuard redirecting all non-tab routes to home
+- [x] BUG-05: Fix Import button text same color as background
+
+## P1 — High
+- [x] BUG-04: Fix craving page chipBorder color used as text color
+- [ ] BUG-02: Library tab href:null — feature unreachable
+- [x] BUG-14: Privacy Policy page not using Typography component
+
+## P2 — Medium
+- [ ] BUG-03: Dark mode primaryDark contrast issue
+- [x] BUG-06: Tracker countdown banner color clash
+- [ ] BUG-07: Dark mode primary.soft stays light
+- [ ] BUG-08: totalSmokeFreeDays misleading name/logic
+- [ ] BUG-11: Price auto-correction destroys valid values
+- [x] BUG-13: Future date shows negative hours
+
+## P3 — Low
+- [ ] BUG-09: Future date shows 0
+- [ ] BUG-10: Reset requires full re-onboarding
+- [ ] BUG-12: Same-day next step inaccessible
+- [x] BUG-15: Bookmark animation runs on mount
+- [ ] BUG-16: Library footer in wrong place
+
+## ✅ Verification
+- [x] TypeScript compilation passes (`npx tsc --noEmit` — no errors)

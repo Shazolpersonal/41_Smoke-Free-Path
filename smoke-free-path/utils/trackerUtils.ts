@@ -288,3 +288,37 @@ export function checkTriggerThreshold(
   ).length;
   return count > 3;
 }
+
+// ─── Future Date Detection ────────────────────────────────────────────────────
+
+/**
+ * Returns true if the given ISO date string is in the future.
+ */
+export function isFutureDate(isoDate: string): boolean {
+  const date = new Date(isoDate);
+  return date.getTime() > Date.now();
+}
+
+/**
+ * Returns the time remaining until the given ISO date.
+ * Returns null if the date is in the past or invalid.
+ */
+export function getTimeUntilStart(isoDate: string): {
+  days: number;
+  hours: number;
+} | null {
+  const date = new Date(isoDate);
+  const diff = date.getTime() - Date.now();
+  if (diff <= 0) return null;
+  const days = Math.floor(diff / 86_400_000);
+  const hours = Math.floor((diff % 86_400_000) / (1000 * 60 * 60));
+  return { days, hours };
+}
+
+/**
+ * Safe modulo function that always returns a non-negative result.
+ * JavaScript's % can return negative for negative operands.
+ */
+export function safeModulo(n: number, m: number): number {
+  return ((n % m) + m) % m;
+}

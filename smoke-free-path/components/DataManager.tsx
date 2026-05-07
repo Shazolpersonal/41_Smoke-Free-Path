@@ -172,7 +172,7 @@ export default function DataManager({ state, onImport }: DataManagerProps) {
         >
           <Typography
             variant="body"
-            style={{ color: theme.colors.infoText, fontWeight: "700" }}
+            style={{ color: theme.colors.onPrimary, fontWeight: "700" }}
           >
             📥 ইম্পোর্ট
           </Typography>

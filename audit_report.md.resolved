@@ -1,0 +1,263 @@
+# 🔍 প্রোজেক্ট বাগ অডিট রিপোর্ট — "ধোঁয়া-মুক্ত পথ" (41 Smoke-Free Path)
+
+> **তারিখ:** ৬ মে, ২০২৬  
+> **অডিটর:** Antigravity AI  
+> **প্রোজেক্ট:** `smoke-free-path` (Expo React Native)
+
+---
+
+## ক্যাটাগরি ১: 🚨 নেভিগেশন / বাটন কাজ করছে না (Critical)
+
+### BUG-01: `NavigationGuard` অনবোর্ডিং-পরবর্তী সকল নন-ট্যাব রুটকে হোমে রিডাইরেক্ট করে
+
+> [!CAUTION]
+> **এটিই মূল সমস্যা যার কারণে বাটন ক্লিক করলে হোম পেইজ লোড হয়।**
+
+**ফাইল:** [_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/_layout.tsx#L42-L44)
+
+```typescript
+// Line 42-44
+} else if (!inTabs && !inOnboarding) {
+  router.replace("/(tabs)");
+}
+```
+
+**সমস্যা:** যখন ইউজার `/craving`, `/slip-up`, `/trigger-log`, `/milestone/[id]`, `/tracker/[step]`, বা `/privacy-policy` রুটে যায়, তখন `segments[0]` এই রুটের নাম হয় (যেমন `"craving"`, `"slip-up"`)। এটি `"(tabs)"` বা `"(onboarding)"` নয়, তাই **guard তাৎক্ষণিকভাবে `/(tabs)` (হোম)-এ রিডাইরেক্ট করে**।
+
+**প্রভাবিত বাটনসমূহ:**
+| বাটন | ফাইল | লাইন |
+|---|---|---|
+| "এখন কি কষ্ট লাগছে?" | `index.tsx` | L88 `router.push("/craving")` |
+| FloatingCravingButton (🔴 FAB) | `FloatingCravingButton.tsx` | L69 `router.push("/craving")` |
+| ট্র্যাকার স্টেপ প্রেস | `tracker.tsx` | L49 `router.push(/tracker/${step})` |
+| "📝 ট্রিগার লগ করুন" | `progress.tsx` | L384 `router.push("/trigger-log")` |
+| "স্লিপ-আপ রিপোর্ট করুন" | `progress.tsx` | L411 `router.push("/slip-up")` |
+| "গোপনীয়তা নীতি" | `settings.tsx` | L313 `router.push("/privacy-policy")` |
+| মাইলস্টোন ডিটেক্টর | `MilestoneDetector.tsx` | L49 `router.push(/milestone/${milestone})` |
+
+**সমাধান:**
+```diff
+- } else if (!inTabs && !inOnboarding) {
+-   router.replace("/(tabs)");
+- }
++ } else {
++   // অনবোর্ডিং সম্পন্ন হলে অন্য রুটে থাকতে দিন (craving, tracker/[step], etc.)
++   // শুধু সম্পূর্ণ অপরিচিত রুটে থাকলে হোমে পাঠান — বর্তমানে কোনো অপরিচিত রুট নেই
++ }
+```
+
+---
+
+### BUG-02: `library` ট্যাব `href: null` — অ্যাক্সেসযোগ্য নয়
+
+**ফাইল:** [tabs/_layout.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/_layout.tsx#L101-L106)
+
+```typescript
+<Tabs.Screen name="library" options={{ href: null }} />
+```
+
+**সমস্যা:** `library.tsx` একটি সম্পূর্ণ "ইসলামিক লাইব্রেরি" পেজ (৫৮০ লাইন কোড সহ), কিন্তু `href: null` দেওয়ায় ট্যাব বারে দেখায় না এবং কোনো বাটন এটিতে নেভিগেট করে না। পুরো ফিচারটি unreachable।
+
+**সমাধান:** ট্যাব বারে যোগ করুন অথবা অন্য পেজ থেকে নেভিগেশন লিংক দিন।
+
+---
+
+## ক্যাটাগরি ২: 🎨 কালার কম্বিনেশন ও টেক্সট ভিজিবিলিটি সমস্যা
+
+### BUG-03: ডার্ক মোডে `primaryDark` কালার — সবুজ-অন-কালো কম কন্ট্রাস্ট
+
+**ফাইল:** [theme.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/theme.tsx#L363-L364)
+
+```typescript
+primary: isDark ? rawColors.primary.dark : rawColors.primary.base,
+// dark mode primary = "#4ADE80" (light green)
+// dark mode background = "#0D0D0F" (near black)
+```
+
+**সমস্যা:** `#4ADE80` (হালকা সবুজ) ডার্ক ব্যাকগ্রাউন্ডে ভালো কাজ করলেও, `primaryDark` (`#4ADE80`) **লাইট মোডেও** একই থাকে। Hero সেকশনে `color="primaryDark"` ব্যবহৃত হলে হালকা ব্যাকগ্রাউন্ডে (`#DCFCE7`) হালকা সবুজ টেক্সট পড়া কঠিন।
+
+**প্রভাবিত UI:**
+- হোম পেজ Hero — `"আজ থেকেই শুরু হলো তোমার যাত্রা!"` (L201, `color="primaryDark"`)
+- হোম পেজ দিন কাউন্টার (L219, `color="primaryDark"`)
+
+### BUG-04: ক্র্যাভিং ইন্টেনসিটি বাটনে `chipBorder` কালার টেক্সটে ব্যবহৃত
+
+**ফাইল:** [craving/index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/craving/index.tsx#L278-L279)
+
+```typescript
+{ color: theme.colors.chipBorder },  // inactive text
+```
+
+**সমস্যা:** `chipBorder` = `#E5E7EB` (লাইট মোডে হালকা ধূসর বর্ডার কালার)। এটি টেক্সট কালার হিসেবে ব্যবহার করলে সাদা/হালকা ব্যাকগ্রাউন্ডে **টেক্সট প্রায় অদৃশ্য** হয়ে যায়। একই সমস্যা strategy ট্যাব টেক্সটেও (L346)।
+
+**সমাধান:** `theme.colors.textSecondary` বা `theme.colors.text` ব্যবহার করুন।
+
+### BUG-05: ইম্পোর্ট বাটনে `info` কালার ব্যাকগ্রাউন্ড + `infoText` টেক্সট — কম কন্ট্রাস্ট
+
+**ফাইল:** [DataManager.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/DataManager.tsx#L159-L176)
+
+```typescript
+backgroundColor: theme.colors.info,      // "#2563EB" (blue)
+color: theme.colors.infoText,             // "#2563EB" (same blue!)
+```
+
+**সমস্যা:** ব্যাকগ্রাউন্ড এবং টেক্সট **একই কালার** (`#2563EB`)। "📥 ইম্পোর্ট" লেখাটি সম্পূর্ণ অদৃশ্য।
+
+**সমাধান:** টেক্সট কালার `theme.colors.onPrimary` (`#FFFFFF`) ব্যবহার করুন।
+
+### BUG-06: ট্র্যাকার কাউন্টডাউন ব্যানারে কন্ট্রাস্ট সমস্যা
+
+**ফাইল:** [tracker.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/tracker.tsx#L138-L155)
+
+```typescript
+backgroundColor: theme.colors.info,  // "#2563EB" (গাঢ় নীল)
+color="primaryDark"                   // "#4ADE80" (হালকা সবুজ)
+```
+
+**সমস্যা:** গাঢ় নীল ব্যাকগ্রাউন্ডে হালকা সবুজ টেক্সট — দৃষ্টিভঙ্গি অস্বস্তিকর এবং অ্যাক্সেসিবিলিটি মান পূরণ করে না।
+
+### BUG-07: `primary.soft` (`#DCFCE7`) ডার্ক মোডে ব্যবহৃত হচ্ছে
+
+**ফাইল:** [theme.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/theme.tsx#L327-L330)
+
+```typescript
+primary: {
+  base: rawColors.primary.base,    // সবসময় "#16A34A"
+  soft: rawColors.primary.soft,    // সবসময় "#DCFCE7" (very light green)
+  dark: rawColors.primary.dark,    // সবসময় "#4ADE80"
+  muted: rawColors.primary.muted,  // সবসময় "#BBF7D0"
+},
+```
+
+**সমস্যা:** `tokens.primary` মোড-সেনসিটিভ নয়। ডার্ক মোডেও `soft` = `#DCFCE7` (খুব হালকা সবুজ)। হোম পেজের Hero `LinearGradient` এই কালার ব্যবহার করে — ডার্ক মোডে **উজ্জ্বল সাদাটে ব্লক** দেখায়।
+
+---
+
+## ক্যাটাগরি ৩: 🧮 লজিকাল সমস্যা
+
+### BUG-08: `computeProgressStats` — `totalSmokeFreeDays` আসলে "ধূমপান-মুক্ত দিন" নয়
+
+**ফাইল:** [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts#L162-L163)
+
+```typescript
+const totalDiff = Math.max(0, Date.now() - new Date(activatedAt).getTime());
+const totalSmokeFreeDays = Math.floor(totalDiff / 86_400_000);
+```
+
+**সমস্যা:** `totalSmokeFreeDays` নামটি বিভ্রান্তিকর — এটি `activatedAt` থেকে **মোট দিন** গণনা করে, স্লিপ-আপের দিনগুলো বাদ দেয় না। কিন্তু হোম পেজে এটি "ধূমপানমুক্ত জীবনের পথে" লেবেলের সাথে দেখানো হয়। যদি ইউজার ৫ বার স্লিপ করে থাকে, তবুও "২০ দিন ধূমপানমুক্ত" দেখায়।
+
+### BUG-09: ফিউচার কুইট ডেটে `smokeFreeDays` নেগেটিভ হওয়া উচিত কিন্তু ০ দেখায়
+
+**ফাইল:** [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts#L155-L159)
+
+```typescript
+const streakDiff = Math.max(0, Date.now() - new Date(streakBaseDate).getTime());
+const smokeFreeDays = Math.floor(streakDiff / 86_400_000);
+```
+
+**সমস্যা:** ফিউচার ডেটে `activatedAt` ভবিষ্যতে থাকলে `Math.max(0, ...)` সব কিছু ০ করে দেয়। তবে Progress পেজে `ProgressStats` কম্পোনেন্ট `0` দিন দেখায় এমনকি প্ল্যান ভবিষ্যতে শুরু হলেও — ইউজার বুঝতে পারে না কেন সব ০।
+
+### BUG-10: `ACTIVATE_PLAN` এবং `ACTIVATE_PLAN_WITH_DATE` — ইডেম্পটেন্সি বাগ
+
+**ফাইল:** [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L276-L299)
+
+```typescript
+case "ACTIVATE_PLAN": {
+  if (state.planState.isActive) return state; // idempotent
+  ...
+}
+case "ACTIVATE_PLAN_WITH_DATE": {
+  if (state.planState.isActive) return state; // idempotent
+  ...
+}
+```
+
+**সমস্যা:** `RESET_PLAN` এর পর `isActive = false` হয়, কিন্তু ট্র্যাকার পেজের `handleActivatePlan` (L26-33) চেক করে `if (userProfile && planState.activatedAt)` — রিসেটের পর `activatedAt = null` তাই এটি `profile-setup` এ পাঠায়, পুরো অনবোর্ডিং আবার করতে হয়।
+
+### BUG-11: `cigarettePricePerPack` অটো-কারেকশন লুপ
+
+**ফাইল:** [AppContext.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L127-L137) এবং [L456-L466](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/context/AppContext.tsx#L456-L466)
+
+**সমস্যা:** দুটি জায়গায় price correction আছে:
+1. `migrateAppState`: `<= 50` হলে `price * packSize` করে
+2. `useEffect`: `=== 15` হলে `300` সেট করে
+
+যদি ইউজার সত্যিই ১৫ টাকার প্যাক (বিড়ি) ব্যবহার করে, অ্যাপ জোর করে ৩০০ করে দেবে। আবার migration-এ ৫০ এর নিচে যেকোনো মূল্য multiply হয়ে যায় — যেমন ৪০ টাকা → ৪০×২০ = ৮০০ টাকা।
+
+### BUG-12: `isStepAccessible` — একই দিনে একাধিক স্টেপ কমপ্লিট করা যায় না (শুধু `lastCompletedAt` চেক)
+
+**ফাইল:** [trackerUtils.ts](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/utils/trackerUtils.ts#L100-L116)
+
+**সমস্যা:** `lastCompletedAt` **যেকোনো** স্টেপ কমপ্লিটের সময় আপডেট হয়। তাই যদি ইউজার ধাপ ১ কমপ্লিট করে, সেইদিন ধাপ ২ আর অ্যাক্সেস করতে পারবে না, এমনকি ধাপ ২ আগে থেকেই অ্যাক্সেসযোগ্য থাকলেও। **কিন্তু**, প্রথম দিন অনবোর্ডিং-এ অ্যাক্টিভেট করলে `lastCompletedAt = null` থাকে, তাই ধাপ ১ অ্যাক্সেসযোগ্য। সমস্যাটি হলো — ধাপ ১ কমপ্লিট করার পর **একই দিনে** ধাপ ২ দেখারও সুযোগ নেই, যা ইউজারকে বিভ্রান্ত করে।
+
+### BUG-13: `hoursSinceActivation` শুধু `% 24` দেখায়
+
+**ফাইল:** [index.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/index.tsx#L99-L104)
+
+```typescript
+const hoursSinceActivation = planState.activatedAt
+  ? Math.floor(
+      (Date.now() - new Date(planState.activatedAt).getTime()) /
+        (1000 * 60 * 60),
+    ) % 24
+  : 0;
+```
+
+**সমস্যা:** এটি ঠিক আছে partial hours দেখাতে, কিন্তু ফিউচার কুইট ডেটে **নেগেটিভ** হতে পারে। `% 24` অপারেটর নেগেটিভ সংখ্যায় নেগেটিভ রেজাল্ট দেয়। যেমন `-49 % 24 = -1`। ইউজার দেখবে: "0 দিন -1 ঘণ্টা"।
+
+---
+
+## ক্যাটাগরি ৪: ⚠️ অন্যান্য গুরুত্বপূর্ণ সমস্যা
+
+### BUG-14: Privacy Policy পেজে `Typography` কম্পোনেন্ট ব্যবহৃত হয়নি
+
+**ফাইল:** [privacy-policy.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/privacy-policy.tsx)
+
+**সমস্যা:** এই পেজে `<Text>` সরাসরি ব্যবহৃত, `Typography` নয়। তাই Bengali ফন্ট (`HindSiliguri`) লোড হবে না — সিস্টেম ডিফল্ট ফন্ট দেখাবে, বাংলা টেক্সট ভাঙা দেখাতে পারে।
+
+### BUG-15: `IslamicCard` বুকমার্ক অ্যানিমেশন মাউন্টে চলে
+
+**ফাইল:** [IslamicCard.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/components/IslamicCard.tsx#L46-L64)
+
+```typescript
+useEffect(() => {
+  // bounce animation
+}, [isBookmarked]);  // runs on mount too!
+```
+
+**সমস্যা:** `useEffect` মাউন্টেও চলে, তাই প্রতিটি `IslamicCard` প্রথমবার রেন্ডার হলেই বুকমার্ক bounce করে — ইউজার কিছু না করলেও।
+
+### BUG-16: `library.tsx` — `ListFooterComponent` লজিক ভুল
+
+**ফাইল:** [library.tsx](file:///home/shazol/antigravaty%20plus%20kiro/41%20Smoke-free-path/smoke-free-path/app/(tabs)/library.tsx#L383-L422)
+
+```typescript
+ListFooterComponent={
+  selectedContent && relatedItems.length > 0 ? ( ... ) : null
+}
+```
+
+**সমস্যা:** `selectedContent` সেট হলে Modal ওপেন হয়। তখন FlatList এর footer-এ "সম্পর্কিত কন্টেন্ট" দেখায় — কিন্তু Modal এর পেছনে মূল লিস্টে এটি দেখায়, Modal-এর ভেতরে নয়। ইউজার এটি দেখতে পায় না।
+
+---
+
+## সারসংক্ষেপ — অগ্রাধিকার অনুযায়ী ফিক্স করুন
+
+| অগ্রাধিকার | বাগ ID | সমস্যা | প্রভাব |
+|---|---|---|---|
+| 🔴 P0 | BUG-01 | NavigationGuard সব মডাল/সাব-রুটকে হোমে রিডাইরেক্ট করে | **সকল ফাংশনাল বাটন অকেজো** |
+| 🔴 P0 | BUG-05 | ইম্পোর্ট বাটনে টেক্সট ও ব্যাকগ্রাউন্ড একই কালার | **বাটন অদৃশ্য** |
+| 🟠 P1 | BUG-04 | ক্র্যাভিং পেজে `chipBorder` কালার টেক্সটে — প্রায় অদৃশ্য | টেক্সট পড়া যায় না |
+| 🟠 P1 | BUG-02 | Library ট্যাব `href: null` — ফিচার unreachable | পুরো ফিচার অ্যাক্সেসযোগ্য নয় |
+| 🟠 P1 | BUG-14 | Privacy Policy-তে Typography নেই — ফন্ট ভাঙা | UI ভাঙা দেখায় |
+| 🟡 P2 | BUG-03 | ডার্ক মোডে primaryDark কন্ট্রাস্ট সমস্যা | পাঠযোগ্যতা কম |
+| 🟡 P2 | BUG-06 | ট্র্যাকার ব্যানারে নীল-সবুজ কালার ক্ল্যাশ | দৃষ্টি অস্বস্তিকর |
+| 🟡 P2 | BUG-07 | ডার্ক মোডে `primary.soft` হালকা থেকে যায় | Hero ব্লক ভুল দেখায় |
+| 🟡 P2 | BUG-08 | `totalSmokeFreeDays` নাম বিভ্রান্তিকর | ভুল তথ্য দেখায় |
+| 🟡 P2 | BUG-11 | Price auto-correction বৈধ মান নষ্ট করে | ভুল হিসাব |
+| 🟡 P2 | BUG-13 | ফিউচার ডেটে নেগেটিভ ঘণ্টা দেখায় | UI ভুল |
+| ⚪ P3 | BUG-09 | ফিউচার ডেটে ০ দেখায় | বিভ্রান্তিকর |
+| ⚪ P3 | BUG-10 | রিসেটের পর পুনরায় অনবোর্ডিং প্রয়োজন | UX সমস্যা |
+| ⚪ P3 | BUG-12 | একই দিনে পরবর্তী স্টেপ দেখা যায় না | বিভ্রান্তিকর |
+| ⚪ P3 | BUG-15 | বুকমার্ক অ্যানিমেশন মাউন্টে চলে | ছোট UI glitch |
+| ⚪ P3 | BUG-16 | Library footer ভুল জায়গায় | কোনো প্রভাব নেই |

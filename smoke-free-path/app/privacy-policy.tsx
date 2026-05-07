@@ -2,13 +2,13 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
+import Typography from "@/components/Typography";
 
 const SECTIONS = [
   {
@@ -58,18 +58,19 @@ export default function PrivacyPolicyScreen() {
           accessibilityRole="button"
           accessibilityLabel="ফিরে যান"
         >
-          <Text
+          <Typography
+            variant="body"
             style={[
               styles.backText,
               { color: theme.colors.onPrimary, opacity: 0.85 },
             ]}
           >
             ← ফিরে যান
-          </Text>
+          </Typography>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.colors.onPrimary }]}>
+        <Typography variant="title" style={[styles.headerTitle, { color: theme.colors.onPrimary }]}>
           গোপনীয়তা নীতি
-        </Text>
+        </Typography>
       </View>
 
       <ScrollView
@@ -77,27 +78,28 @@ export default function PrivacyPolicyScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.intro, { color: theme.colors.textSecondary }]}>
+        <Typography variant="small" style={[styles.intro, { color: theme.colors.textSecondary }]}>
           সর্বশেষ আপডেট: এপ্রিল ২০২৬
-        </Text>
-        <Text style={[styles.introText, { color: theme.colors.text }]}>
+        </Typography>
+        <Typography variant="body" style={[styles.introText, { color: theme.colors.text }]}>
           "ধোঁয়া-মুক্ত পথ" অ্যাপ আপনার গোপনীয়তাকে সর্বোচ্চ গুরুত্ব দেয়। এই
           নীতিটি ব্যাখ্যা করে যে আমরা কীভাবে আপনার তথ্য পরিচালনা করি।
-        </Text>
+        </Typography>
 
         {SECTIONS.map((section, idx) => (
           <View
             key={idx}
             style={[styles.section, { backgroundColor: theme.colors.surface }]}
           >
-            <Text
+            <Typography
+              variant="subheading"
               style={[styles.sectionTitle, { color: theme.colors.primary }]}
             >
               {section.title}
-            </Text>
-            <Text style={[styles.sectionContent, { color: theme.colors.text }]}>
+            </Typography>
+            <Typography variant="body" style={[styles.sectionContent, { color: theme.colors.text }]}>
               {section.content}
-            </Text>
+            </Typography>
           </View>
         ))}
       </ScrollView>

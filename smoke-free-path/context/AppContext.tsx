@@ -124,17 +124,11 @@ function migrateAppState(raw: BackupData): AppState {
     userProfile = rest;
   }
 
-  // ─── Fix old incorrect cigarettePricePerPack default ──────
-  // Migration: If the price is unrealistically low (<= 50), it's likely a single cigarette price.
-  // Convert it to a pack price based on cigarettesPerPack.
-  if (userProfile && userProfile.cigarettePricePerPack <= 50) {
-    const packSize =
-      userProfile.cigarettesPerPack > 0 ? userProfile.cigarettesPerPack : 20;
-    userProfile = {
-      ...userProfile,
-      cigarettePricePerPack: userProfile.cigarettePricePerPack * packSize,
-    };
-  }
+  // ─── cigarettePricePerPack validation ──────
+  // BUG-11 FIX: Removed auto-correction logic
+  // Users may genuinely use low-cost products like bidi (10-20 BDT per pack)
+  // Preserve user input exactly as provided
+  // Migration now only validates that the price is a positive number
 
   const rawCompletedSteps = Array.isArray(planState.completedSteps)
     ? planState.completedSteps
@@ -452,18 +446,9 @@ export function AppProvider({ children }: AppProviderProps) {
       });
   }, []);
 
-  // ─── Fix old incorrect cigarettePricePerPack default ──────
-  useEffect(() => {
-    if (state.userProfile && state.userProfile.cigarettePricePerPack === 15) {
-      console.log(
-        "🔄 Fixing incorrect cigarettePricePerPack default from 15 to 300",
-      );
-      dispatch({
-        type: "SET_USER_PROFILE",
-        payload: { ...state.userProfile, cigarettePricePerPack: 300 },
-      });
-    }
-  }, [state.userProfile?.cigarettePricePerPack]);
+  // BUG-11 FIX: Removed auto-correction useEffect
+  // Users may genuinely use low-cost products like bidi (10-20 BDT per pack)
+  // The onboarding flow now collects the correct price from the user
 
   // Persist state with debounce (1500ms) to avoid excessive AsyncStorage writes
   const saveFailureCountRef = useRef(0);
