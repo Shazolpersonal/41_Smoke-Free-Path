@@ -306,13 +306,15 @@ export function isFutureDate(isoDate: string): boolean {
 export function getTimeUntilStart(isoDate: string): {
   days: number;
   hours: number;
+  minutes: number;
 } | null {
   const date = new Date(isoDate);
   const diff = date.getTime() - Date.now();
   if (diff <= 0) return null;
   const days = Math.floor(diff / 86_400_000);
   const hours = Math.floor((diff % 86_400_000) / (1000 * 60 * 60));
-  return { days, hours };
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  return { days, hours, minutes };
 }
 
 /**

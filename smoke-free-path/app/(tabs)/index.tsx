@@ -206,25 +206,7 @@ export default function HomeScreen() {
                 },
               ]}
             >
-              {isEmptyState ? (
-                <View style={{ alignItems: "center" }}>
-                  <Typography
-                    variant="heading"
-                    color="primaryDark"
-                    align="center"
-                    style={{ marginBottom: theme.spacing.sm }}
-                  >
-                    আজ থেকেই শুরু হলো তোমার যাত্রা! 🌱
-                  </Typography>
-                  <Typography
-                    variant="subheading"
-                    color="textSecondary"
-                    align="center"
-                  >
-                    প্রথম পদক্ষেপটাই সবচেয়ে সাহসী।
-                  </Typography>
-                </View>
-              ) : isFutureQuitDate && timeUntilStart ? (
+              {isFutureQuitDate && timeUntilStart ? (
                 // BUG-09: Show countdown for future quit dates
                 <View style={{ alignItems: "center" }}>
                   <Typography
@@ -246,14 +228,33 @@ export default function HomeScreen() {
                       marginBottom: theme.spacing.xs,
                     }}
                   >
-                    {timeUntilStart.days} দিন {timeUntilStart.hours} ঘণ্টা
+                    {timeUntilStart.days}দিন {timeUntilStart.hours}ঘণ্টা{" "}
+                    {timeUntilStart.minutes}মি.
                   </Typography>
                   <Typography
                     variant="small"
                     color="textDisabled"
                     style={{ fontWeight: "500" }}
                   >
-                    যাত্রা শুরু হয়েছে
+                    ধূমপান-মুক্ত জীবনের প্রস্তুতি নিন
+                  </Typography>
+                </View>
+              ) : isEmptyState ? (
+                <View style={{ alignItems: "center" }}>
+                  <Typography
+                    variant="heading"
+                    color="primaryDark"
+                    align="center"
+                    style={{ marginBottom: theme.spacing.sm }}
+                  >
+                    আজ থেকেই শুরু হলো তোমার যাত্রা! 🌱
+                  </Typography>
+                  <Typography
+                    variant="subheading"
+                    color="textSecondary"
+                    align="center"
+                  >
+                    প্রথম পদক্ষেপটাই সবচেয়ে সাহসী।
                   </Typography>
                 </View>
               ) : (
@@ -375,7 +376,7 @@ export default function HomeScreen() {
             )}
 
             {/* ZONE 3 — PROGRESS SNAPSHOT */}
-            {planState.isActive && (
+            {planState.isActive && !isFutureQuitDate && (
               <Animated.View entering={FadeInUp.delay(200).duration(300)}>
                 <View style={styles.statsContainer}>
                   <View
