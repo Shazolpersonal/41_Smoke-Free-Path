@@ -1,0 +1,3 @@
+## 2026-05-07 - Added Accessibility Label to HealthTimeline
+**Learning:** In React Native timelines that use visual cues (like faded opacity and colored dots) to indicate state, screen readers will skip the visual cues entirely. We must explicitly construct an `accessibilityLabel` on the row wrapper that translates the visual state (e.g., 'Achieved: [Time] - [Benefit]') so users relying on assistive technology have context.
+**Action:** Always wrap status-indicating list items with `accessible={true}` and compute a descriptive, localized `accessibilityLabel` that combines the status condition with the text content.
