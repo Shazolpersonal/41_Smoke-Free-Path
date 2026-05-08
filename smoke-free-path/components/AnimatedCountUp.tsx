@@ -69,7 +69,7 @@ export default function AnimatedCountUp({
   const variantStyle = theme.typography[
     variant as keyof typeof theme.typography
   ] as any;
-  const colorStyle = theme.colors[color as keyof typeof theme.colors];
+  const colorStyle = (typeof theme.colors[color as keyof typeof theme.colors] === "string" ? theme.colors[color as keyof typeof theme.colors] : theme.colors.text) as string;
 
   const fw = variantStyle?.fontWeight;
   const fontFamilyValue =

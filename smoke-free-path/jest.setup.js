@@ -22,3 +22,16 @@ jest.mock("react-native-worklets", () => {
     createSerializable: jest.fn((val) => val),
   };
 });
+
+jest.mock("expo-secure-store", () => ({
+  getItemAsync: jest.fn(key => Promise.resolve(global.secureStore ? global.secureStore[key] : null)),
+  setItemAsync: jest.fn((key, value) => {
+    if (!global.secureStore) global.secureStore = {};
+    global.secureStore[key] = value;
+    return Promise.resolve();
+  }),
+  deleteItemAsync: jest.fn(key => {
+    if (global.secureStore) delete global.secureStore[key];
+    return Promise.resolve();
+  }),
+}));
