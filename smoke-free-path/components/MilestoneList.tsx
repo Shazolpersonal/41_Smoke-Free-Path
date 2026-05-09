@@ -1,78 +1,65 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useTheme } from "../theme";
+import Typography from "./Typography";
+import MilestoneStarburst from "./illustrations/MilestoneStarburst";
 import { getMilestoneContent } from "@/services/ContentService";
-import { MILESTONE_BADGES } from "@/constants";
 
 interface MilestoneListProps {
   milestones: Record<number, string>;
 }
 
+const MILESTONE_DAYS = [1, 3, 7, 14, 21, 30, 41];
+
 export default function MilestoneList({ milestones }: MilestoneListProps) {
   const { theme } = useTheme();
 
-  const achievedMilestones = Object.keys(milestones)
-    .map(Number)
-    .filter((steps) => Boolean(milestones[steps]))
-    .map((steps) => ({
-      steps,
-      content: getMilestoneContent(steps),
-    }));
-
-  if (achievedMilestones.length === 0) return null;
-
   return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: theme.colors.surface, ...theme.shadows.card },
-      ]}
-    >
-      {achievedMilestones.map(({ steps, content }) => (
-        <View key={steps} style={styles.row}>
-          <Text style={styles.emoji}>{MILESTONE_BADGES[steps] ?? "🏆"}</Text>
-          <View style={styles.info}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>
-              {content?.titleBangla ?? `${steps} ধাপ`}
-            </Text>
-            {content?.healthBenefit ? (
-              <Text
-                style={[styles.benefit, { color: theme.colors.textSecondary }]}
-              >
-                {content.healthBenefit}
-              </Text>
-            ) : null}
+    <View style={styles.container}>
+      {MILESTONE_DAYS.map((steps) => {
+        const isAchieved = Boolean(milestones[steps]);
+        const content = getMilestoneContent(steps);
+        const starColor = isAchieved ? theme.colors.gold.primary : theme.tokens.background.elevated;
+        const textColor = isAchieved ? theme.colors.text : theme.colors.textMuted;
+
+        return (
+          <View key={steps} style={[styles.row, !isAchieved && { opacity: 0.7 }]}>
+            <View style={styles.iconContainer}>
+              <MilestoneStarburst size={32} color={starColor} hasGlow={isAchieved} />
+            </View>
+            <View style={styles.info}>
+              <Typography variant="bodyLarge" style={{ color: textColor, fontWeight: "700", marginBottom: 2 }}>
+                {content?.titleBangla ?? `${steps} ধাপ`}
+              </Typography>
+              {content?.healthBenefit ? (
+                <Typography variant="caption" style={{ color: isAchieved ? theme.colors.textSecondary : theme.colors.textDisabled }}>
+                  {content.healthBenefit}
+                </Typography>
+              ) : null}
+            </View>
           </View>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 12,
-    padding: 14,
+  container: {
+    paddingVertical: 8,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  emoji: {
-    fontSize: 24,
-    marginRight: 12,
+  iconContainer: {
+    marginRight: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 40,
   },
   info: {
     flex: 1,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: "700",
-    marginBottom: 2,
-  },
-  benefit: {
-    fontSize: 12,
-    lineHeight: 17,
   },
 });
