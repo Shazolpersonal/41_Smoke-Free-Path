@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback, useRef, useEffect } from "react";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence, withDelay } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -7,7 +8,6 @@ import {
   StyleSheet,
   Alert,
   AccessibilityInfo,
-  Animated,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -54,9 +54,21 @@ export default function StepPlanScreen() {
     }
   }, [stepNum, planState, router]);
 
-  const checkmarkScale = useRef(new Animated.Value(0)).current;
-  const checkmarkOpacity = useRef(new Animated.Value(0)).current;
+  const checkmarkScale = useSharedValue(0);
+  const checkmarkOpacity = useSharedValue(0);
   const isCompleting = useRef(false);
+
+  const checkmarkStyle = useAnimatedStyle(() => {
+    return {
+      opacity: checkmarkOpacity.value,
+    };
+  });
+  const checkmarkTextStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: checkmarkScale.value }],
+    };
+  });
+
 
   const progress = stepProgress[stepNum];
   const completedItems = progress?.completedItems ?? [];
@@ -84,28 +96,15 @@ export default function StepPlanScreen() {
   const animateCheckmark = useCallback(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) return;
-      checkmarkScale.setValue(0);
-      checkmarkOpacity.setValue(1);
-      Animated.sequence([
-        Animated.spring(checkmarkScale, {
-          toValue: 1.2,
-          useNativeDriver: true,
-          speed: 30,
-          bounciness: 6,
-        }),
-        Animated.spring(checkmarkScale, {
-          toValue: 1,
-          useNativeDriver: true,
-          speed: 30,
-          bounciness: 4,
-        }),
-        Animated.delay(400),
-        Animated.timing(checkmarkOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      checkmarkScale.value = 0;
+      checkmarkOpacity.value = 1;
+
+      checkmarkScale.value = withSequence(
+        withSpring(1.2, { damping: 12, stiffness: 100 }),
+        withSpring(1, { damping: 15, stiffness: 120 })
+      );
+
+      checkmarkOpacity.value = withDelay(400, withTiming(0, { duration: 300 }));
     });
   }, [checkmarkScale, checkmarkOpacity]);
 
@@ -183,13 +182,10 @@ export default function StepPlanScreen() {
       {/* Checkmark completion overlay */}
       <Animated.View
         pointerEvents="none"
-        style={[styles.checkmarkOverlay, { opacity: checkmarkOpacity }]}
+        style={[styles.checkmarkOverlay, checkmarkStyle]}
       >
         <Animated.Text
-          style={[
-            styles.checkmarkText,
-            { transform: [{ scale: checkmarkScale }] },
-          ]}
+          style={[styles.checkmarkText, checkmarkTextStyle]}
         >
           ✓
         </Animated.Text>

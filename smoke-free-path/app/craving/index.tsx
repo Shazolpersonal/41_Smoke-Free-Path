@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
   TouchableOpacity,
   Modal,
   StyleSheet,
-  Animated,
   AccessibilityInfo,
 } from "react-native";
 import Typography from "@/components/Typography";
@@ -76,30 +76,20 @@ export default function CravingScreen() {
   );
 
   // Slide-up animation on mount
-  const slideAnim = useRef(new Animated.Value(60)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useSharedValue(60);
+  const fadeAnim = useSharedValue(0);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) {
-        slideAnim.setValue(0);
-        fadeAnim.setValue(1);
+        slideAnim.value = 0;
+        fadeAnim.value = 1;
         return;
       }
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 350,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      slideAnim.value = withTiming(0, { duration: 400 });
+      fadeAnim.value = withTiming(1, { duration: 500 });
     });
-  }, [slideAnim, fadeAnim]);
+  }, []);
 
   const markStrategyUsed = useCallback((tab: StrategyTab) => {
     setActiveTab(tab);

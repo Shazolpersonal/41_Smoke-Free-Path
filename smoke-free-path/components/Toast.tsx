@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text, AccessibilityInfo } from "react-native";
+import { StyleSheet, Text, AccessibilityInfo } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { useTheme } from "../theme";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -25,8 +26,16 @@ export default function Toast({
 }: ToastProps) {
   const { theme } = useTheme();
   const [reduceMotion, setReduceMotion] = useState(false);
-  const translateY = useRef(new Animated.Value(80)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useSharedValue(80);
+  const opacity = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+      opacity: opacity.value,
+    };
+  });
+
 
   // Detect reduce motion preference once on mount
   useEffect(() => {
@@ -38,34 +47,24 @@ export default function Toast({
     if (!visible) return;
 
     if (reduceMotion) {
-      opacity.setValue(1);
-      translateY.setValue(0);
+      opacity.value = 1;
+      translateY.value = 0;
     } else {
-      Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      translateY.value = withTiming(0, { duration: 250 });
+      opacity.value = withTiming(1, { duration: 200 });
     }
 
     const timer = setTimeout(onHide, duration);
     return () => clearTimeout(timer);
-  }, [visible, duration, onHide, reduceMotion, opacity, translateY]);
+  }, [visible, duration, onHide, reduceMotion]);
 
   // Reset animation values when hidden
   useEffect(() => {
     if (!visible) {
-      translateY.setValue(80);
-      opacity.setValue(0);
+      translateY.value = 80;
+      opacity.value = 0;
     }
-  }, [visible, opacity, translateY]);
+  }, [visible]);
 
   if (!visible) return null;
 
@@ -80,7 +79,7 @@ export default function Toast({
     <Animated.View
       style={[
         styles.container,
-        { backgroundColor: bgColor, transform: [{ translateY }], opacity },
+        { backgroundColor: bgColor }, animatedStyle,
       ]}
       accessibilityLiveRegion="polite"
       accessibilityLabel={message}

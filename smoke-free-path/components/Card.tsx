@@ -1,15 +1,15 @@
-import React, { useRef, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   View,
   StyleSheet,
   ViewStyle,
   StyleProp,
-  Animated,
   TouchableOpacity,
   AccessibilityInfo,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../theme";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 
 interface CardProps {
   children: React.ReactNode;
@@ -25,30 +25,27 @@ export default function Card({
   accessibilityLabel,
 }: CardProps) {
   const { theme } = useTheme();
-  const scale = useRef(new Animated.Value(1)).current;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
 
   const handlePressIn = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) return;
-      Animated.spring(scale, {
-        toValue: 0.97,
-        useNativeDriver: true,
-        speed: 50,
-        bounciness: 4,
-      }).start();
+      scale.value = withTiming(0.96, { duration: 150 });
     });
   }, [scale]);
 
   const handlePressOut = useCallback(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) return;
-      Animated.spring(scale, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 50,
-        bounciness: 4,
-      }).start();
+      scale.value = withSpring(1, { damping: 15, stiffness: 120, mass: 1 });
     });
   }, [scale]);
 
@@ -63,7 +60,7 @@ export default function Card({
           ...theme.shadows.card,
         },
         style,
-        { transform: [{ scale }] },
+        animatedStyle,
       ]}
     >
       {children}

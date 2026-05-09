@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
   AccessibilityInfo,
   TouchableOpacity,
   Text,
@@ -8,13 +7,22 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence, withRepeat } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FloatingCravingButton() {
   const router = useRouter();
   const { theme } = useTheme();
   const [reduceMotion, setReduceMotion] = useState(false);
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useSharedValue(0);
+  const pressScale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleAnim.value * pressScale.value }],
+    };
+  });
+
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
@@ -23,36 +31,25 @@ export default function FloatingCravingButton() {
   }, []);
 
   useEffect(() => {
+
     if (reduceMotion) {
-      scaleAnim.setValue(1);
+      scaleAnim.value = 1;
       return;
     }
 
-    // A-grade: A smooth entrance scale, followed by a soft 3-time pulse then stop
-    Animated.sequence([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 5,
-      }),
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleAnim, {
-            toValue: 1.05,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1.0,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ]),
-        { iterations: 3 },
-      ),
-    ]).start();
-  }, [reduceMotion, scaleAnim]);
+    scaleAnim.value = withSequence(
+      withSpring(1, { damping: 15, stiffness: 120, mass: 1 }),
+      withRepeat(
+        withSequence(
+          withTiming(1.05, { duration: 800 }),
+          withTiming(1.0, { duration: 800 })
+        ),
+        3,
+        false
+      )
+    );
+
+  }, [reduceMotion]);
 
   return (
     <Animated.View
@@ -61,12 +58,14 @@ export default function FloatingCravingButton() {
         {
           backgroundColor: theme.colors.error,
           ...theme.shadows.elevated,
-          transform: [{ scale: scaleAnim }],
         },
+        animatedStyle,
       ]}
     >
       <TouchableOpacity
         onPress={() => router.push("/craving")}
+        onPressIn={() => { pressScale.value = withTiming(0.96, { duration: 150 }); }}
+        onPressOut={() => { pressScale.value = withSpring(1, { damping: 15, stiffness: 120, mass: 1 }); }}
         style={styles.touchable}
         activeOpacity={0.8}
         accessibilityLabel="ক্র্যাভিং সহায়তা"

@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, useWindowDimensions, Pressable } from "react-native";
-import Animated, {
+import Animated, { withTiming, withSequence, withDelay,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
@@ -55,8 +55,24 @@ export default React.memo(function StepCard({
 
   const config = (STATUS_CONFIG[status] || STATUS_CONFIG.future) as any;
 
+const opacityVal = useSharedValue(1);
+
+  React.useEffect(() => {
+    if (status === "complete") {
+      scale.value = withSequence(
+        withTiming(1.2, { duration: 125 }),
+        withTiming(1, { duration: 125 })
+      );
+      opacityVal.value = withSequence(
+        withTiming(0.5, { duration: 100 }),
+        withTiming(1, { duration: 150 })
+      );
+    }
+  }, [status]);
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
+    opacity: opacityVal.value,
   }));
 
   const handlePressIn = () => {

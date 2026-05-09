@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -6,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Animated,
   AccessibilityInfo,
 } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -36,30 +36,20 @@ export default function TriggerLogScreen() {
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const slideAnim = useRef(new Animated.Value(60)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useSharedValue(60);
+  const fadeAnim = useSharedValue(0);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) {
-        slideAnim.setValue(0);
-        fadeAnim.setValue(1);
+        slideAnim.value = 0;
+        fadeAnim.value = 1;
         return;
       }
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 350,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      slideAnim.value = withTiming(0, { duration: 400 });
+      fadeAnim.value = withTiming(1, { duration: 500 });
     });
-  }, [slideAnim, fadeAnim]);
+  }, []);
 
   const weeklySummary = useMemo(
     () => getWeeklyTriggerSummary(state.triggerLogs),
@@ -76,7 +66,15 @@ export default function TriggerLogScreen() {
     return getTriggerCopingStrategies(selectedTrigger);
   }, [selectedTrigger]);
 
+  const animatedScrollStyle = useAnimatedStyle(() => {
+    return {
+      opacity: fadeAnim.value,
+      transform: [{ translateY: slideAnim.value }],
+    };
+  });
+
   const handleSubmit = () => {
+
     if (!selectedTrigger) {
       try {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -239,11 +237,8 @@ export default function TriggerLogScreen() {
       <Animated.ScrollView
         style={[
           styles.scroll,
-          {
-            backgroundColor: theme.colors.background,
-            transform: [{ translateY: slideAnim }],
-            opacity: fadeAnim,
-          },
+          { backgroundColor: theme.colors.background },
+          animatedScrollStyle,
         ]}
         contentContainerStyle={[
           styles.scrollContent,

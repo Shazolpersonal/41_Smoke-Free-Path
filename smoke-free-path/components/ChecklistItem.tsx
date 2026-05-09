@@ -3,10 +3,10 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
-  Animated,
   AccessibilityInfo,
 } from "react-native";
 import { useTheme } from "../theme";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import Typography from "./Typography";
 import type {
   ChecklistItem as ChecklistItemType,
@@ -32,25 +32,37 @@ export default React.memo(function ChecklistItem({
   onToggle,
 }: ChecklistItemProps) {
   const { theme } = useTheme();
-  const scaleAnim = useRef(new Animated.Value(isCompleted ? 1 : 0)).current;
+  const scaleAnim = useSharedValue(isCompleted ? 1 : 0);
+  const pressScale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleAnim.value }],
+    };
+  });
+
+  const containerStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: pressScale.value }],
+    };
+  });
+
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) {
-        scaleAnim.setValue(isCompleted ? 1 : 0);
+        scaleAnim.value = isCompleted ? 1 : 0;
         return;
       }
-      Animated.spring(scaleAnim, {
-        toValue: isCompleted ? 1 : 0,
-        friction: 5,
-        tension: 80,
-        useNativeDriver: true,
-      }).start();
+      scaleAnim.value = withSpring(isCompleted ? 1 : 0, { damping: 12, stiffness: 100, mass: 1 });
     });
-  }, [isCompleted, scaleAnim]);
+  }, [isCompleted]);
 
   return (
+    <Animated.View style={containerStyle}>
     <TouchableOpacity
+      onPressIn={() => { pressScale.value = withTiming(0.96, { duration: 150 }); }}
+      onPressOut={() => { pressScale.value = withSpring(1, { damping: 15, stiffness: 120, mass: 1 }); }}
       style={[
         styles.row,
         {
@@ -86,7 +98,7 @@ export default React.memo(function ChecklistItem({
           },
         ]}
       >
-        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <Animated.View style={animatedStyle}>
           <Typography
             variant="small"
             style={[
@@ -125,6 +137,7 @@ export default React.memo(function ChecklistItem({
         {item.text}
       </Typography>
     </TouchableOpacity>
+    </Animated.View>
   );
 });
 
