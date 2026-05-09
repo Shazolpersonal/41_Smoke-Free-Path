@@ -126,6 +126,7 @@ export interface IslamicContent {
   stepAssignment: number | null; // কোন ধাপের জন্য (1–41), null = general
   relatedContentIds: string[];
   practicalPhrase?: string; // শুধু social_pressure_dua: বাস্তবে বলার বাংলা বাক্য
+  occasion?: string; // when to read this dua (e.g. সকালে, কঠিন মুহূর্তে)
 }
 
 // ─── Milestone ────────────────────────────────────────────────────────────────
