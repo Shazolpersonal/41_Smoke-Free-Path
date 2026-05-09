@@ -23,7 +23,9 @@ import WeeklyTriggerChart from "@/components/WeeklyTriggerChart";
 import ProgressStats from "@/components/ProgressStats";
 import ProgressBarCard from "@/components/ProgressBarCard";
 import Card from "@/components/Card";
+import GradientCard from "@/components/ui/GradientCard";
 import ScreenHeader from "@/components/ScreenHeader";
+import IslamicGeometricBorder from "@/components/illustrations/IslamicGeometricBorder";
 import Typography from "@/components/Typography";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { TriggerType } from "@/types";
@@ -328,7 +330,7 @@ export default function ProgressScreen() {
                 color="text"
                 accessibilityRole="header"
               >
-                অর্জিত মাইলস্টোন
+                আপনার অর্জনসমূহ
               </Typography>
               <Typography variant="body" color="textSecondary">
                 {collapsed.milestones ? "▶" : "▼"}

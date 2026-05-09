@@ -1,326 +1,252 @@
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
-import StepProgress from "@/components/onboarding/StepProgress";
+import GradientCard from "@/components/ui/GradientCard";
+import StarField from "@/components/illustrations/StarField";
+import CrescentMoon from "@/components/illustrations/CrescentMoon";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+  withSpring,
+} from "react-native-reanimated";
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const styles = createStyles(theme);
+
+  // Entrance animation values
+  const bgOpacity = useSharedValue(0);
+  const titleY = useSharedValue(30);
+  const titleOpacity = useSharedValue(0);
+  const subtitleY = useSharedValue(30);
+  const subtitleOpacity = useSharedValue(0);
+  const pillsY = useSharedValue(30);
+  const pillsOpacity = useSharedValue(0);
+  const ctaY = useSharedValue(30);
+  const ctaOpacity = useSharedValue(0);
+
+  // Press animation value
+  const ctaScale = useSharedValue(1);
+
+  useEffect(() => {
+    bgOpacity.value = withTiming(1, {
+      duration: theme.animation.timing.verySlow,
+    });
+    titleY.value = withDelay(
+      200,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    titleOpacity.value = withDelay(
+      200,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+    subtitleY.value = withDelay(
+      400,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    subtitleOpacity.value = withDelay(
+      400,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+    pillsY.value = withDelay(
+      600,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    pillsOpacity.value = withDelay(
+      600,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+    ctaY.value = withDelay(
+      800,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    ctaOpacity.value = withDelay(
+      800,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+  }, []);
+
+  const animatedBgStyle = useAnimatedStyle(() => ({
+    opacity: bgOpacity.value,
+  }));
+  const animatedTitleStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+    transform: [{ translateY: titleY.value }],
+  }));
+  const animatedSubtitleStyle = useAnimatedStyle(() => ({
+    opacity: subtitleOpacity.value,
+    transform: [{ translateY: subtitleY.value }],
+  }));
+  const animatedPillsStyle = useAnimatedStyle(() => ({
+    opacity: pillsOpacity.value,
+    transform: [{ translateY: pillsY.value }],
+  }));
+  const animatedCtaContainerStyle = useAnimatedStyle(() => ({
+    opacity: ctaOpacity.value,
+    transform: [{ translateY: ctaY.value }],
+    marginTop: "auto",
+  }));
+  const animatedCtaStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ctaScale.value }],
+  }));
+
+  const pills = ["৪১ দিনের গাইড", "ইসলামিক দুআ", "বিজ্ঞানসম্মত"];
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingHorizontal: theme.spacing.lg,
-          paddingTop: 40,
-          paddingBottom: theme.spacing.xl,
-        }}
-        showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      <GradientCard
+        colors={theme.colors.gradients.screenBackground}
+        style={StyleSheet.absoluteFillObject}
+        borderRadius={0}
       >
-        <StepProgress currentStep={1} totalSteps={3} />
-        <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
-          <Typography
-            variant="display"
-            style={[styles.appName, { color: theme.colors.primaryDark }]}
-          >
-            ধোঁয়া-মুক্ত পথ
-          </Typography>
-          <Typography
-            variant="subheading"
-            style={[
-              styles.subtitle,
-              { color: theme.colors.primary, marginTop: theme.spacing.xs },
-            ]}
-          >
-            Smoke-Free Path
-          </Typography>
-        </View>
-
-        <View
-          style={[styles.iconContainer, { marginBottom: theme.spacing.lg }]}
-        >
-          <Typography variant="display" style={styles.icon}>
-            🌿
-          </Typography>
-        </View>
-
-        <View
-          style={[
-            styles.contentCard,
-            {
-              backgroundColor: theme.colors.surface,
-              padding: theme.spacing.lg,
-              marginBottom: theme.spacing.xl,
-            },
-          ]}
-        >
-          <Typography
-            variant="heading"
-            isArabic
-            style={[
-              styles.bismillah,
-              { color: theme.colors.primary, marginBottom: theme.spacing.xs },
-            ]}
-          >
-            بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
-          </Typography>
-          <Typography
-            variant="body"
-            align="center"
-            style={[
-              styles.bismillahBangla,
-              {
-                color: theme.colors.textSecondary,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          >
-            পরম করুণাময় আল্লাহর নামে শুরু করছি
-          </Typography>
-
-          <View
-            style={[
-              styles.divider,
-              {
-                backgroundColor: theme.colors.border,
-                marginBottom: theme.spacing.md,
-              },
-            ]}
-          />
-
-          <Typography
-            variant="title"
-            align="center"
-            style={[
-              styles.introTitle,
-              {
-                color: theme.colors.primaryDark,
-                marginBottom: theme.spacing.sm,
-              },
-            ]}
-          >
-            আপনাকে স্বাগতম
-          </Typography>
-          <Typography
-            variant="subheading"
-            align="center"
-            style={[
-              styles.introText,
-              {
-                color: theme.colors.textSecondary,
-                marginBottom: theme.spacing.lg,
-              },
-            ]}
-          >
-            এই অ্যাপটি আপনাকে ইসলামিক দৃষ্টিকোণ থেকে ধূমপান ত্যাগে সহায়তা করবে।
-            কুরআন, হাদিস, দোয়া ও জিকিরের মাধ্যমে আল্লাহর সাহায্য নিয়ে আপনি এই
-            কঠিন যাত্রায় সফল হতে পারবেন।
-          </Typography>
-
-          <View
-            style={[styles.featureList, { marginBottom: theme.spacing.lg }]}
-          >
-            <View
-              style={[styles.featureItem, { marginBottom: theme.spacing.sm }]}
-            >
-              <Typography variant="title" style={styles.featureIcon}>
-                📅
-              </Typography>
-              <Typography
-                variant="body"
-                style={[styles.featureText, { color: theme.colors.text }]}
-              >
-                ৪১-ধাপের ব্যক্তিগতকৃত পরিকল্পনা
-              </Typography>
-            </View>
-            <View
-              style={[styles.featureItem, { marginBottom: theme.spacing.sm }]}
-            >
-              <Typography variant="title" style={styles.featureIcon}>
-                🤲
-              </Typography>
-              <Typography
-                variant="body"
-                style={[styles.featureText, { color: theme.colors.text }]}
-              >
-                দৈনিক দোয়া, জিকির ও ইসলামিক অনুপ্রেরণা
-              </Typography>
-            </View>
-            <View
-              style={[styles.featureItem, { marginBottom: theme.spacing.sm }]}
-            >
-              <Typography variant="title" style={styles.featureIcon}>
-                💪
-              </Typography>
-              <Typography
-                variant="body"
-                style={[styles.featureText, { color: theme.colors.text }]}
-              >
-                ক্র্যাভিং মোকাবেলার কার্যকর কৌশল
-              </Typography>
-            </View>
-            <View
-              style={[styles.featureItem, { marginBottom: theme.spacing.sm }]}
-            >
-              <Typography variant="title" style={styles.featureIcon}>
-                📊
-              </Typography>
-              <Typography
-                variant="body"
-                style={[styles.featureText, { color: theme.colors.text }]}
-              >
-                অগ্রগতি ট্র্যাকিং ও মাইলস্টোন উদযাপন
-              </Typography>
-            </View>
+        <Animated.View style={[styles.topArea, animatedBgStyle]}>
+          <StarField />
+          <View style={styles.moonContainer}>
+            <CrescentMoon size={120} />
           </View>
+        </Animated.View>
 
-          <Typography
-            variant="title"
-            align="right"
-            isArabic
-            style={[
-              styles.quoteArabic,
-              {
-                color: theme.colors.primary,
-                marginTop: theme.spacing.sm,
-                marginBottom: theme.spacing.xs,
-              },
-            ]}
+        <View style={styles.bottomArea}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
           >
-            وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا
-          </Typography>
-          <Typography
-            variant="body"
-            align="center"
-            style={[styles.quoteBangla, { color: theme.colors.textSecondary }]}
-          >
-            "যে আল্লাহকে ভয় করে, আল্লাহ তার জন্য পথ বের করে দেন।"
-          </Typography>
-          <Typography
-            variant="small"
-            align="center"
-            style={[
-              styles.quoteSource,
-              { color: theme.colors.textDisabled, marginTop: theme.spacing.xs },
-            ]}
-          >
-            — সূরা তালাক, আয়াত ২
-          </Typography>
+            <Animated.View style={animatedTitleStyle}>
+              <Typography
+                variant="display"
+                style={[styles.mainTitle, { color: theme.colors.gold.primary }]}
+              >
+                আপনাকে স্বাগতম
+              </Typography>
+            </Animated.View>
+
+            <Animated.View style={animatedSubtitleStyle}>
+              <Typography
+                variant="bodyLarge"
+                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
+              >
+                ধূমপান ছাড়ার এই কঠিন যাত্রায় আপনি একা নন। কুরআন, সুন্নাহ ও
+                আল্লাহর রহমতের ছায়ায় আমরা একসাথে এই পথে চলব।
+              </Typography>
+            </Animated.View>
+
+            <Animated.View style={[styles.pillsContainer, animatedPillsStyle]}>
+              {pills.map((pill, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.pill,
+                    {
+                      backgroundColor: theme.colors.surfaceVariant,
+                      borderColor: theme.colors.gold.primary,
+                    },
+                  ]}
+                >
+                  <Typography
+                    variant="caption"
+                    style={{ color: theme.colors.gold.primary }}
+                  >
+                    {pill}
+                  </Typography>
+                </View>
+              ))}
+            </Animated.View>
+
+            <Animated.View style={animatedCtaContainerStyle}>
+              <TouchableOpacity
+                onPressIn={() => {
+                  ctaScale.value = withSpring(0.97, theme.animation.spring);
+                }}
+                onPressOut={() => {
+                  ctaScale.value = withSpring(1, theme.animation.spring);
+                }}
+                onPress={() => router.push("/(onboarding)/profile-setup")}
+                activeOpacity={1}
+                accessibilityRole="button"
+                accessibilityLabel="বিসমিল্লাহ বলে শুরু করি"
+                style={styles.touchableTarget}
+              >
+                <Animated.View style={animatedCtaStyle}>
+                  <GradientCard
+                    colors={theme.colors.gradients.goldButton}
+                    hasShadow
+                    shadowPreset="goldGlow"
+                    borderRadius={theme.radius.xl}
+                    style={styles.ctaButton}
+                  >
+                    <Typography
+                      variant="h3"
+                      style={{ color: theme.colors.onPrimary }}
+                    >
+                      বিসমিল্লাহ বলে শুরু করি
+                    </Typography>
+                  </GradientCard>
+                </Animated.View>
+              </TouchableOpacity>
+            </Animated.View>
+          </ScrollView>
         </View>
-
-        <TouchableOpacity
-          style={[
-            styles.startButton,
-            {
-              backgroundColor: theme.colors.primary,
-              shadowColor: theme.colors.primary,
-              paddingVertical: 18,
-              paddingHorizontal: theme.spacing.xl,
-            },
-          ]}
-          onPress={() => router.push("/(onboarding)/profile-setup")}
-          activeOpacity={0.85}
-          accessibilityRole="button"
-          accessibilityLabel="শুরু করুন"
-        >
-          <Typography
-            variant="title"
-            style={[
-              styles.startButtonText,
-              { color: theme.colors.onPrimary, marginRight: theme.spacing.sm },
-            ]}
-          >
-            শুরু করুন
-          </Typography>
-          <Typography
-            variant="title"
-            style={[styles.startButtonArrow, { color: theme.colors.onPrimary }]}
-          >
-            →
-          </Typography>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+      </GradientCard>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  topArea: {
+    height: "60%",
+    justifyContent: "center",
     alignItems: "center",
   },
-  appName: {
+  moonContainer: {
+    position: "absolute",
+    transform: [{ translateY: -20 }, { translateX: 10 }],
+  },
+  bottomArea: {
+    height: "40%",
+    paddingHorizontal: theme.spacing[6],
+    paddingBottom: theme.spacing[10],
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
+  },
+  mainTitle: {
     textAlign: "center",
-    letterSpacing: 1,
+    marginBottom: theme.spacing[4],
   },
   subtitle: {
     textAlign: "center",
+    marginBottom: theme.spacing[8],
   },
-  iconContainer: {
-    alignItems: "center",
-  },
-  icon: {
-    fontSize: 64, // Keeping this inline as display doesn't cover 64px for emoji
-  },
-  contentCard: {
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  bismillah: {
-    textAlign: "right",
-  },
-  bismillahBangla: {},
-  divider: {
-    height: 1,
-  },
-  introTitle: {
-    fontWeight: "bold",
-  },
-  introText: {
-    lineHeight: 24,
-  },
-  featureList: {},
-  featureItem: {
+  pillsContainer: {
     flexDirection: "row",
-    alignItems: "center",
-  },
-  featureIcon: {
-    width: 28,
-    textAlign: "center",
-  },
-  featureText: {
-    flex: 1,
-    lineHeight: 20,
-  },
-  quoteArabic: {
-    lineHeight: 30,
-  },
-  quoteBangla: {
-    fontStyle: "italic",
-    lineHeight: 22,
-  },
-  quoteSource: {},
-  startButton: {
-    borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    flexWrap: "wrap",
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[10],
   },
-  startButtonText: {},
-  startButtonArrow: {},
+  pill: {
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[1] + 2,
+    borderRadius: theme.radius.full,
+    borderWidth: 1,
+  },
+  touchableTarget: {
+    minHeight: theme.spacing[12],
+    justifyContent: "center",
+  },
+  ctaButton: {
+    height: 56,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
 });

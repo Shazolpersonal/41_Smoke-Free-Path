@@ -45,7 +45,7 @@ export default function WeeklyTriggerChart() {
       {weeklyChartData.length === 0 ? (
         <View
           style={styles.emptyState}
-          accessibilityLabel="এই সপ্তাহে কোনো ট্রিগার লগ নেই। ট্রিগার লগ করুন।"
+          accessibilityLabel="এই সপ্তাহে আলহামদুলিল্লাহ! এই সপ্তাহে কোনো কঠিন মুহূর্ত আসেনি 🌿। ট্রিগার লগ করুন।"
         >
           <Typography
             variant="display"

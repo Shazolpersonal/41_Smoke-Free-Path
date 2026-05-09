@@ -26,10 +26,20 @@ import { useProgressStats } from "@/hooks/useProgressStats";
 import IslamicCard from "@/components/IslamicCard";
 import Typography from "@/components/Typography";
 import Shimmer from "@/components/Shimmer";
+import GradientCard from "@/components/ui/GradientCard";
+import StatCard from "@/components/dashboard/StatCard";
+import IslamicInspirationCard from "@/components/dashboard/IslamicInspirationCard";
+import DayProgressBar from "@/components/dashboard/DayProgressBar";
+import CrescentMoon from "@/components/illustrations/CrescentMoon";
+import DuaDecorator from "@/components/illustrations/DuaDecorator";
 import AnimatedCountUp from "@/components/AnimatedCountUp";
-import { getStepContent } from "@/services/ContentService";
+import { getStepContent, getStepPlan } from "@/services/ContentService";
 import { loadAppState } from "@/services/StorageService";
-import { isFutureDate, getTimeUntilStart, safeModulo } from "@/utils/trackerUtils";
+import {
+  isFutureDate,
+  getTimeUntilStart,
+  safeModulo,
+} from "@/utils/trackerUtils";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -56,6 +66,11 @@ export default function HomeScreen() {
   const currentStep = planState.currentStep;
   const stepContent = useMemo(
     () => getStepContent(currentStep > 0 ? currentStep : 1),
+    [currentStep],
+  );
+
+  const stepPlan = useMemo(
+    () => getStepPlan(currentStep > 0 ? currentStep : 1),
     [currentStep],
   );
 
@@ -105,15 +120,16 @@ export default function HomeScreen() {
     : null;
 
   // Calculate hours if activated (BUG-13: use safe modulo for non-negative hours)
-  const hoursSinceActivation = planState.activatedAt && !isFutureQuitDate
-    ? safeModulo(
-        Math.floor(
-          (Date.now() - new Date(planState.activatedAt).getTime()) /
-            (1000 * 60 * 60),
-        ),
-        24,
-      )
-    : 0;
+  const hoursSinceActivation =
+    planState.activatedAt && !isFutureQuitDate
+      ? safeModulo(
+          Math.floor(
+            (Date.now() - new Date(planState.activatedAt).getTime()) /
+              (1000 * 60 * 60),
+          ),
+          24,
+        )
+      : 0;
 
   if (!hydrated) {
     return (
@@ -186,15 +202,17 @@ export default function HomeScreen() {
             />
           }
         >
-          {/* ZONE 1 — HERO */}
+          {/* SECTION A — Header */}
           <Animated.View entering={FadeInDown.delay(0).duration(400)}>
             <LinearGradient
-              colors={[theme.tokens.primary.soft, "transparent"]}
+              colors={theme.colors.gradients.screenBackground}
               style={[
                 styles.heroContainer,
                 {
                   paddingHorizontal: theme.spacing.lg,
                   paddingVertical: theme.spacing.xl,
+                  borderBottomLeftRadius: theme.radius.xl,
+                  borderBottomRightRadius: theme.radius.xl,
                 },
                 isMilestone && {
                   borderWidth: 1.5,
@@ -206,8 +224,22 @@ export default function HomeScreen() {
                 },
               ]}
             >
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: theme.spacing.xl,
+                }}
+              >
+                <Typography variant="h3" color="textSecondary">
+                  আস-সালামু আলাইকুম, {userProfile?.name || "বন্ধু"}
+                </Typography>
+                <CrescentMoon size={40} showGlow={false} />
+              </View>
+
               {isFutureQuitDate && timeUntilStart ? (
-                // BUG-09: Show countdown for future quit dates
                 <View style={{ alignItems: "center" }}>
                   <Typography
                     variant="heading"
@@ -242,44 +274,35 @@ export default function HomeScreen() {
               ) : isEmptyState ? (
                 <View style={{ alignItems: "center" }}>
                   <Typography
-                    variant="heading"
-                    color="primaryDark"
-                    align="center"
-                    style={{ marginBottom: theme.spacing.sm }}
-                  >
-                    আজ থেকেই শুরু হলো তোমার যাত্রা! 🌱
-                  </Typography>
-                  <Typography
-                    variant="subheading"
-                    color="textSecondary"
+                    variant="numberDisplay"
+                    color="primary"
                     align="center"
                   >
-                    প্রথম পদক্ষেপটাই সবচেয়ে সাহসী।
+                    ০
                   </Typography>
+                  <Typography variant="body" color="textMuted" align="center">
+                    দিন ধূমপানমুক্ত
+                  </Typography>
+                  <View style={{ marginTop: theme.spacing.sm }}>
+                    <DuaDecorator width={120} opacity={0.6} />
+                  </View>
                 </View>
               ) : (
                 <View style={{ alignItems: "center" }}>
                   <Typography
-                    variant="display"
-                    color="primaryDark"
+                    variant="numberDisplay"
+                    color="primary"
                     numberOfLines={1}
                     adjustsFontSizeToFit={true}
-                    style={{
-                      fontSize: 48,
-                      fontWeight: "700",
-                      marginBottom: theme.spacing.xs,
-                    }}
                   >
-                    {stats?.totalSmokeFreeDays || 0} দিন {hoursSinceActivation}{" "}
-                    ঘণ্টা
+                    {stats?.totalSmokeFreeDays || 0}
                   </Typography>
-                  <Typography
-                    variant="small"
-                    color="textDisabled"
-                    style={{ fontWeight: "500" }}
-                  >
-                    যাত্রা শুরু হয়েছে
+                  <Typography variant="body" color="textMuted" align="center">
+                    দিন ধূমপানমুক্ত
                   </Typography>
+                  <View style={{ marginTop: theme.spacing.sm }}>
+                    <DuaDecorator width={120} opacity={0.6} />
+                  </View>
                   {isMilestone && (
                     <Typography
                       variant="subheading"
@@ -334,162 +357,184 @@ export default function HomeScreen() {
               </Animated.View>
             )}
 
-            {/* ZONE 2 — ACTION */}
+            {/* SECTION B — Today's Step Card */}
             {planState.isActive && (
               <Animated.View entering={FadeInUp.delay(100).duration(300)}>
-                <Animated.View style={animatedButtonStyle}>
-                  <TouchableOpacity
-                    style={[
-                      styles.cravingButton,
-                      {
-                        backgroundColor: theme.tokens.accent.base,
-                        paddingVertical: theme.spacing.md,
-                        paddingHorizontal: theme.spacing.lg,
-                        marginTop: theme.spacing.lg,
-                        marginBottom: theme.spacing.xl,
-                        borderRadius: 14,
-                        alignItems: "center",
-                        shadowColor: theme.tokens.accent.base,
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                        elevation: 5,
-                      },
-                    ]}
-                    onPressIn={handleCravingPressIn}
-                    onPressOut={handleCravingPressOut}
-                    onPress={handleCravingPress}
-                    activeOpacity={1}
-                    accessibilityLabel="এখন কি কষ্ট লাগছে?"
-                    accessibilityRole="button"
+                <GradientCard
+                  colors={theme.colors.gradients.cardSurface}
+                  hasShadow={true}
+                  shadowPreset="goldGlow"
+                  style={{
+                    padding: theme.spacing.lg,
+                    marginTop: theme.spacing.lg,
+                    marginBottom: theme.spacing.lg,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="textMuted"
+                    style={{ marginBottom: theme.spacing.xs }}
                   >
-                    <Typography
-                      variant="title"
-                      color="onPrimary"
-                      style={{ fontWeight: "600" }}
+                    আজকের ধাপ
+                  </Typography>
+                  <Typography
+                    variant="h2"
+                    color="primary"
+                    style={{ marginBottom: theme.spacing.xs }}
+                  >
+                    {stepContent
+                      ? `ধাপ ${stepPlan?.step}: ${stepPlan?.title}`
+                      : "আজকের কাজ"}
+                  </Typography>
+                  <Typography
+                    variant="body"
+                    color="textMuted"
+                    style={{ marginBottom: theme.spacing.md }}
+                  >
+                    {stepPlan?.theme || "আপনার ধূমপান-মুক্ত যাত্রা চালিয়ে যান"}
+                  </Typography>
+
+                  <View style={{ marginBottom: theme.spacing.lg }}>
+                    <DayProgressBar progress={stepContent ? 0.3 : 0} />
+                  </View>
+
+                  <Animated.View style={animatedButtonStyle}>
+                    <TouchableOpacity
+                      onPressIn={handleCravingPressIn}
+                      onPressOut={handleCravingPressOut}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        if (stepContent) {
+                          router.push(`/tracker/${stepPlan!.step}`);
+                        }
+                      }}
+                      activeOpacity={1}
+                      accessibilityRole="button"
                     >
-                      এখন কি কষ্ট লাগছে?
-                    </Typography>
-                  </TouchableOpacity>
-                </Animated.View>
+                      <LinearGradient
+                        colors={theme.colors.gradients.goldButton}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{
+                          paddingVertical: theme.spacing.md,
+                          paddingHorizontal: theme.spacing.lg,
+                          borderRadius: theme.radius.md,
+                          alignItems: "center",
+                          flexDirection: "row",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Typography
+                          variant="bodyLarge"
+                          color="onPrimary"
+                          style={{ fontWeight: "600" }}
+                        >
+                          আজকের কাজ দেখুন →
+                        </Typography>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </Animated.View>
+                </GradientCard>
               </Animated.View>
             )}
 
-            {/* ZONE 3 — PROGRESS SNAPSHOT */}
+            {/* SECTION C — Quick Stats Row */}
             {planState.isActive && !isFutureQuitDate && (
               <Animated.View entering={FadeInUp.delay(200).duration(300)}>
-                <View style={styles.statsContainer}>
-                  <View
-                    style={[
-                      styles.statCard,
-                      {
-                        backgroundColor: theme.colors.surface,
-                        borderRadius: theme.radius.lg,
-                        padding: theme.spacing.md,
-                        ...theme.shadows.card,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginBottom: theme.spacing.xs,
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Ionicons
-                        name="leaf"
-                        size={20}
-                        color={theme.colors.primary}
-                        style={{ marginRight: theme.spacing.xs }}
-                      />
-                      <Typography
-                        variant="small"
-                        color="textSecondary"
-                        align="center"
-                      >
-                        সিগারেট বাঁচানো
-                      </Typography>
-                    </View>
-                    <View style={{ alignItems: "center" }}>
-                      {isEmptyState ? (
-                        <Typography variant="heading" color="text">
-                          --
-                        </Typography>
-                      ) : (
-                        <AnimatedCountUp
-                          value={stats?.totalSavedCigarettes || 0}
-                          variant="heading"
-                          color="text"
-                        />
-                      )}
-                    </View>
-                  </View>
-
-                  <View style={{ width: theme.spacing.md }} />
-
-                  <View
-                    style={[
-                      styles.statCard,
-                      {
-                        backgroundColor: theme.colors.surface,
-                        borderRadius: theme.radius.lg,
-                        padding: theme.spacing.md,
-                        ...theme.shadows.card,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginBottom: theme.spacing.xs,
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Typography
-                        variant="small"
-                        color="textSecondary"
-                        align="center"
-                      >
-                        টাকা বাঁচানো
-                      </Typography>
-                    </View>
-                    <View style={{ alignItems: "center" }}>
-                      {isEmptyState ? (
-                        <Typography variant="heading" color="text">
-                          --
-                        </Typography>
-                      ) : (
-                        <AnimatedCountUp
-                          value={stats?.totalSavedMoney || 0}
-                          variant="heading"
-                          color="text"
-                          prefix="৳"
-                        />
-                      )}
-                    </View>
-                  </View>
+                <View
+                  style={[
+                    styles.statsContainer,
+                    { marginBottom: theme.spacing.lg, gap: theme.spacing.sm },
+                  ]}
+                >
+                  <StatCard
+                    label="টাকা সাশ্রয়"
+                    value={stats?.totalSavedMoney || 0}
+                    prefix="৳"
+                  />
+                  <StatCard
+                    label="সিগারেট এড়ানো"
+                    value={stats?.totalSavedCigarettes || 0}
+                  />
+                  <StatCard
+                    label="স্ট্রিক দিন"
+                    value={stats?.smokeFreeDays || 0}
+                  />
                 </View>
               </Animated.View>
             )}
 
-            {/* ZONE 4 — SPIRITUAL */}
+            {/* SECTION D — Islamic Inspiration Card */}
             <Animated.View
               entering={FadeInUp.delay(300).duration(300)}
-              style={{ marginTop: theme.spacing.xl, opacity: 0.9 }}
+              style={{ marginBottom: theme.spacing.xl }}
             >
-              {stepContent && (
-                <IslamicCard
-                  content={stepContent}
-                  isBookmarked={isBookmarked}
-                  onBookmark={handleBookmark}
+              {stepPlan?.hadith ? (
+                <IslamicInspirationCard
+                  arabicText={stepPlan.hadith.arabicText}
+                  transliteration="بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+                  translation={stepPlan.hadith.banglaTranslation}
+                  source={stepPlan.hadith.source}
+                />
+              ) : (
+                <IslamicInspirationCard
+                  arabicText="رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا"
+                  transliteration="Rabbana la tuzigh quloobana ba'da idh hadaytana"
+                  translation="হে আমাদের পালনকর্তা! সরল পথ প্রদর্শনের পর তুমি আমাদের অন্তরকে সত্যলংঘনে প্রবৃত্ত করোনা।"
+                  source="সূরা আল ইমরান, আয়াত ৮"
                 />
               )}
             </Animated.View>
           </View>
         </ScrollView>
+
+        {/* SECTION E — Floating Action Button (Craving help) */}
+        {planState.isActive && (
+          <Animated.View
+            entering={FadeInUp.delay(400).duration(400)}
+            style={{
+              position: "absolute",
+              bottom: theme.spacing.xl,
+              right: theme.spacing.lg,
+            }}
+          >
+            <TouchableOpacity
+              onPressIn={handleCravingPressIn}
+              onPressOut={handleCravingPressOut}
+              onPress={handleCravingPress}
+              activeOpacity={1}
+              accessibilityRole="button"
+            >
+              <Animated.View style={animatedButtonStyle}>
+                <LinearGradient
+                  colors={theme.colors.gradients.goldButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    paddingVertical: theme.spacing.md,
+                    paddingHorizontal: theme.spacing.lg,
+                    borderRadius: theme.radius.full,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: theme.colors.primary,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 5,
+                  }}
+                >
+                  <Typography
+                    variant="bodyLarge"
+                    color="onPrimary"
+                    style={{ fontWeight: "700" }}
+                  >
+                    সাহায্য দরকার?
+                  </Typography>
+                </LinearGradient>
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
       </Animated.View>
     </SafeAreaView>
   );
