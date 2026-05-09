@@ -37,11 +37,7 @@ export default function SmokeWave({
 
       {/* Wave 1: Slow, wide wave */}
       <Path
-        d={`M 0 ${height * 0.5}
-            C ${width * 0.2} ${height * 0.2},
-              ${width * 0.4} ${height * 0.8},
-              ${width * 0.7} ${height * 0.4}
-            S ${width} ${height * 0.3}, ${width} ${height * 0.3}`}
+        d={`M 0 ${height * 0.5} C ${width * 0.2} ${height * 0.2} ${width * 0.4} ${height * 0.8} ${width * 0.7} ${height * 0.4} S ${width} ${height * 0.3} ${width} ${height * 0.3}`}
         fill="none"
         stroke="url(#smokeGrad)"
         strokeWidth={12}
@@ -51,11 +47,7 @@ export default function SmokeWave({
 
       {/* Wave 2: Middle wave, tighter curve */}
       <Path
-        d={`M 0 ${height * 0.6}
-            C ${width * 0.15} ${height * 0.8},
-              ${width * 0.35} ${height * 0.2},
-              ${width * 0.6} ${height * 0.6}
-            S ${width} ${height * 0.45}, ${width} ${height * 0.45}`}
+        d={`M 0 ${height * 0.6} C ${width * 0.15} ${height * 0.8} ${width * 0.35} ${height * 0.2} ${width * 0.6} ${height * 0.6} S ${width} ${height * 0.45} ${width} ${height * 0.45}`}
         fill="none"
         stroke="url(#smokeGrad)"
         strokeWidth={16}
@@ -65,11 +57,7 @@ export default function SmokeWave({
 
       {/* Wave 3: Higher wave */}
       <Path
-        d={`M 0 ${height * 0.4}
-            C ${width * 0.25} ${height * 0.1},
-              ${width * 0.45} ${height * 0.7},
-              ${width * 0.8} ${height * 0.3}
-            S ${width} ${height * 0.6}, ${width} ${height * 0.6}`}
+        d={`M 0 ${height * 0.4} C ${width * 0.25} ${height * 0.1} ${width * 0.45} ${height * 0.7} ${width * 0.8} ${height * 0.3} S ${width} ${height * 0.6} ${width} ${height * 0.6}`}
         fill="none"
         stroke="url(#smokeGrad)"
         strokeWidth={20}

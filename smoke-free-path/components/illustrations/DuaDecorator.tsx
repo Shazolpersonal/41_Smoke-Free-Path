@@ -22,9 +22,9 @@ export default function DuaDecorator({
 
   // A symmetrical path expanding out from the center diamond
   // Left swash
-  const leftPath = `M ${center - 12} ${centerY} C ${center - 40} ${centerY - 10}, ${center - 60} ${centerY + 10}, ${20} ${centerY}`;
+  const leftPath = `M ${center - 12} ${centerY} C ${center - 40} ${centerY - 10} ${center - 60} ${centerY + 10} ${20} ${centerY}`;
   // Right swash
-  const rightPath = `M ${center + 12} ${centerY} C ${center + 40} ${centerY - 10}, ${center + 60} ${centerY + 10}, ${width - 20} ${centerY}`;
+  const rightPath = `M ${center + 12} ${centerY} C ${center + 40} ${centerY - 10} ${center + 60} ${centerY + 10} ${width - 20} ${centerY}`;
 
   return (
     <Svg
