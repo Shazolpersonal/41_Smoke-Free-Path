@@ -4,7 +4,6 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Animated,
   AccessibilityInfo,
   Alert,
   TextInput,
@@ -20,6 +19,7 @@ import CigarettesInputCard from "@/components/slip-up/CigarettesInputCard";
 import TriggerReasonCard from "@/components/slip-up/TriggerReasonCard";
 import DecisionCard from "@/components/slip-up/DecisionCard";
 import { getDuasByCategory } from "@/services/ContentService";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import type { TriggerType, SlipUpDecision } from "@/types";
 
 const MOTIVATIONAL_MESSAGE =
@@ -35,32 +35,30 @@ export default function SlipUpScreen() {
   );
   const [cigarettesSmoked, setCigarettesSmoked] = useState<string>("1");
 
-  const slideAnim = useRef(new Animated.Value(60)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useSharedValue(60);
+  const fadeAnim = useSharedValue(0);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) {
-        slideAnim.setValue(0);
-        fadeAnim.setValue(1);
+        slideAnim.value = 0;
+        fadeAnim.value = 1;
         return;
       }
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 350,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      slideAnim.value = withTiming(0, { duration: 350 });
+      fadeAnim.value = withTiming(1, { duration: 300 });
     });
-  }, [slideAnim, fadeAnim]);
+  }, []);
 
   const tawbahDuas = useMemo(() => getDuasByCategory("tawbah_dua"), []);
+
+  const animatedScrollStyle = useAnimatedStyle(() => {
+    return {
+      opacity: fadeAnim.value,
+      transform: [{ translateY: slideAnim.value }],
+    };
+  });
+
   const firstDua = tawbahDuas[0] ?? null;
 
   const currentTrackerStep = state.planState.currentStep;
@@ -140,11 +138,8 @@ export default function SlipUpScreen() {
       <Animated.ScrollView
         style={[
           styles.scroll,
-          {
-            backgroundColor: theme.colors.background,
-            transform: [{ translateY: slideAnim }],
-            opacity: fadeAnim,
-          },
+          { backgroundColor: theme.colors.background },
+          animatedScrollStyle,
         ]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

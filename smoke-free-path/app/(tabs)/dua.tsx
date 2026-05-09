@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -8,7 +9,6 @@ import {
   Modal,
   StyleSheet,
   Pressable,
-  Animated,
   AccessibilityInfo,
 } from "react-native";
 import ArabicText from "@/components/ArabicText";
@@ -50,21 +50,17 @@ const AnimatedDuaItem = React.memo(function AnimatedDuaItem({
   onPress: (item: IslamicContent) => void;
   categoryLabel: string;
 }) {
-  const opacity = useRef(new Animated.Value(0)).current;
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) {
-        opacity.setValue(1);
-      } else {
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
+        opacity.value = 1;
+        return;
       }
+      opacity.value = withTiming(1, { duration: 400 });
     });
-  }, [opacity]);
+  }, []);
 
   return (
     <Animated.View

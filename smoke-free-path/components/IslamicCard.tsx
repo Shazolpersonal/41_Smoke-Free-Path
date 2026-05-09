@@ -3,13 +3,13 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Animated,
   AccessibilityInfo,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import ArabicText from "@/components/ArabicText";
 import Typography from "@/components/Typography";
 import { useTheme } from "@/hooks/useTheme";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence } from "react-native-reanimated";
 import type { IslamicContent, ContentType } from "@/types";
 
 interface IslamicCardProps {
@@ -41,7 +41,21 @@ export default React.memo(function IslamicCard({
     dhikr: theme.colors.warning,
   };
 
-  const bookmarkScale = useRef(new Animated.Value(1)).current;
+  const bookmarkScale = useSharedValue(1);
+  const pressScale = useSharedValue(1);
+
+  const animatedBookmarkStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: bookmarkScale.value }],
+    };
+  });
+
+  const animatedCardStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: pressScale.value }],
+    };
+  });
+
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -51,25 +65,18 @@ export default React.memo(function IslamicCard({
     }
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) return;
-      Animated.sequence([
-        Animated.spring(bookmarkScale, {
-          toValue: 1.2,
-          useNativeDriver: true,
-          speed: 50,
-          bounciness: 8,
-        }),
-        Animated.spring(bookmarkScale, {
-          toValue: 1,
-          useNativeDriver: true,
-          speed: 50,
-          bounciness: 4,
-        }),
-      ]).start();
+      bookmarkScale.value = withSequence(
+        withSpring(1.2, { damping: 10, stiffness: 100, mass: 1 }),
+        withSpring(1, { damping: 12, stiffness: 100, mass: 1 })
+      );
     });
   }, [isBookmarked]);
 
   return (
+    <Animated.View style={animatedCardStyle}>
     <TouchableOpacity
+      onPressIn={() => { pressScale.value = withTiming(0.96, { duration: 150 }); }}
+      onPressOut={() => { pressScale.value = withSpring(1, { damping: 15, stiffness: 120, mass: 1 }); }}
       style={[
         styles.card,
         {
@@ -175,7 +182,7 @@ export default React.memo(function IslamicCard({
             <Animated.Text
               style={[
                 styles.bookmark,
-                { transform: [{ scale: bookmarkScale }], fontSize: 20 },
+                animatedBookmarkStyle, { fontSize: 20 },
               ]}
             >
               {isBookmarked ? "🔖" : "📄"}
@@ -184,6 +191,7 @@ export default React.memo(function IslamicCard({
         )}
       </View>
     </TouchableOpacity>
+    </Animated.View>
   );
 });
 

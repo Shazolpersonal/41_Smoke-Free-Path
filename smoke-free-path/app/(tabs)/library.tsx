@@ -1,3 +1,4 @@
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import React, {
   useState,
   useMemo,
@@ -15,7 +16,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Animated,
   AccessibilityInfo,
 } from "react-native";
 import { useAppContext } from "@/context/AppContext";
@@ -60,26 +60,29 @@ const AnimatedLibraryItem = React.memo(function AnimatedLibraryItem({
   onBookmark: (id: string) => void;
   onPress: (item: IslamicContent) => void;
 }) {
-  const opacity = useRef(new Animated.Value(0)).current;
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
       if (reduceMotion) {
-        opacity.setValue(1);
-      } else {
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
+        opacity.value = 1;
+        return;
       }
+      opacity.value = withTiming(1, { duration: 400 });
     });
-  }, [opacity]);
+  }, []);
+
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
 
   const label = `${TYPE_LABELS[item.type] ?? item.type} — ${item.source}`;
 
   return (
-    <Animated.View style={{ opacity }} accessibilityLabel={label}>
+    <Animated.View style={animatedStyle} accessibilityLabel={label}>
       <IslamicCard
         content={item}
         isBookmarked={isBookmarked}

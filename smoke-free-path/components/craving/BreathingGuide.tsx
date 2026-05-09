@@ -1,11 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Animated, AccessibilityInfo, StyleSheet } from "react-native";
+import { View, AccessibilityInfo, StyleSheet } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, cancelAnimation, runOnJS } from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
 
 export default function BreathingGuide() {
   const { theme } = useTheme();
-  const scale = useRef(new Animated.Value(1)).current;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
   const [instruction, setInstruction] = useState("প্রস্তুত হোন...");
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -13,30 +21,24 @@ export default function BreathingGuide() {
     let active = true;
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
 
+
     const breatheCycle = () => {
       if (!active) return;
       setInstruction("শ্বাস নিন... (৪ সেকেন্ড)");
 
-      Animated.timing(scale, {
-        toValue: 2.2,
-        duration: 4000,
-        useNativeDriver: true,
-      }).start(() => {
-        if (!active) return;
-        setInstruction("ধরে রাখুন... (৪ সেকেন্ড)");
-
-        setTimeout(() => {
-          if (!active) return;
-          setInstruction("শ্বাস ছাড়ুন... (৬ সেকেন্ড)");
-
-          Animated.timing(scale, {
-            toValue: 1,
-            duration: 6000,
-            useNativeDriver: true,
-          }).start(() => {
-            if (active) breatheCycle();
-          });
-        }, 4000);
+      scale.value = withTiming(2.2, { duration: 4000 }, (finished) => {
+        if (finished && active) {
+          runOnJS(setInstruction)("ধরে রাখুন... (৪ সেকেন্ড)");
+          setTimeout(() => {
+            if (!active) return;
+            runOnJS(setInstruction)("শ্বাস ছাড়ুন... (৬ সেকেন্ড)");
+            scale.value = withTiming(1, { duration: 6000 }, (finished2) => {
+              if (finished2 && active) {
+                runOnJS(breatheCycle)();
+              }
+            });
+          }, 4000);
+        }
       });
     };
 
@@ -45,7 +47,7 @@ export default function BreathingGuide() {
     return () => {
       active = false;
       clearTimeout(timer);
-      scale.stopAnimation();
+      cancelAnimation(scale);
     };
   }, [scale]);
 
@@ -68,7 +70,7 @@ export default function BreathingGuide() {
           <Animated.View
             style={[
               styles.breathingCircle,
-              { backgroundColor: theme.colors.primary, transform: [{ scale }] },
+              { backgroundColor: theme.colors.primary }, animatedStyle,
             ]}
           />
         ) : (
