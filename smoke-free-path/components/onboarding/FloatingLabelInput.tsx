@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, StyleSheet, TouchableWithoutFeedback, KeyboardTypeOptions } from "react-native";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  KeyboardTypeOptions,
+} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -44,7 +50,10 @@ export default function FloatingLabelInput({
     const color = interpolateColor(
       progress.value,
       [0, 1],
-      [theme.colors.textMuted, isFocused ? theme.colors.gold.primary : theme.colors.textMuted]
+      [
+        theme.colors.textMuted,
+        isFocused ? theme.colors.gold.primary : theme.colors.textMuted,
+      ],
     );
 
     return {
@@ -61,7 +70,10 @@ export default function FloatingLabelInput({
     const borderColor = interpolateColor(
       progress.value,
       [0, 1],
-      [theme.colors.border, isFocused ? theme.colors.gold.primary : theme.colors.border]
+      [
+        theme.colors.border,
+        isFocused ? theme.colors.gold.primary : theme.colors.border,
+      ],
     );
     return {
       borderColor,

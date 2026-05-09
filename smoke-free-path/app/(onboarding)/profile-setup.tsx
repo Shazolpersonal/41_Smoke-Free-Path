@@ -22,6 +22,8 @@ import {
   MAX_SMOKING_YEARS,
 } from "@/constants/calculations";
 
+const MAX_CIGARETTE_PRICE = 10000;
+
 import StepProgress from "@/components/onboarding/StepProgress";
 import ProfileHeader from "@/components/onboarding/ProfileHeader";
 import ProfileForm, {
@@ -77,8 +79,8 @@ export default function ProfileSetupScreen() {
       newErrors.cigarettePricePerPack = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (isNaN(price) || price <= 0) {
       newErrors.cigarettePricePerPack = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
-    } else if (price > 10000) {
-      newErrors.cigarettePricePerPack = "মূল্য ১০০০০-এর বেশি হতে পারে না";
+    } else if (price > MAX_CIGARETTE_PRICE) {
+      newErrors.cigarettePricePerPack = `মূল্য ${MAX_CIGARETTE_PRICE}-এর বেশি হতে পারে না`;
     }
 
     setErrors(newErrors);
@@ -90,12 +92,12 @@ export default function ProfileSetupScreen() {
     const cigs = parseInt(form.cigarettesPerDay, 10);
     if (isNaN(cigs) || cigs <= 0 || cigs > MAX_CIGARETTES_PER_DAY) return false;
     const years = parseInt(form.smokingYears, 10);
-    if (isNaN(years) || years < MIN_SMOKING_YEARS || years > MAX_SMOKING_YEARS) return false;
+    if (isNaN(years) || years < MIN_SMOKING_YEARS || years > MAX_SMOKING_YEARS)
+      return false;
     const price = parseInt(form.cigarettePricePerPack, 10);
-    if (isNaN(price) || price <= 0 || price > 10000) return false;
+    if (isNaN(price) || price <= 0 || price > MAX_CIGARETTE_PRICE) return false;
     return true;
   }, [form]);
-
 
   async function handleNext() {
     if (!validate()) return;
@@ -114,7 +116,10 @@ export default function ProfileSetupScreen() {
         },
       });
     } catch {
-      Alert.alert("ত্রুটি", "তথ্য সেভ করতে একটু সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করবেন?");
+      Alert.alert(
+        "ত্রুটি",
+        "তথ্য সেভ করতে একটু সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করবেন?",
+      );
     }
   }
 
@@ -123,14 +128,27 @@ export default function ProfileSetupScreen() {
   };
 
   return (
-    <GradientCard colors={theme.colors.gradients.screenBackground} style={styles.container} borderRadius={0}>
+    <GradientCard
+      colors={theme.colors.gradients.screenBackground}
+      style={styles.container}
+      borderRadius={0}
+    >
       <SafeAreaView style={styles.flex}>
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <View style={styles.headerDecoration}>
-             {(() => { const { width } = Dimensions.get("window"); return <IslamicGeometricBorder pattern="line" color={theme.colors.gold.primary} width={width} />; })()}
+            {(() => {
+              const { width } = Dimensions.get("window");
+              return (
+                <IslamicGeometricBorder
+                  pattern="line"
+                  color={theme.colors.gold.primary}
+                  width={width}
+                />
+              );
+            })()}
           </View>
           <ScrollView
             contentContainerStyle={[
@@ -145,7 +163,7 @@ export default function ProfileSetupScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <StepProgress currentStep={2} totalSteps={3} />
-            <View style={{height: theme.spacing.md}}/>
+            <View style={{ height: theme.spacing.md }} />
 
             <TouchableOpacity
               onPress={() => router.back()}
@@ -162,7 +180,6 @@ export default function ProfileSetupScreen() {
               </Typography>
             </TouchableOpacity>
 
-
             <ProfileHeader
               stepText="ধাপ ২ / ৩"
               title="আপনার পরিচয়"
@@ -178,7 +195,10 @@ export default function ProfileSetupScreen() {
             />
 
             <TouchableOpacity
-              style={[styles.nextButtonTouchTarget, !isValid && styles.disabledButton]}
+              style={[
+                styles.nextButtonTouchTarget,
+                !isValid && styles.disabledButton,
+              ]}
               onPress={handleNext}
               activeOpacity={0.85}
               disabled={!isValid}
@@ -190,10 +210,7 @@ export default function ProfileSetupScreen() {
                 borderRadius={theme.radius.xl}
                 style={styles.nextButton}
               >
-                <Typography
-                  variant="h3"
-                  color="onPrimary"
-                >
+                <Typography variant="h3" color="onPrimary">
                   সামনে এগিয়ে যান →
                 </Typography>
               </GradientCard>
@@ -220,10 +237,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   nextButtonTouchTarget: {
-     marginTop: 16,
+    marginTop: 16,
   },
   disabledButton: {
-      opacity: 0.5,
+    opacity: 0.5,
   },
   nextButton: {
     height: 56,

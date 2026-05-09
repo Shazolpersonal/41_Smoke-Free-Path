@@ -162,8 +162,10 @@ export default function QuitDateScreen() {
         cigarettePricePerPack: Math.max(parsedPricePerPack, 1),
         cigarettesPerPack: existingProfile?.cigarettesPerPack ?? 20,
         notificationsEnabled: existingProfile?.notificationsEnabled ?? true,
-        morningNotificationTime: existingProfile?.morningNotificationTime ?? "08:00",
-        eveningNotificationTime: existingProfile?.eveningNotificationTime ?? "21:00",
+        morningNotificationTime:
+          existingProfile?.morningNotificationTime ?? "08:00",
+        eveningNotificationTime:
+          existingProfile?.eveningNotificationTime ?? "21:00",
         onboardingCompleted: true,
         createdAt: existingProfile?.createdAt ?? new Date().toISOString(),
       };
@@ -177,14 +179,21 @@ export default function QuitDateScreen() {
       await saveOnboardingStep(0); // Complete
       router.replace("/(tabs)");
     } catch (error) {
-      Alert.alert("ত্রুটি", "কিছু একটা সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+      Alert.alert(
+        "ত্রুটি",
+        "কিছু একটা সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।",
+      );
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <GradientCard colors={theme.colors.gradients.screenBackground} style={styles.container} borderRadius={0}>
+    <GradientCard
+      colors={theme.colors.gradients.screenBackground}
+      style={styles.container}
+      borderRadius={0}
+    >
       <SafeAreaView style={styles.flex}>
         <ScrollView
           contentContainerStyle={[
@@ -199,7 +208,7 @@ export default function QuitDateScreen() {
         >
           <StepProgress currentStep={3} totalSteps={3} />
 
-          <View style={{height: theme.spacing.md}}/>
+          <View style={{ height: theme.spacing.md }} />
 
           <TouchableOpacity
             onPress={() => router.back()}
@@ -216,7 +225,9 @@ export default function QuitDateScreen() {
             </Typography>
           </TouchableOpacity>
 
-          <View style={{ alignItems: "center", marginBottom: theme.spacing.lg }}>
+          <View
+            style={{ alignItems: "center", marginBottom: theme.spacing.lg }}
+          >
             <CrescentMoon size={60} />
             <DuaDecorator />
           </View>
@@ -321,7 +332,10 @@ export default function QuitDateScreen() {
               >
                 <Typography
                   variant="small"
-                  style={[styles.quickDateText, { color: theme.colors.textSecondary }]}
+                  style={[
+                    styles.quickDateText,
+                    { color: theme.colors.textSecondary },
+                  ]}
                 >
                   আজ থেকেই
                 </Typography>
@@ -346,7 +360,10 @@ export default function QuitDateScreen() {
               >
                 <Typography
                   variant="small"
-                  style={[styles.quickDateText, { color: theme.colors.textSecondary }]}
+                  style={[
+                    styles.quickDateText,
+                    { color: theme.colors.textSecondary },
+                  ]}
                 >
                   গতকাল থেকে
                 </Typography>
@@ -366,7 +383,10 @@ export default function QuitDateScreen() {
               >
                 <Typography
                   variant="small"
-                  style={[styles.quickDateText, { color: theme.colors.textSecondary }]}
+                  style={[
+                    styles.quickDateText,
+                    { color: theme.colors.textSecondary },
+                  ]}
                 >
                   তারিখ বাছুন
                 </Typography>
@@ -380,81 +400,96 @@ export default function QuitDateScreen() {
                 { color: theme.colors.textMuted, marginTop: theme.spacing.lg },
               ]}
             >
-              আল্লাহর উপর ভরসা রেখে এই সিদ্ধান্ত নিন। প্রতিটি দিন আল্লাহর রহমতে নতুন সুযোগ।
+              আল্লাহর উপর ভরসা রেখে এই সিদ্ধান্ত নিন। প্রতিটি দিন আল্লাহর রহমতে
+              নতুন সুযোগ।
             </Typography>
-
           </View>
 
           <Modal
-              visible={showAndroidPicker}
-              transparent
-              animationType="fade"
-              onRequestClose={() => setShowAndroidPicker(false)}
-            >
-              <View style={styles.modalOverlay}>
-                <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="inline"
-                    minimumDate={minDate}
-                    maximumDate={
-                      new Date(
-                        today.getFullYear(),
-                        today.getMonth(),
-                        today.getDate() + MAX_FUTURE_DAYS,
-                      )
-                    }
-                    onChange={handleDateChange}
-                    themeVariant={theme.isDark ? "dark" : "light"}
-                  />
-                  <TouchableOpacity
-                    style={styles.modalButton}
-                    onPress={() => setShowAndroidPicker(false)}
+            visible={showAndroidPicker}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowAndroidPicker(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View
+                style={[
+                  styles.modalContent,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              >
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="date"
+                  display="inline"
+                  minimumDate={minDate}
+                  maximumDate={
+                    new Date(
+                      today.getFullYear(),
+                      today.getMonth(),
+                      today.getDate() + MAX_FUTURE_DAYS,
+                    )
+                  }
+                  onChange={handleDateChange}
+                  themeVariant={theme.isDark ? "dark" : "light"}
+                />
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setShowAndroidPicker(false)}
+                >
+                  <GradientCard
+                    colors={theme.colors.gradients.goldButton}
+                    borderRadius={theme.radius.md}
+                    style={styles.modalButtonInner}
                   >
-                    <GradientCard
-                      colors={theme.colors.gradients.goldButton}
-                      borderRadius={theme.radius.md}
-                      style={styles.modalButtonInner}
-                    >
-                      <Typography variant="h3" color="onPrimary">
-                        নিশ্চিত করুন
-                      </Typography>
-                    </GradientCard>
-                  </TouchableOpacity>
-                </View>
+                    <Typography variant="h3" color="onPrimary">
+                      নিশ্চিত করুন
+                    </Typography>
+                  </GradientCard>
+                </TouchableOpacity>
               </View>
+            </View>
           </Modal>
 
           <TouchableOpacity
-            style={[styles.startButtonTouchTarget, isLoading && styles.startButtonDisabled]}
+            style={[
+              styles.startButtonTouchTarget,
+              isLoading && styles.startButtonDisabled,
+            ]}
             onPress={handleStart}
             disabled={isLoading}
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityState={{ disabled: isLoading }}
-            accessibilityLabel={isLoading ? "সেটআপ হচ্ছে..." : "আল্লাহর উপর ভরসা রেখে শুরু করি"}
+            accessibilityLabel={
+              isLoading ? "সেটআপ হচ্ছে..." : "আল্লাহর উপর ভরসা রেখে শুরু করি"
+            }
           >
             <GradientCard
-                colors={theme.colors.gradients.goldButton}
-                hasShadow
-                shadowPreset="goldGlow"
-                borderRadius={theme.radius.xl}
-                style={styles.startButton}
+              colors={theme.colors.gradients.goldButton}
+              hasShadow
+              shadowPreset="goldGlow"
+              borderRadius={theme.radius.xl}
+              style={styles.startButton}
+            >
+              {isLoading ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.colors.onPrimary}
+                  style={{ marginRight: theme.spacing.sm }}
+                />
+              ) : null}
+              <Typography
+                variant="h3"
+                style={[
+                  styles.startButtonText,
+                  { color: theme.colors.onPrimary },
+                ]}
               >
-                {isLoading ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={theme.colors.onPrimary}
-                    style={{ marginRight: theme.spacing.sm }}
-                  />
-                ) : null}
-                <Typography
-                  variant="h3"
-                  style={[styles.startButtonText, { color: theme.colors.onPrimary }]}
-                >
-                  {isLoading ? "সেটআপ হচ্ছে..." : "আল্লাহর উপর ভরসা রেখে শুরু করি →"}
-                </Typography>
+                {isLoading
+                  ? "সেটআপ হচ্ছে..."
+                  : "আল্লাহর উপর ভরসা রেখে শুরু করি →"}
+              </Typography>
             </GradientCard>
           </TouchableOpacity>
         </ScrollView>

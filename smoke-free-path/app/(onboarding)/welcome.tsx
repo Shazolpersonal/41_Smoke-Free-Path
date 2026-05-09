@@ -17,6 +17,7 @@ import Animated, {
 export default function WelcomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   // Entrance animation values
   const bgOpacity = useSharedValue(0);
@@ -33,15 +34,41 @@ export default function WelcomeScreen() {
   const ctaScale = useSharedValue(1);
 
   useEffect(() => {
-    bgOpacity.value = withTiming(1, { duration: 800 });
-    titleY.value = withDelay(200, withTiming(0, { duration: 600 }));
-    titleOpacity.value = withDelay(200, withTiming(1, { duration: 600 }));
-    subtitleY.value = withDelay(400, withTiming(0, { duration: 600 }));
-    subtitleOpacity.value = withDelay(400, withTiming(1, { duration: 600 }));
-    pillsY.value = withDelay(600, withTiming(0, { duration: 600 }));
-    pillsOpacity.value = withDelay(600, withTiming(1, { duration: 600 }));
-    ctaY.value = withDelay(800, withTiming(0, { duration: 600 }));
-    ctaOpacity.value = withDelay(800, withTiming(1, { duration: 600 }));
+    bgOpacity.value = withTiming(1, {
+      duration: theme.animation.timing.verySlow,
+    });
+    titleY.value = withDelay(
+      200,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    titleOpacity.value = withDelay(
+      200,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+    subtitleY.value = withDelay(
+      400,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    subtitleOpacity.value = withDelay(
+      400,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+    pillsY.value = withDelay(
+      600,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    pillsOpacity.value = withDelay(
+      600,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
+    ctaY.value = withDelay(
+      800,
+      withTiming(0, { duration: theme.animation.timing.verySlow }),
+    );
+    ctaOpacity.value = withDelay(
+      800,
+      withTiming(1, { duration: theme.animation.timing.verySlow }),
+    );
   }, []);
 
   const animatedBgStyle = useAnimatedStyle(() => ({
@@ -169,7 +196,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -184,8 +211,8 @@ const styles = StyleSheet.create({
   },
   bottomArea: {
     height: "40%",
-    paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingHorizontal: theme.spacing[6],
+    paddingBottom: theme.spacing[10],
   },
   scrollContent: {
     flexGrow: 1,
@@ -193,27 +220,27 @@ const styles = StyleSheet.create({
   },
   mainTitle: {
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: theme.spacing[4],
   },
   subtitle: {
     textAlign: "center",
-    marginBottom: 32,
+    marginBottom: theme.spacing[8],
   },
   pillsContainer: {
     flexDirection: "row",
     justifyContent: "center",
     flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 40,
+    gap: theme.spacing[2],
+    marginBottom: theme.spacing[10],
   },
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 9999,
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[1] + 2,
+    borderRadius: theme.radius.full,
     borderWidth: 1,
   },
   touchableTarget: {
-    minHeight: 48,
+    minHeight: theme.spacing[12],
     justifyContent: "center",
   },
   ctaButton: {
