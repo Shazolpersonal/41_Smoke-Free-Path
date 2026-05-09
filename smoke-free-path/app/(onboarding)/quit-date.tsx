@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerEvent,
@@ -24,6 +25,9 @@ import {
 } from "@/services/NotificationService";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
+import GradientCard from "@/components/ui/GradientCard";
+import CrescentMoon from "@/components/illustrations/CrescentMoon";
+import DuaDecorator from "@/components/illustrations/DuaDecorator";
 import {
   DEFAULT_CIGARETTE_PRICE_PER_PACK,
   MIN_CIGARETTES_PER_DAY,
@@ -74,6 +78,9 @@ export default function QuitDateScreen() {
   const [showAndroidPicker, setShowAndroidPicker] = useState(false);
   const [dateError, setDateError] = useState("");
 
+  const minDate = new Date(today);
+  minDate.setDate(today.getDate() - MAX_PAST_DAYS);
+
   function handleDateChange(_event: DateTimePickerEvent | null, date?: Date) {
     if (Platform.OS === "android") {
       setShowAndroidPicker(false);
@@ -118,509 +125,368 @@ export default function QuitDateScreen() {
     );
 
     // Validation Rules
-    if (
-      isNaN(parsedCigsPerDay) ||
-      parsedCigsPerDay < MIN_CIGARETTES_PER_DAY ||
-      parsedCigsPerDay > MAX_CIGARETTES_PER_DAY
-    ) {
+    if (parsedCigsPerDay < MIN_CIGARETTES_PER_DAY) {
       Alert.alert(
-        "ভুল ইনপুট",
-        `দৈনিক সিগারেট সংখ্যা ${MIN_CIGARETTES_PER_DAY} থেকে ${MAX_CIGARETTES_PER_DAY} এর মধ্যে হতে হবে।`,
+        "ত্রুটি",
+        "দৈনিক সিগারেটের সংখ্যা ১ বা তার বেশি হতে হবে। পূর্ববর্তী ধাপে ফিরে গিয়ে তথ্য সংশোধন করুন।",
       );
-      return;
-    }
-
-    if (
-      isNaN(parsedSmokingYears) ||
-      parsedSmokingYears < MIN_SMOKING_YEARS ||
-      parsedSmokingYears > MAX_SMOKING_YEARS
-    ) {
-      Alert.alert(
-        "ভুল ইনপুট",
-        `ধূমপানের বছর ${MIN_SMOKING_YEARS} থেকে ${MAX_SMOKING_YEARS} এর মধ্যে হতে হবে।`,
-      );
-      return;
-    }
-
-    if (isNaN(parsedPricePerPack) || parsedPricePerPack <= 0) {
-      Alert.alert("ভুল ইনপুট", "প্রতি প্যাকের মূল্য ধনাত্মক হতে হবে।");
       return;
     }
 
     setIsLoading(true);
-    try {
-      await setupAndroidChannel();
-      const notificationsEnabled = await requestPermission();
 
-      const profile: UserProfile = {
-        id: existingProfile?.id ?? Crypto.randomUUID(),
-        name: params.name ?? existingProfile?.name ?? "",
+    try {
+      if (Platform.OS !== "web") {
+        await setupAndroidChannel();
+        await requestPermission();
+      }
+
+      let userId = existingProfile?.id;
+      if (!userId) {
+        if (typeof Crypto.randomUUID === "function") {
+          userId = Crypto.randomUUID();
+        } else {
+          userId = Math.random().toString(36).substring(2, 15);
+        }
+      }
+
+      const updatedProfile: UserProfile = {
+        ...existingProfile,
+        id: userId,
+        name: params.name || existingProfile?.name || "ব্যবহারকারী",
         cigarettesPerDay: parsedCigsPerDay,
-        smokingYears: parsedSmokingYears,
-        cigarettePricePerPack: parsedPricePerPack,
+        smokingYears: Math.min(
+          Math.max(parsedSmokingYears, MIN_SMOKING_YEARS),
+          MAX_SMOKING_YEARS,
+        ),
+        cigarettePricePerPack: Math.max(parsedPricePerPack, 1),
         cigarettesPerPack: existingProfile?.cigarettesPerPack ?? 20,
-        notificationsEnabled,
-        morningNotificationTime:
-          existingProfile?.morningNotificationTime ?? "08:00",
-        eveningNotificationTime:
-          existingProfile?.eveningNotificationTime ?? "21:00",
+        notificationsEnabled: existingProfile?.notificationsEnabled ?? true,
+        morningNotificationTime: existingProfile?.morningNotificationTime ?? "08:00",
+        eveningNotificationTime: existingProfile?.eveningNotificationTime ?? "21:00",
         onboardingCompleted: true,
         createdAt: existingProfile?.createdAt ?? new Date().toISOString(),
       };
 
-      dispatch({ type: "SET_USER_PROFILE", payload: profile });
+      dispatch({ type: "SET_USER_PROFILE", payload: updatedProfile });
       dispatch({
         type: "ACTIVATE_PLAN_WITH_DATE",
         payload: selectedDate.toISOString(),
       });
-      await saveOnboardingStep(0);
+
+      await saveOnboardingStep(0); // Complete
       router.replace("/(tabs)");
-    } catch {
-      Alert.alert(
-        "ত্রুটি",
-        "সেটআপ সম্পন্ন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
-      );
+    } catch (error) {
+      Alert.alert("ত্রুটি", "কিছু একটা সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
     } finally {
       setIsLoading(false);
     }
   }
 
-  const minDate = new Date(today);
-  minDate.setDate(minDate.getDate() - MAX_PAST_DAYS);
-
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingHorizontal: theme.spacing.lg,
-          paddingTop: theme.spacing.xl,
-          paddingBottom: 48,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          accessibilityLabel="পূর্ববর্তী ধাপে যান"
-          accessibilityRole="button"
-          style={[styles.backButton, { marginBottom: theme.spacing.sm }]}
-        >
-          <Typography
-            variant="subheading"
-            style={[styles.backButtonText, { color: theme.colors.primary }]}
-          >
-            ← পিছনে
-          </Typography>
-        </TouchableOpacity>
-        <StepProgress currentStep={3} totalSteps={3} />
-        <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
-          <Typography
-            variant="small"
-            style={[
-              styles.stepIndicator,
-              { color: theme.colors.primary, marginBottom: theme.spacing.xs },
-            ]}
-          >
-            ধাপ ৩ / ৩
-          </Typography>
-          <Typography
-            variant="display"
-            style={[
-              styles.title,
-              {
-                color: theme.colors.primaryDark,
-                marginBottom: theme.spacing.xs,
-              },
-            ]}
-          >
-            যাত্রা শুরু করুন
-          </Typography>
-          <Typography
-            variant="body"
-            style={[styles.subtitle, { color: theme.colors.textSecondary }]}
-          >
-            আপনার ধূমপান ত্যাগের তারিখ নির্বাচন করুন
-          </Typography>
-        </View>
-
-        <View
-          style={[
-            styles.motivationCard,
+    <GradientCard colors={theme.colors.gradients.screenBackground} style={styles.container} borderRadius={0}>
+      <SafeAreaView style={styles.flex}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
             {
-              backgroundColor: theme.colors.surface,
-              borderLeftColor: theme.colors.primary,
-              padding: 20,
-              marginBottom: 20,
+              paddingHorizontal: theme.spacing.lg,
+              paddingTop: theme.spacing.xl,
+              paddingBottom: theme.spacing.xl,
             },
           ]}
+          showsVerticalScrollIndicator={false}
         >
-          <Typography
-            variant="title"
-            isArabic
-            style={[
-              styles.motivationArabic,
-              { color: theme.colors.primary, marginBottom: theme.spacing.sm },
-            ]}
-          >
-            وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ
-          </Typography>
-          <Typography
-            variant="body"
-            style={[
-              styles.motivationBangla,
-              {
-                color: theme.colors.textSecondary,
-                marginBottom: theme.spacing.xs,
-              },
-            ]}
-          >
-            "আমার সাফল্য কেবল আল্লাহর সাহায্যেই।"
-          </Typography>
-          <Typography
-            variant="small"
-            style={[
-              styles.motivationSource,
-              { color: theme.colors.textDisabled },
-            ]}
-          >
-            — সূরা হুদ, আয়াত ৮৮
-          </Typography>
-        </View>
+          <StepProgress currentStep={3} totalSteps={3} />
 
-        {/* Quit Date Picker */}
-        <View
-          style={[
-            styles.dateCard,
-            {
-              backgroundColor: theme.colors.surface,
-              padding: theme.spacing.md,
-              marginBottom: 20,
-            },
-          ]}
-        >
-          <Typography
-            variant="subheading"
-            style={[
-              styles.dateLabel,
-              { color: theme.colors.primary, marginBottom: theme.spacing.xs },
-            ]}
-          >
-            🗓️ ধূমপান ত্যাগের তারিখ
-          </Typography>
-          <Typography
-            variant="small"
-            style={[
-              styles.dateHint,
-              {
-                color: theme.colors.textDisabled,
-                marginBottom: theme.spacing.sm,
-              },
-            ]}
-          >
-            আজ থেকে শুরু করতে পারেন, অথবা গত ৩০ দিনের মধ্যে একটি তারিখ বেছে নিন
-          </Typography>
+          <View style={{height: theme.spacing.md}}/>
 
-          {/* Selected date display */}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            accessibilityLabel="পূর্ববর্তী ধাপে যান"
+            accessibilityRole="button"
+            style={[styles.backButton, { marginBottom: theme.spacing.md }]}
+          >
+            <Typography
+              variant="body"
+              color="primary"
+              style={styles.backButtonText}
+            >
+              ← পিছনে
+            </Typography>
+          </TouchableOpacity>
+
+          <View style={{ alignItems: "center", marginBottom: theme.spacing.lg }}>
+            <CrescentMoon size={60} />
+            <DuaDecorator />
+          </View>
+
+          <View style={[styles.header, { marginBottom: theme.spacing.lg }]}>
+            <Typography
+              variant="h2"
+              style={[styles.title, { color: theme.colors.text }]}
+            >
+              কবে থেকে এই নতুন পথচলা শুরু করতে চান?
+            </Typography>
+            <Typography
+              variant="body"
+              style={[
+                styles.subtitle,
+                { color: theme.colors.textMuted, marginTop: theme.spacing.xs },
+              ]}
+            >
+              বিসমিল্লাহ বলে শুরু করুন
+            </Typography>
+          </View>
+
           <View
             style={[
-              styles.selectedDateDisplay,
+              styles.dateCard,
               {
-                backgroundColor: theme.colors.surfaceVariant,
+                backgroundColor: theme.colors.surface,
                 borderColor: theme.colors.border,
-                paddingVertical: 12,
-                paddingHorizontal: theme.spacing.md,
-                marginBottom: 12,
+                borderWidth: 1,
+                padding: theme.spacing.lg,
+                marginBottom: theme.spacing.xl,
               },
             ]}
           >
             <Typography
-              variant="heading"
+              variant="body"
               style={[
-                styles.selectedDateText,
-                { color: theme.colors.primaryDark },
+                styles.dateLabel,
+                {
+                  color: theme.colors.textSecondary,
+                  marginBottom: theme.spacing.sm,
+                },
               ]}
             >
-              {formatBengaliDate(selectedDate)}
+              নির্বাচিত তারিখ:
             </Typography>
-          </View>
 
-          {/* iOS: inline picker */}
-          {Platform.OS === "ios" && (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="inline"
-              minimumDate={minDate}
-              maximumDate={
-                new Date(
-                  today.getFullYear(),
-                  today.getMonth(),
-                  today.getDate() + MAX_FUTURE_DAYS,
-                )
-              }
-              onChange={handleDateChange}
-              locale="bn"
-              style={{ marginBottom: theme.spacing.sm }}
-            />
-          )}
+            <View
+              style={[
+                styles.selectedDateDisplay,
+                {
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderColor: theme.colors.gold.primary,
+                  paddingVertical: 14,
+                  marginBottom: 12,
+                },
+              ]}
+            >
+              <Typography
+                variant="h1"
+                style={[
+                  styles.selectedDateText,
+                  { color: theme.colors.gold.primary },
+                ]}
+              >
+                {formatBengaliDate(selectedDate)}
+              </Typography>
+            </View>
 
-          {/* Android: button to open modal picker */}
-          {Platform.OS === "android" && (
-            <>
+            {dateError ? (
+              <Typography
+                variant="small"
+                style={[
+                  styles.errorText,
+                  {
+                    color: theme.colors.error,
+                    marginTop: theme.spacing.xs,
+                    marginBottom: theme.spacing.xs,
+                  },
+                ]}
+              >
+                {dateError}
+              </Typography>
+            ) : null}
+
+            <View style={[styles.quickDateRow, { gap: 10, marginTop: 12 }]}>
               <TouchableOpacity
                 style={[
-                  styles.androidPickerBtn,
+                  styles.quickDateBtn,
                   {
                     backgroundColor: theme.colors.surfaceVariant,
                     borderColor: theme.colors.border,
-                    paddingVertical: 12,
-                    marginBottom: theme.spacing.sm,
+                    paddingVertical: 10,
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedDate(new Date(today));
+                  setDateError("");
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="আজ থেকেই"
+              >
+                <Typography
+                  variant="small"
+                  style={[styles.quickDateText, { color: theme.colors.textSecondary }]}
+                >
+                  আজ থেকেই
+                </Typography>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.quickDateBtn,
+                  {
+                    backgroundColor: theme.colors.surfaceVariant,
+                    borderColor: theme.colors.border,
+                    paddingVertical: 10,
+                  },
+                ]}
+                onPress={() => {
+                  const yesterday = new Date(today);
+                  yesterday.setDate(today.getDate() - 1);
+                  setSelectedDate(yesterday);
+                  setDateError("");
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="গতকাল থেকে"
+              >
+                <Typography
+                  variant="small"
+                  style={[styles.quickDateText, { color: theme.colors.textSecondary }]}
+                >
+                  গতকাল থেকে
+                </Typography>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.quickDateBtn,
+                  {
+                    backgroundColor: theme.colors.surfaceVariant,
+                    borderColor: theme.colors.border,
+                    paddingVertical: 10,
                   },
                 ]}
                 onPress={() => setShowAndroidPicker(true)}
-                activeOpacity={0.8}
                 accessibilityRole="button"
-                accessibilityLabel="তারিখ পরিবর্তন করুন"
+                accessibilityLabel="তারিখ বাছুন"
               >
                 <Typography
-                  variant="body"
-                  style={[
-                    styles.androidPickerBtnText,
-                    { color: theme.colors.primary },
-                  ]}
+                  variant="small"
+                  style={[styles.quickDateText, { color: theme.colors.textSecondary }]}
                 >
-                  📅 তারিখ পরিবর্তন করুন
+                  তারিখ বাছুন
                 </Typography>
               </TouchableOpacity>
-              {showAndroidPicker && (
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display="default"
-                  minimumDate={minDate}
-                  maximumDate={
-                    new Date(
-                      today.getFullYear(),
-                      today.getMonth(),
-                      today.getDate() + MAX_FUTURE_DAYS,
-                    )
-                  }
-                  onChange={handleDateChange}
-                />
-              )}
-            </>
-          )}
+            </View>
 
-          {/* Web fallback */}
-          {Platform.OS === "web" && (
-            <input
-              type="date"
-              value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`}
-              min={`${minDate.getFullYear()}-${String(minDate.getMonth() + 1).padStart(2, "0")}-${String(minDate.getDate()).padStart(2, "0")}`}
-              onChange={(e) => {
-                const parts = e.target.value.split("-");
-                if (parts.length === 3) {
-                  const d = new Date(
-                    parseInt(parts[0]),
-                    parseInt(parts[1]) - 1,
-                    parseInt(parts[2]),
-                  );
-                  if (!isNaN(d.getTime())) handleDateChange(null, d);
-                }
-              }}
-              style={{
-                width: "100%",
-                padding: "14px 16px",
-                fontSize: 16,
-                borderRadius: 12,
-                border: dateError
-                  ? `1.5px solid ${theme.colors.error}`
-                  : `1.5px solid ${theme.colors.border}`,
-                backgroundColor: theme.colors.surface,
-                color: theme.colors.text,
-                boxSizing: "border-box",
-                marginTop: 8,
-                outline: "none",
-              }}
-            />
-          )}
-
-          {dateError ? (
             <Typography
-              variant="small"
+              variant="body"
               style={[
-                styles.errorText,
-                {
-                  color: theme.colors.error,
-                  marginTop: theme.spacing.xs,
-                  marginLeft: theme.spacing.xs,
-                },
+                styles.motivationSource,
+                { color: theme.colors.textMuted, marginTop: theme.spacing.lg },
               ]}
             >
-              {dateError}
+              আল্লাহর উপর ভরসা রেখে এই সিদ্ধান্ত নিন। প্রতিটি দিন আল্লাহর রহমতে নতুন সুযোগ।
             </Typography>
-          ) : null}
 
-          <View style={[styles.quickDateRow, { gap: 10, marginTop: 12 }]}>
-            <TouchableOpacity
-              style={[
-                styles.quickDateBtn,
-                {
-                  backgroundColor: theme.colors.surfaceVariant,
-                  borderColor: theme.colors.border,
-                  paddingVertical: 10,
-                },
-              ]}
-              onPress={() => {
-                setSelectedDate(new Date(today));
-                setDateError("");
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="আজই"
-            >
-              <Typography
-                variant="small"
-                style={[styles.quickDateText, { color: theme.colors.primary }]}
-              >
-                আজই
-              </Typography>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.quickDateBtn,
-                {
-                  backgroundColor: theme.colors.surfaceVariant,
-                  borderColor: theme.colors.border,
-                  paddingVertical: 10,
-                },
-              ]}
-              onPress={() => {
-                const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
-                setSelectedDate(yesterday);
-                setDateError("");
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="গতকাল"
-            >
-              <Typography
-                variant="small"
-                style={[styles.quickDateText, { color: theme.colors.primary }]}
-              >
-                গতকাল
-              </Typography>
-            </TouchableOpacity>
           </View>
-        </View>
 
-        <View
-          style={[
-            styles.journeyCard,
-            {
-              backgroundColor: theme.colors.surfaceVariant,
-              borderColor: theme.colors.border,
-              padding: theme.spacing.lg,
-              marginBottom: theme.spacing.xl,
-            },
-          ]}
-        >
-          <Typography
-            variant="display"
-            style={[styles.journeyIcon, { fontSize: 40, marginBottom: 12 }]}
-          >
-            🌿
-          </Typography>
-          <Typography
-            variant="subheading"
-            style={[styles.journeyText, { color: theme.colors.primary }]}
-          >
-            আজ থেকে আপনার ৪১-ধাপের ধোঁয়া-মুক্ত যাত্রা শুরু হোক
-          </Typography>
-        </View>
+          <Modal
+              visible={showAndroidPicker}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setShowAndroidPicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="inline"
+                    minimumDate={minDate}
+                    maximumDate={
+                      new Date(
+                        today.getFullYear(),
+                        today.getMonth(),
+                        today.getDate() + MAX_FUTURE_DAYS,
+                      )
+                    }
+                    onChange={handleDateChange}
+                    themeVariant={theme.isDark ? "dark" : "light"}
+                  />
+                  <TouchableOpacity
+                    style={styles.modalButton}
+                    onPress={() => setShowAndroidPicker(false)}
+                  >
+                    <GradientCard
+                      colors={theme.colors.gradients.goldButton}
+                      borderRadius={theme.radius.md}
+                      style={styles.modalButtonInner}
+                    >
+                      <Typography variant="h3" color="onPrimary">
+                        নিশ্চিত করুন
+                      </Typography>
+                    </GradientCard>
+                  </TouchableOpacity>
+                </View>
+              </View>
+          </Modal>
 
-        <TouchableOpacity
-          style={[
-            styles.startButton,
-            {
-              backgroundColor: theme.colors.primary,
-              shadowColor: theme.colors.primary,
-              paddingVertical: 18,
-              paddingHorizontal: theme.spacing.xl,
-            },
-            isLoading && styles.startButtonDisabled,
-          ]}
-          onPress={handleStart}
-          disabled={isLoading}
-          activeOpacity={0.85}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isLoading }}
-          accessibilityLabel={isLoading ? "সেটআপ হচ্ছে..." : "এখনই শুরু করুন"}
-        >
-          {isLoading && (
-            <ActivityIndicator
-              size="small"
-              color={theme.colors.onPrimary}
-              style={{ marginRight: theme.spacing.sm }}
-            />
-          )}
-          <Typography
-            variant="title"
-            style={[styles.startButtonText, { color: theme.colors.onPrimary }]}
+          <TouchableOpacity
+            style={[styles.startButtonTouchTarget, isLoading && styles.startButtonDisabled]}
+            onPress={handleStart}
+            disabled={isLoading}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isLoading }}
+            accessibilityLabel={isLoading ? "সেটআপ হচ্ছে..." : "আল্লাহর উপর ভরসা রেখে শুরু করি"}
           >
-            {isLoading ? "সেটআপ হচ্ছে..." : "এখনই শুরু করুন"}
-          </Typography>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+            <GradientCard
+                colors={theme.colors.gradients.goldButton}
+                hasShadow
+                shadowPreset="goldGlow"
+                borderRadius={theme.radius.xl}
+                style={styles.startButton}
+              >
+                {isLoading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.onPrimary}
+                    style={{ marginRight: theme.spacing.sm }}
+                  />
+                ) : null}
+                <Typography
+                  variant="h3"
+                  style={[styles.startButtonText, { color: theme.colors.onPrimary }]}
+                >
+                  {isLoading ? "সেটআপ হচ্ছে..." : "আল্লাহর উপর ভরসা রেখে শুরু করি →"}
+                </Typography>
+            </GradientCard>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    </GradientCard>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
-  header: {},
-  stepIndicator: {
-    fontWeight: "600",
+  scrollContent: {
+    flexGrow: 1,
   },
+  header: {},
   title: {
     fontWeight: "bold",
-  },
-  subtitle: {},
-  motivationCard: {
-    borderRadius: 14,
-    borderLeftWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  motivationArabic: {
-    textAlign: "right",
-    lineHeight: 28,
-  },
-  motivationBangla: {
-    fontStyle: "italic",
     textAlign: "center",
   },
-  motivationSource: {
+  subtitle: {
     textAlign: "center",
   },
   dateCard: {
     borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   },
   dateLabel: {
     fontWeight: "700",
   },
-  dateHint: {},
   selectedDateDisplay: {
     borderRadius: 10,
     alignItems: "center",
@@ -629,14 +495,6 @@ const styles = StyleSheet.create({
   selectedDateText: {
     fontWeight: "700",
     letterSpacing: 1,
-  },
-  androidPickerBtn: {
-    borderRadius: 10,
-    alignItems: "center",
-    borderWidth: 1.5,
-  },
-  androidPickerBtnText: {
-    fontWeight: "600",
   },
   errorText: {},
   quickDateRow: {
@@ -651,26 +509,17 @@ const styles = StyleSheet.create({
   quickDateText: {
     fontWeight: "600",
   },
-  journeyCard: {
-    borderRadius: 14,
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  journeyIcon: {},
-  journeyText: {
-    fontWeight: "600",
+  motivationSource: {
     textAlign: "center",
-    lineHeight: 26,
+  },
+  startButtonTouchTarget: {
+    marginTop: 16,
   },
   startButton: {
-    borderRadius: 14,
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
   },
   startButtonDisabled: {
     opacity: 0.6,
@@ -683,5 +532,27 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    width: "100%",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+  },
+  modalButton: {
+    width: "100%",
+    marginTop: 16,
+  },
+  modalButtonInner: {
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

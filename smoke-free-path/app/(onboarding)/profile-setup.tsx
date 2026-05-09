@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -28,6 +28,9 @@ import ProfileForm, {
   FormData,
   FormErrors,
 } from "@/components/onboarding/ProfileForm";
+import GradientCard from "@/components/ui/GradientCard";
+import IslamicGeometricBorder from "@/components/illustrations/IslamicGeometricBorder";
+import { Dimensions } from "react-native";
 
 export default function ProfileSetupScreen() {
   const router = useRouter();
@@ -48,32 +51,32 @@ export default function ProfileSetupScreen() {
     const newErrors: FormErrors = {};
 
     if (!form.name.trim()) {
-      newErrors.name = "নাম প্রয়োজন";
+      newErrors.name = "দয়া করে আপনার নামটি লিখুন";
     }
 
     const cigs = parseInt(form.cigarettesPerDay, 10);
     if (!form.cigarettesPerDay.trim()) {
-      newErrors.cigarettesPerDay = "দৈনিক সিগারেট সংখ্যা প্রয়োজন";
+      newErrors.cigarettesPerDay = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (isNaN(cigs) || cigs <= 0) {
-      newErrors.cigarettesPerDay = "সংখ্যাটি ধনাত্মক হতে হবে";
+      newErrors.cigarettesPerDay = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (cigs > MAX_CIGARETTES_PER_DAY) {
       newErrors.cigarettesPerDay = `দৈনিক সিগারেট সংখ্যা ${MAX_CIGARETTES_PER_DAY}-এর বেশি হতে পারে না`;
     }
 
     const years = parseInt(form.smokingYears, 10);
     if (!form.smokingYears.trim()) {
-      newErrors.smokingYears = "ধূমপানের বছর প্রয়োজন";
+      newErrors.smokingYears = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (isNaN(years) || years < MIN_SMOKING_YEARS) {
-      newErrors.smokingYears = "সংখ্যাটি ধনাত্মক হতে হবে";
+      newErrors.smokingYears = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (years > MAX_SMOKING_YEARS) {
       newErrors.smokingYears = `ধূমপানের বছর ${MAX_SMOKING_YEARS}-এর বেশি হতে পারে না`;
     }
 
     const price = parseInt(form.cigarettePricePerPack, 10);
     if (!form.cigarettePricePerPack.trim()) {
-      newErrors.cigarettePricePerPack = "প্রতি প্যাকের মূল্য প্রয়োজন";
+      newErrors.cigarettePricePerPack = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (isNaN(price) || price <= 0) {
-      newErrors.cigarettePricePerPack = "মূল্য ধনাত্মক হতে হবে";
+      newErrors.cigarettePricePerPack = "সংখ্যাটি শূন্যের চেয়ে বেশি হতে হবে";
     } else if (price > 10000) {
       newErrors.cigarettePricePerPack = "মূল্য ১০০০০-এর বেশি হতে পারে না";
     }
@@ -81,6 +84,18 @@ export default function ProfileSetupScreen() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
+
+  const isValid = useMemo(() => {
+    if (!form.name.trim()) return false;
+    const cigs = parseInt(form.cigarettesPerDay, 10);
+    if (isNaN(cigs) || cigs <= 0 || cigs > MAX_CIGARETTES_PER_DAY) return false;
+    const years = parseInt(form.smokingYears, 10);
+    if (isNaN(years) || years < MIN_SMOKING_YEARS || years > MAX_SMOKING_YEARS) return false;
+    const price = parseInt(form.cigarettePricePerPack, 10);
+    if (isNaN(price) || price <= 0 || price > 10000) return false;
+    return true;
+  }, [form]);
+
 
   async function handleNext() {
     if (!validate()) return;
@@ -99,7 +114,7 @@ export default function ProfileSetupScreen() {
         },
       });
     } catch {
-      Alert.alert("ত্রুটি", "ডেটা সংরক্ষণে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+      Alert.alert("ত্রুটি", "তথ্য সেভ করতে একটু সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করবেন?");
     }
   }
 
@@ -108,83 +123,85 @@ export default function ProfileSetupScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingHorizontal: theme.spacing.lg,
-              paddingTop: theme.spacing.xl,
-              paddingBottom: theme.spacing.xl,
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+    <GradientCard colors={theme.colors.gradients.screenBackground} style={styles.container} borderRadius={0}>
+      <SafeAreaView style={styles.flex}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            accessibilityLabel="পূর্ববর্তী ধাপে যান"
-            accessibilityRole="button"
-            style={[styles.backButton, { marginBottom: theme.spacing.md }]}
-          >
-            <Typography
-              variant="body"
-              color="primary"
-              style={{ fontWeight: "600" }}
-            >
-              ← পিছনে
-            </Typography>
-          </TouchableOpacity>
-
-          <StepProgress currentStep={2} totalSteps={3} />
-
-          <ProfileHeader
-            stepText="ধাপ ২ / ৩"
-            title="আপনার পরিচয়"
-            subtitle="আপনার সম্পর্কে কিছু তথ্য দিন"
-          />
-
-          <ProfileForm
-            form={form}
-            errors={errors}
-            onChangeForm={setForm}
-            onClearError={handleClearError}
-            onSubmit={handleNext}
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.nextButton,
+          <View style={styles.headerDecoration}>
+             {(() => { const { width } = Dimensions.get("window"); return <IslamicGeometricBorder pattern="line" color={theme.colors.gold.primary} width={width} />; })()}
+          </View>
+          <ScrollView
+            contentContainerStyle={[
+              styles.scrollContent,
               {
-                backgroundColor: theme.colors.primary,
-                shadowColor: theme.colors.primary,
-                paddingVertical: theme.spacing.md,
-                paddingHorizontal: theme.spacing.xl,
+                paddingHorizontal: theme.spacing.lg,
+                paddingTop: theme.spacing.xl,
+                paddingBottom: theme.spacing.xl,
               },
             ]}
-            onPress={handleNext}
-            activeOpacity={0.85}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
-            <Typography
-              variant="title"
-              color="onPrimary"
-              style={{ marginRight: theme.spacing.sm }}
+            <StepProgress currentStep={2} totalSteps={3} />
+            <View style={{height: theme.spacing.md}}/>
+
+            <TouchableOpacity
+              onPress={() => router.back()}
+              accessibilityLabel="পূর্ববর্তী ধাপে যান"
+              accessibilityRole="button"
+              style={[styles.backButton, { marginBottom: theme.spacing.md }]}
             >
-              পরবর্তী
-            </Typography>
-            <Typography variant="title" color="onPrimary">
-              →
-            </Typography>
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+              <Typography
+                variant="body"
+                color="primary"
+                style={{ fontWeight: "600" }}
+              >
+                ← পিছনে
+              </Typography>
+            </TouchableOpacity>
+
+
+            <ProfileHeader
+              stepText="ধাপ ২ / ৩"
+              title="আপনার পরিচয়"
+              subtitle="আপনার সম্পর্কে কিছু তথ্য দিন"
+            />
+
+            <ProfileForm
+              form={form}
+              errors={errors}
+              onChangeForm={setForm}
+              onClearError={handleClearError}
+              onSubmit={handleNext}
+            />
+
+            <TouchableOpacity
+              style={[styles.nextButtonTouchTarget, !isValid && styles.disabledButton]}
+              onPress={handleNext}
+              activeOpacity={0.85}
+              disabled={!isValid}
+            >
+              <GradientCard
+                colors={theme.colors.gradients.goldButton}
+                hasShadow
+                shadowPreset="goldGlow"
+                borderRadius={theme.radius.xl}
+                style={styles.nextButton}
+              >
+                <Typography
+                  variant="h3"
+                  color="onPrimary"
+                >
+                  সামনে এগিয়ে যান →
+                </Typography>
+              </GradientCard>
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </GradientCard>
   );
 }
 
@@ -195,18 +212,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerDecoration: {
+    width: "100%",
+    height: 16,
+  },
   scrollContent: {
     flexGrow: 1,
   },
+  nextButtonTouchTarget: {
+     marginTop: 16,
+  },
+  disabledButton: {
+      opacity: 0.5,
+  },
   nextButton: {
-    borderRadius: 14,
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
   },
   backButton: {
     alignSelf: "flex-start",
