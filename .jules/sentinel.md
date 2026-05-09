@@ -6,3 +6,8 @@
 **Vulnerability:** Predictable identifier generation using `Date.now()` mixed with a truncated `Crypto.randomUUID()`.
 **Learning:** The previous implementation used an insecure pattern (`Date.now() + Crypto.randomUUID().slice(0,8)`) which reduced the UUID entropy to a mere 32 bits, making identifiers predictable and vulnerable to enumeration or collision attacks.
 **Prevention:** Rely strictly on a full `Crypto.randomUUID()` (which provides 122 bits of entropy) for globally unique and unpredictable identifiers.
+
+## 2026-05-09 - [Sentinel Security Fix]
+**Vulnerability:** Insecure Random ID Generation in Test Mocks
+**Learning:** The test suite used Math.random() combined with Date.now() for simulating unique identifiers, reproducing an anti-pattern. This weak entropy could mask true UUID collision edge cases that tests are designed to catch.
+**Prevention:** Apply the application's actual standard (Crypto.randomUUID()) across both source code and test suite environments for ID generation to ensure high entropy and accurate mock behavior.
