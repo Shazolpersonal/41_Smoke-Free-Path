@@ -45,7 +45,7 @@ export default function ChecklistSection({
             key={item.id}
             item={item}
             isCompleted={completedItems.includes(item.id)}
-            onToggle={() => onToggle(item.id)}
+            onToggle={onToggle}
             // Assuming ChecklistItem handles its own internal styling or we can add a divider here
           />
         ))}
