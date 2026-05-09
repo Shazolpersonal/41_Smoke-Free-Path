@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
-import { FormInput } from "@/components/FormElements";
+import FloatingLabelInput from "./FloatingLabelInput";
 
 export interface FormData {
   name: string;
@@ -37,25 +37,20 @@ export default function ProfileForm({
 
   return (
     <View style={[styles.form, { marginBottom: theme.spacing.lg }]}>
-      {/* Name Field */}
-      <FormInput
-        label="আপনার নাম *"
-        placeholder="যেমন: মোহাম্মদ রহিম"
+      <FloatingLabelInput
+        label="আপনার নাম"
+        placeholder="দয়া করে আপনার নামটি লিখুন"
         value={form.name}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, name: text }));
           if (errors.name) onClearError("name");
         }}
         error={errors.name}
-        autoCapitalize="words"
-        returnKeyType="next"
       />
 
-      {/* Cigarettes Per Day */}
-      <FormInput
-        label="দৈনিক সিগারেট সংখ্যা *"
-        helperText="প্রতিদিন গড়ে কতটি সিগারেট খান?"
-        placeholder="যেমন: 10"
+      <FloatingLabelInput
+        label="দিনে কতটি সিগারেট?"
+        placeholder="দিনে কতগুলো সিগারেট খাওয়া হতো?"
         value={form.cigarettesPerDay}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, cigarettesPerDay: text }));
@@ -63,14 +58,11 @@ export default function ProfileForm({
         }}
         error={errors.cigarettesPerDay}
         keyboardType="numeric"
-        returnKeyType="next"
       />
 
-      {/* Smoking Years */}
-      <FormInput
-        label="ধূমপানের বছর *"
-        helperText="কত বছর ধরে ধূমপান করছেন?"
-        placeholder="যেমন: 5"
+      <FloatingLabelInput
+        label="কত বছর ধরে?"
+        placeholder="কত বছর ধরে ধূমপানের অভ্যাস?"
         value={form.smokingYears}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, smokingYears: text }));
@@ -78,14 +70,11 @@ export default function ProfileForm({
         }}
         error={errors.smokingYears}
         keyboardType="numeric"
-        returnKeyType="next"
       />
 
-      {/* Cigarette Price Per Pack */}
-      <FormInput
-        label="প্রতি প্যাকের মূল্য (টাকা) *"
-        helperText="একটি সিগারেট প্যাকের দাম কত?"
-        placeholder="যেমন: 300"
+      <FloatingLabelInput
+        label="প্রতি প্যাকের দাম (টাকা)"
+        placeholder="প্রতি প্যাকের দাম কত ছিল?"
         value={form.cigarettePricePerPack}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, cigarettePricePerPack: text }));
@@ -94,8 +83,6 @@ export default function ProfileForm({
         }}
         error={errors.cigarettePricePerPack}
         keyboardType="numeric"
-        returnKeyType="done"
-        onSubmitEditing={onSubmit}
       />
 
       <View
