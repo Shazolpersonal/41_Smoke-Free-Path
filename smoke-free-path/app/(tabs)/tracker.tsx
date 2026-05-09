@@ -5,10 +5,17 @@ import { useRouter } from "expo-router";
 import { useAppContext } from "@/context/AppContext";
 import StepCard from "@/components/StepCard";
 import Card from "@/components/Card";
+import GradientCard from "@/components/ui/GradientCard";
+import IslamicGeometricBorder from "@/components/illustrations/IslamicGeometricBorder";
 import ScreenHeader from "@/components/ScreenHeader";
 import Typography from "@/components/Typography";
-import { isStepAccessible, getStepStatus, createAccessContext } from "@/utils/trackerUtils";
+import {
+  isStepAccessible,
+  getStepStatus,
+  createAccessContext,
+} from "@/utils/trackerUtils";
 import { TOTAL_STEPS } from "@/constants";
+import { useProgressStats } from "@/hooks/useProgressStats";
 import { useTheme } from "@/hooks/useTheme";
 
 function getDaysUntil(dateStr: string): number {
@@ -20,6 +27,7 @@ export default function TrackerScreen() {
   const router = useRouter();
   const { state, dispatch } = useAppContext();
   const { planState, stepProgress, userProfile } = state;
+  const stats = useProgressStats();
   const { theme } = useTheme();
 
   function handleActivatePlan() {
@@ -37,8 +45,8 @@ export default function TrackerScreen() {
   const rows = useMemo(() => {
     const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1);
     const result: number[][] = [];
-    for (let i = 0; i < steps.length; i += 7) {
-      result.push(steps.slice(i, i + 7));
+    for (let i = 0; i < steps.length; i += 5) {
+      result.push(steps.slice(i, i + 5));
     }
     return result;
   }, []);
@@ -49,7 +57,7 @@ export default function TrackerScreen() {
         router.push(`/tracker/${step}`);
       }
     },
-    [router, planState]
+    [router, planState],
   );
 
   // Cache step statuses to prevent redundant Date instantiations
@@ -124,10 +132,66 @@ export default function TrackerScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
-      <ScreenHeader
-        title="৪১-ধাপের ট্র্যাকার"
-        subtitle={`আপনি এখন ধাপ ${planState.currentStep} এ আছেন`}
-      />
+      <View
+        style={{
+          paddingHorizontal: theme.spacing.md,
+          paddingTop: theme.spacing.md,
+          paddingBottom: theme.spacing.sm,
+        }}
+      >
+        <Typography variant="h1" color="onPrimary" style={{ marginBottom: 4 }}>
+          ৪১ দিনের যাত্রা
+        </Typography>
+        <Typography
+          variant="body"
+          color="textSecondary"
+          style={{ marginBottom: theme.spacing.md }}
+        >
+          প্রতিটি দিন আল্লাহর রহমতে এক নতুন সুযোগ
+        </Typography>
+        <IslamicGeometricBorder
+          pattern="diamonds"
+          width={Math.min(400, 300)}
+          opacity={0.6}
+        />
+      </View>
+
+      {planState.isActive && (
+        <GradientCard
+          colors={theme.colors.gradients.cardSurface}
+          hasShadow={true}
+          style={{
+            marginHorizontal: theme.spacing.md,
+            marginBottom: theme.spacing.md,
+            padding: theme.spacing.lg,
+          }}
+        >
+          <Typography
+            variant="h3"
+            color="primary"
+            style={{ marginBottom: theme.spacing.sm }}
+          >
+            আপনি {stats?.totalSmokeFreeDays || 0} দিন সম্পন্ন করেছেন
+          </Typography>
+          <View
+            style={{
+              height: 4,
+              backgroundColor: theme.colors.surfaceVariant,
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              style={{
+                height: "100%",
+                width: `${Math.min(100, Math.max(0, ((stats?.totalSmokeFreeDays || 0) / 41) * 100))}%`,
+                backgroundColor: theme.colors.primary,
+                borderRadius: 2,
+              }}
+            />
+          </View>
+        </GradientCard>
+      )}
 
       {/* Upcoming quit date countdown */}
       {planState.activatedAt &&
@@ -193,7 +257,7 @@ export default function TrackerScreen() {
           {rows.map((row, rowIdx) => (
             <View
               key={rowIdx}
-              style={[styles.row, row.length < 7 && styles.rowCentered]}
+              style={[styles.row, row.length < 5 && styles.rowCentered]}
             >
               {row.map((step) => {
                 const { status, isCurrent } = cellStatuses[step];

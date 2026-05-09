@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View, useWindowDimensions, Pressable } from "react-native";
-import Animated, { withTiming, withSequence, withDelay,
+import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../theme";
 import Typography from "./Typography";
+import MilestoneStarburst from "./illustrations/MilestoneStarburst";
 import type { StepStatus } from "@/types";
 
 interface StepCardProps {
@@ -17,6 +22,8 @@ interface StepCardProps {
   onPress: (step: number) => void;
 }
 
+const MILESTONE_DAYS = [1, 3, 7, 14, 21, 30, 41];
+
 export default React.memo(function StepCard({
   step,
   status,
@@ -25,18 +32,37 @@ export default React.memo(function StepCard({
 }: StepCardProps) {
   const { theme } = useTheme();
   const { width } = useWindowDimensions();
-  const COLUMNS = 7;
+  const COLUMNS = 5;
   const PADDING = 32;
   const GAP = 8;
-  const cardSize = Math.floor(
-    (width - PADDING - GAP * (COLUMNS - 1)) / COLUMNS,
+  const cardSize = Math.max(
+    60,
+    Math.floor((width - PADDING - GAP * (COLUMNS - 1)) / COLUMNS),
   );
 
   const scale = useSharedValue(1);
+  const pulseOpacity = useSharedValue(0.3);
+
+  const isMilestone = MILESTONE_DAYS.includes(step);
+
+  useEffect(() => {
+    if (isCurrent) {
+      pulseOpacity.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.3, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1, // infinite
+        true, // reverse
+      );
+    } else {
+      pulseOpacity.value = 1;
+    }
+  }, [isCurrent]);
 
   const STATUS_CONFIG = {
     complete: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.gold.primary,
       textColor: theme.colors.onPrimary,
       icon: "✓",
     },
@@ -47,32 +73,24 @@ export default React.memo(function StepCard({
       borderColor: theme.colors.primary,
     },
     future: {
-      backgroundColor: theme.colors.surfaceVariant,
-      textColor: theme.colors.textDisabled,
+      backgroundColor: theme.tokens.background.elevated,
+      textColor: theme.colors.textMuted,
       icon: "🔒",
     },
   };
 
   const config = (STATUS_CONFIG[status] || STATUS_CONFIG.future) as any;
 
-const opacityVal = useSharedValue(1);
-
-  React.useEffect(() => {
-    if (status === "complete") {
-      scale.value = withSequence(
-        withTiming(1.2, { duration: 125 }),
-        withTiming(1, { duration: 125 })
-      );
-      opacityVal.value = withSequence(
-        withTiming(0.5, { duration: 100 }),
-        withTiming(1, { duration: 150 })
-      );
-    }
-  }, [status]);
-
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    opacity: opacityVal.value,
+  }));
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    opacity: pulseOpacity.value,
+    borderWidth: isCurrent ? 2 : config.borderColor ? 1.5 : 0,
+    borderColor: isCurrent
+      ? theme.colors.gold.primary
+      : config.borderColor || "transparent",
   }));
 
   const handlePressIn = () => {
@@ -101,7 +119,7 @@ const opacityVal = useSharedValue(1);
       onPressOut={handlePressOut}
       disabled={status === "future"}
       accessibilityLabel={accessibilityLabel}
-      style={{ margin: 4 }}
+      style={{ margin: GAP / 2 }}
     >
       <Animated.View
         style={[
@@ -110,54 +128,39 @@ const opacityVal = useSharedValue(1);
             backgroundColor: config.backgroundColor,
             width: cardSize,
             height: cardSize,
-            borderRadius: 12,
+            borderRadius: theme.radius.md,
             alignItems: "center",
             justifyContent: "center",
-            borderColor: config.borderColor || "transparent",
-            borderWidth: config.borderColor ? 1.5 : 0,
           },
-          isCurrent && {
-            borderWidth: 2.5,
-            borderColor: theme.colors.warning,
-            ...theme.shadows.card,
-          },
+          pulseStyle,
           animatedStyle,
         ]}
       >
         <Typography
-          variant="small"
-          style={[
-            styles.stepNumber,
-            {
-              color: isCurrent ? theme.colors.warning : config.textColor,
-              fontWeight: "800",
-            },
-          ]}
+          variant="numberSmall"
+          style={{
+            color: config.textColor,
+          }}
         >
           {step}
         </Typography>
-        {isCurrent ? (
+
+        {status === "complete" ? (
           <Typography
-            variant="small"
-            style={[
-              styles.currentDot,
-              { color: theme.colors.warning, marginTop: 1 },
-            ]}
-          >
-            ●
-          </Typography>
-        ) : config.icon ? (
-          <Typography
-            variant="small"
+            variant="caption"
             style={[
               styles.icon,
-              { color: config.textColor, fontSize: 10, marginTop: 1 },
+              { color: config.textColor, marginTop: 2, fontWeight: "bold" },
             ]}
           >
             {config.icon}
           </Typography>
-        ) : (
-          <View style={styles.iconPlaceholder} />
+        ) : null}
+
+        {isMilestone && (
+          <View style={styles.milestoneOverlay}>
+            <MilestoneStarburst size={20} />
+          </View>
         )}
       </Animated.View>
     </Pressable>
@@ -165,11 +168,17 @@ const opacityVal = useSharedValue(1);
 });
 
 const styles = StyleSheet.create({
-  card: {},
-  stepNumber: { fontSize: 13 },
-  icon: {},
-  currentDot: { fontSize: 8 },
-  iconPlaceholder: {
-    height: 14,
+  card: {
+    overflow: "visible",
+  },
+  icon: {
+    position: "absolute",
+    bottom: 4,
+  },
+  milestoneOverlay: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    zIndex: 10,
   },
 });
