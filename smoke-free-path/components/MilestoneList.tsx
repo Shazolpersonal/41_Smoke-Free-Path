@@ -19,20 +19,41 @@ export default function MilestoneList({ milestones }: MilestoneListProps) {
       {MILESTONE_DAYS.map((steps) => {
         const isAchieved = Boolean(milestones[steps]);
         const content = getMilestoneContent(steps);
-        const starColor = isAchieved ? theme.colors.gold.primary : theme.tokens.background.elevated;
-        const textColor = isAchieved ? theme.colors.text : theme.colors.textMuted;
+        const starColor = isAchieved
+          ? theme.colors.gold.primary
+          : theme.tokens.background.elevated;
+        const textColor = isAchieved
+          ? theme.colors.text
+          : theme.colors.textMuted;
 
         return (
-          <View key={steps} style={[styles.row, !isAchieved && { opacity: 0.7 }]}>
+          <View
+            key={steps}
+            style={[styles.row, !isAchieved && { opacity: 0.7 }]}
+          >
             <View style={styles.iconContainer}>
-              <MilestoneStarburst size={32} color={starColor} hasGlow={isAchieved} />
+              <MilestoneStarburst
+                size={32}
+                color={starColor}
+                hasGlow={isAchieved}
+              />
             </View>
             <View style={styles.info}>
-              <Typography variant="bodyLarge" style={{ color: textColor, fontWeight: "700", marginBottom: 2 }}>
+              <Typography
+                variant="bodyLarge"
+                style={{ color: textColor, fontWeight: "700", marginBottom: 2 }}
+              >
                 {content?.titleBangla ?? `${steps} ধাপ`}
               </Typography>
               {content?.healthBenefit ? (
-                <Typography variant="caption" style={{ color: isAchieved ? theme.colors.textSecondary : theme.colors.textDisabled }}>
+                <Typography
+                  variant="caption"
+                  style={{
+                    color: isAchieved
+                      ? theme.colors.textSecondary
+                      : theme.colors.textDisabled,
+                  }}
+                >
                   {content.healthBenefit}
                 </Typography>
               ) : null}

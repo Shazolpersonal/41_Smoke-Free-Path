@@ -9,7 +9,11 @@ import GradientCard from "@/components/ui/GradientCard";
 import IslamicGeometricBorder from "@/components/illustrations/IslamicGeometricBorder";
 import ScreenHeader from "@/components/ScreenHeader";
 import Typography from "@/components/Typography";
-import { isStepAccessible, getStepStatus, createAccessContext } from "@/utils/trackerUtils";
+import {
+  isStepAccessible,
+  getStepStatus,
+  createAccessContext,
+} from "@/utils/trackerUtils";
 import { TOTAL_STEPS } from "@/constants";
 import { useProgressStats } from "@/hooks/useProgressStats";
 import { useTheme } from "@/hooks/useTheme";
@@ -53,7 +57,7 @@ export default function TrackerScreen() {
         router.push(`/tracker/${step}`);
       }
     },
-    [router, planState]
+    [router, planState],
   );
 
   // Cache step statuses to prevent redundant Date instantiations
@@ -128,14 +132,28 @@ export default function TrackerScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }}>
-      <View style={{ paddingHorizontal: theme.spacing.md, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.sm }}>
+      <View
+        style={{
+          paddingHorizontal: theme.spacing.md,
+          paddingTop: theme.spacing.md,
+          paddingBottom: theme.spacing.sm,
+        }}
+      >
         <Typography variant="h1" color="onPrimary" style={{ marginBottom: 4 }}>
           ৪১ দিনের যাত্রা
         </Typography>
-        <Typography variant="body" color="textSecondary" style={{ marginBottom: theme.spacing.md }}>
+        <Typography
+          variant="body"
+          color="textSecondary"
+          style={{ marginBottom: theme.spacing.md }}
+        >
           প্রতিটি দিন আল্লাহর রহমতে এক নতুন সুযোগ
         </Typography>
-        <IslamicGeometricBorder pattern="diamonds" width={Math.min(400, 300)} opacity={0.6} />
+        <IslamicGeometricBorder
+          pattern="diamonds"
+          width={Math.min(400, 300)}
+          opacity={0.6}
+        />
       </View>
 
       {planState.isActive && (
@@ -148,11 +166,29 @@ export default function TrackerScreen() {
             padding: theme.spacing.lg,
           }}
         >
-          <Typography variant="h3" color="primary" style={{ marginBottom: theme.spacing.sm }}>
+          <Typography
+            variant="h3"
+            color="primary"
+            style={{ marginBottom: theme.spacing.sm }}
+          >
             আপনি {stats?.totalSmokeFreeDays || 0} দিন সম্পন্ন করেছেন
           </Typography>
-          <View style={{ height: 4, backgroundColor: theme.colors.surfaceVariant, borderRadius: 2, overflow: "hidden" }}>
-            <View style={{ height: "100%", width: `${Math.min(100, Math.max(0, ((stats?.totalSmokeFreeDays || 0) / 41) * 100))}%`, backgroundColor: theme.colors.primary, borderRadius: 2 }} />
+          <View
+            style={{
+              height: 4,
+              backgroundColor: theme.colors.surfaceVariant,
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              style={{
+                height: "100%",
+                width: `${Math.min(100, Math.max(0, ((stats?.totalSmokeFreeDays || 0) / 41) * 100))}%`,
+                backgroundColor: theme.colors.primary,
+                borderRadius: 2,
+              }}
+            />
           </View>
         </GradientCard>
       )}
@@ -221,7 +257,7 @@ export default function TrackerScreen() {
           {rows.map((row, rowIdx) => (
             <View
               key={rowIdx}
-              style={[styles.row, row.length < 7 && styles.rowCentered]}
+              style={[styles.row, row.length < 5 && styles.rowCentered]}
             >
               {row.map((step) => {
                 const { status, isCurrent } = cellStatuses[step];

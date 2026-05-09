@@ -7,7 +7,7 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
-  Easing
+  Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../theme";
@@ -35,7 +35,10 @@ export default React.memo(function StepCard({
   const COLUMNS = 5;
   const PADDING = 32;
   const GAP = 8;
-  const cardSize = Math.max(60, Math.floor((width - PADDING - GAP * (COLUMNS - 1)) / COLUMNS));
+  const cardSize = Math.max(
+    60,
+    Math.floor((width - PADDING - GAP * (COLUMNS - 1)) / COLUMNS),
+  );
 
   const scale = useSharedValue(1);
   const pulseOpacity = useSharedValue(0.3);
@@ -47,10 +50,10 @@ export default React.memo(function StepCard({
       pulseOpacity.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.3, { duration: 800, easing: Easing.inOut(Easing.ease) })
+          withTiming(0.3, { duration: 800, easing: Easing.inOut(Easing.ease) }),
         ),
         -1, // infinite
-        true // reverse
+        true, // reverse
       );
     } else {
       pulseOpacity.value = 1;
@@ -85,7 +88,9 @@ export default React.memo(function StepCard({
   const pulseStyle = useAnimatedStyle(() => ({
     opacity: pulseOpacity.value,
     borderWidth: isCurrent ? 2 : config.borderColor ? 1.5 : 0,
-    borderColor: isCurrent ? theme.colors.gold.primary : (config.borderColor || "transparent"),
+    borderColor: isCurrent
+      ? theme.colors.gold.primary
+      : config.borderColor || "transparent",
   }));
 
   const handlePressIn = () => {
@@ -143,7 +148,10 @@ export default React.memo(function StepCard({
         {status === "complete" ? (
           <Typography
             variant="caption"
-            style={[styles.icon, { color: config.textColor, marginTop: 2, fontWeight: 'bold' }]}
+            style={[
+              styles.icon,
+              { color: config.textColor, marginTop: 2, fontWeight: "bold" },
+            ]}
           >
             {config.icon}
           </Typography>

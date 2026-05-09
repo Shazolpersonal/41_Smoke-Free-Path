@@ -329,7 +329,9 @@ export default function ProgressScreen() {
                 variant="title"
                 color="text"
                 accessibilityRole="header"
-              >আপনার অর্জনসমূহ</Typography>
+              >
+                আপনার অর্জনসমূহ
+              </Typography>
               <Typography variant="body" color="textSecondary">
                 {collapsed.milestones ? "▶" : "▼"}
               </Typography>

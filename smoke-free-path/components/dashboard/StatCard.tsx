@@ -9,7 +9,7 @@ interface StatCardProps {
   label: string;
   value: number;
   prefix?: string;
-  suffix?: string;
+
   style?: StyleProp<ViewStyle>;
   islamicCardGradient?: boolean;
 }
@@ -18,7 +18,6 @@ export default function StatCard({
   label,
   value,
   prefix,
-  suffix,
   style,
   islamicCardGradient = false,
 }: StatCardProps) {
@@ -36,10 +35,10 @@ export default function StatCard({
       <View style={styles.content}>
         <AnimatedCountUp
           value={value}
-          variant="numberSmall" as any
+          variant={"numberSmall" as any}
           color="text"
           prefix={prefix}
-          suffix={suffix}
+
         />
         <Typography
           variant="caption"

@@ -35,7 +35,11 @@ import DuaDecorator from "@/components/illustrations/DuaDecorator";
 import AnimatedCountUp from "@/components/AnimatedCountUp";
 import { getStepContent, getStepPlan } from "@/services/ContentService";
 import { loadAppState } from "@/services/StorageService";
-import { isFutureDate, getTimeUntilStart, safeModulo } from "@/utils/trackerUtils";
+import {
+  isFutureDate,
+  getTimeUntilStart,
+  safeModulo,
+} from "@/utils/trackerUtils";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -64,7 +68,6 @@ export default function HomeScreen() {
     () => getStepContent(currentStep > 0 ? currentStep : 1),
     [currentStep],
   );
-
 
   const stepPlan = useMemo(
     () => getStepPlan(currentStep > 0 ? currentStep : 1),
@@ -117,15 +120,16 @@ export default function HomeScreen() {
     : null;
 
   // Calculate hours if activated (BUG-13: use safe modulo for non-negative hours)
-  const hoursSinceActivation = planState.activatedAt && !isFutureQuitDate
-    ? safeModulo(
-        Math.floor(
-          (Date.now() - new Date(planState.activatedAt).getTime()) /
-            (1000 * 60 * 60),
-        ),
-        24,
-      )
-    : 0;
+  const hoursSinceActivation =
+    planState.activatedAt && !isFutureQuitDate
+      ? safeModulo(
+          Math.floor(
+            (Date.now() - new Date(planState.activatedAt).getTime()) /
+              (1000 * 60 * 60),
+          ),
+          24,
+        )
+      : 0;
 
   if (!hydrated) {
     return (
@@ -220,7 +224,15 @@ export default function HomeScreen() {
                 },
               ]}
             >
-              <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.xl }}>
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: theme.spacing.xl,
+                }}
+              >
                 <Typography variant="h3" color="textSecondary">
                   আস-সালামু আলাইকুম, {userProfile?.name || "বন্ধু"}
                 </Typography>
@@ -268,11 +280,7 @@ export default function HomeScreen() {
                   >
                     ০
                   </Typography>
-                  <Typography
-                    variant="body"
-                    color="textMuted"
-                    align="center"
-                  >
+                  <Typography variant="body" color="textMuted" align="center">
                     দিন ধূমপানমুক্ত
                   </Typography>
                   <View style={{ marginTop: theme.spacing.sm }}>
@@ -289,11 +297,7 @@ export default function HomeScreen() {
                   >
                     {stats?.totalSmokeFreeDays || 0}
                   </Typography>
-                  <Typography
-                    variant="body"
-                    color="textMuted"
-                    align="center"
-                  >
+                  <Typography variant="body" color="textMuted" align="center">
                     দিন ধূমপানমুক্ত
                   </Typography>
                   <View style={{ marginTop: theme.spacing.sm }}>
@@ -366,14 +370,28 @@ export default function HomeScreen() {
                     marginBottom: theme.spacing.lg,
                   }}
                 >
-                  <Typography variant="caption" color="textMuted" style={{ marginBottom: theme.spacing.xs }}>
+                  <Typography
+                    variant="caption"
+                    color="textMuted"
+                    style={{ marginBottom: theme.spacing.xs }}
+                  >
                     আজকের ধাপ
                   </Typography>
-                  <Typography variant="h2" color="primary" style={{ marginBottom: theme.spacing.xs }}>
-                    {stepContent ? `ধাপ ${stepContent.step}: ${stepContent.title}` : 'আজকের কাজ'}
+                  <Typography
+                    variant="h2"
+                    color="primary"
+                    style={{ marginBottom: theme.spacing.xs }}
+                  >
+                    {stepContent
+                      ? `ধাপ ${stepPlan?.step}: ${stepPlan?.title}`
+                      : "আজকের কাজ"}
                   </Typography>
-                  <Typography variant="body" color="textMuted" style={{ marginBottom: theme.spacing.md }}>
-                    {stepPlan?.theme || 'আপনার ধূমপান-মুক্ত যাত্রা চালিয়ে যান'}
+                  <Typography
+                    variant="body"
+                    color="textMuted"
+                    style={{ marginBottom: theme.spacing.md }}
+                  >
+                    {stepPlan?.theme || "আপনার ধূমপান-মুক্ত যাত্রা চালিয়ে যান"}
                   </Typography>
 
                   <View style={{ marginBottom: theme.spacing.lg }}>
@@ -387,7 +405,7 @@ export default function HomeScreen() {
                       onPress={() => {
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         if (stepContent) {
-                          router.push(`/tracker/${stepPlan.step}`);
+                          router.push(`/tracker/${stepPlan!.step}`);
                         }
                       }}
                       activeOpacity={1}
@@ -406,7 +424,11 @@ export default function HomeScreen() {
                           justifyContent: "center",
                         }}
                       >
-                        <Typography variant="bodyLarge" color="onPrimary" style={{ fontWeight: "600" }}>
+                        <Typography
+                          variant="bodyLarge"
+                          color="onPrimary"
+                          style={{ fontWeight: "600" }}
+                        >
                           আজকের কাজ দেখুন →
                         </Typography>
                       </LinearGradient>
@@ -419,7 +441,12 @@ export default function HomeScreen() {
             {/* SECTION C — Quick Stats Row */}
             {planState.isActive && !isFutureQuitDate && (
               <Animated.View entering={FadeInUp.delay(200).duration(300)}>
-                <View style={[styles.statsContainer, { marginBottom: theme.spacing.lg, gap: theme.spacing.sm }]}>
+                <View
+                  style={[
+                    styles.statsContainer,
+                    { marginBottom: theme.spacing.lg, gap: theme.spacing.sm },
+                  ]}
+                >
                   <StatCard
                     label="টাকা সাশ্রয়"
                     value={stats?.totalSavedMoney || 0}
@@ -465,7 +492,11 @@ export default function HomeScreen() {
         {planState.isActive && (
           <Animated.View
             entering={FadeInUp.delay(400).duration(400)}
-            style={{ position: 'absolute', bottom: theme.spacing.xl, right: theme.spacing.lg }}
+            style={{
+              position: "absolute",
+              bottom: theme.spacing.xl,
+              right: theme.spacing.lg,
+            }}
           >
             <TouchableOpacity
               onPressIn={handleCravingPressIn}
@@ -492,7 +523,11 @@ export default function HomeScreen() {
                     elevation: 5,
                   }}
                 >
-                  <Typography variant="bodyLarge" color="onPrimary" style={{ fontWeight: "700" }}>
+                  <Typography
+                    variant="bodyLarge"
+                    color="onPrimary"
+                    style={{ fontWeight: "700" }}
+                  >
                     সাহায্য দরকার?
                   </Typography>
                 </LinearGradient>
