@@ -2,6 +2,7 @@
   "expo": {
     "name": "ধোঁয়া-মুক্ত পথ",
     "slug": "smoke-free-path",
+    "owner": "shazolislam",
     "scheme": "smokefree",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -50,7 +51,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e73e6816-ebb7-40b7-9dec-e4b3b3661515"
+        "projectId": "bf451887-6cc2-453f-be14-6594556a0e55"
       }
     }
   }
