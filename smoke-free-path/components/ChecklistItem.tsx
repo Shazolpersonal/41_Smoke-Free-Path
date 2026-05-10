@@ -16,7 +16,7 @@ import type {
 interface ChecklistItemProps {
   item: ChecklistItemType;
   isCompleted: boolean;
-  onToggle: () => void;
+  onToggle: (id: string) => void;
 }
 
 const TYPE_ICONS: Record<ItemType, string> = {
@@ -72,7 +72,7 @@ export default React.memo(function ChecklistItem({
           alignItems: "center",
         },
       ]}
-      onPress={onToggle}
+      onPress={() => onToggle(item.id)}
       activeOpacity={0.7}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: isCompleted }}

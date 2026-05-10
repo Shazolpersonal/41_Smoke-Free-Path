@@ -4,3 +4,6 @@
 ## 2024-05-04 - React.memo Optimization for FlatList Items
 **Learning:** In React Native list implementations (like `FlatList` or custom grids), components wrapped in `React.memo` (e.g., `StepCard`) frequently have their memoization defeated if parent components pass inline arrow functions (e.g., `onPress={() => onPress(step)}`) to their props, causing them to re-render unnecessarily on every parent update.
 **Action:** When defining list item components, pass the item identifier (e.g., `step: number`) directly to the child's `onPress` prop. In the parent, define a stable callback using `useCallback` that accepts the identifier, and pass this stable reference to the child component.
+## 2025-05-10 - Fix React.memo breaking on ChecklistItem
+**Learning:** Passing an inline arrow function (`() => onToggle(id)`) as a prop breaks `React.memo` by generating a new function reference on every render, causing unnecessary re-renders of list items.
+**Action:** Changed the `ChecklistItem` component to invoke `onToggle(item.id)` internally, allowing the parent (`ChecklistSection`) to pass down the stable callback reference directly.
