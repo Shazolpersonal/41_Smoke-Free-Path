@@ -22,7 +22,7 @@ interface ProfileFormProps {
   form: FormData;
   errors: FormErrors;
   onChangeForm: (updater: (prev: FormData) => FormData) => void;
-  onClearError: (field: keyof FormErrors) => void;
+  onClearError?: (field: keyof FormErrors) => void;
   onSubmit: () => void;
 }
 
@@ -43,7 +43,7 @@ export default function ProfileForm({
         value={form.name}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, name: text }));
-          if (errors.name) onClearError("name");
+          if (errors.name) onClearError?.("name");
         }}
         error={errors.name}
       />
@@ -54,7 +54,7 @@ export default function ProfileForm({
         value={form.cigarettesPerDay}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, cigarettesPerDay: text }));
-          if (errors.cigarettesPerDay) onClearError("cigarettesPerDay");
+          if (errors.cigarettesPerDay) onClearError?.("cigarettesPerDay");
         }}
         error={errors.cigarettesPerDay}
         keyboardType="numeric"
@@ -66,7 +66,7 @@ export default function ProfileForm({
         value={form.smokingYears}
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, smokingYears: text }));
-          if (errors.smokingYears) onClearError("smokingYears");
+          if (errors.smokingYears) onClearError?.("smokingYears");
         }}
         error={errors.smokingYears}
         keyboardType="numeric"
@@ -79,7 +79,7 @@ export default function ProfileForm({
         onChangeText={(text) => {
           onChangeForm((prev) => ({ ...prev, cigarettePricePerPack: text }));
           if (errors.cigarettePricePerPack)
-            onClearError("cigarettePricePerPack");
+            onClearError?.("cigarettePricePerPack");
         }}
         error={errors.cigarettePricePerPack}
         keyboardType="numeric"
