@@ -4,6 +4,7 @@
 // the cached value without re-loading.
 // Validates: Requirements 24.2, 24.3, 24.4, 24.5
 
+import crypto from "crypto";
 import * as fc from "fast-check";
 import {
   clearOldTriggerLogs,
@@ -2056,7 +2057,7 @@ describe("Property 1: triggerId Type Preservation", () => {
             state = appReducer(state, {
               type: "ADD_CRAVING_SESSION",
               payload: {
-                id: `cs_${Math.random()}`,
+                id: `cs_${crypto.randomUUID()}`,
                 startTime: new Date().toISOString(),
                 endTime: null,
                 intensity: 5,
@@ -2968,11 +2969,11 @@ describe("Property 20: Milestone Trigger on Step Completion", () => {
 // ─── ID generation functions matching craving/index.tsx ──────────────────────
 
 function generateCravingSessionId(): string {
-  return `cs_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  return `cs_${crypto.randomUUID()}`;
 }
 
 function generateTriggerLogId(): string {
-  return `tl_cr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  return `tl_cr_${crypto.randomUUID()}`;
 }
 
 // ─── Property 21: Collision-Resistant ID Uniqueness ──────────────────────────
@@ -3013,7 +3014,7 @@ describe("Property 21: Collision-Resistant ID Uniqueness", () => {
       fc.property(fc.integer({ min: 1, max: 20 }), (n) => {
         for (let i = 0; i < n; i++) {
           const id = generateCravingSessionId();
-          expect(id).toMatch(/^cs_\d+_[a-z0-9]{7}$/);
+          expect(id).toMatch(/^cs_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
         }
       }),
       { numRuns: 50 },
@@ -3025,7 +3026,7 @@ describe("Property 21: Collision-Resistant ID Uniqueness", () => {
       fc.property(fc.integer({ min: 1, max: 20 }), (n) => {
         for (let i = 0; i < n; i++) {
           const id = generateTriggerLogId();
-          expect(id).toMatch(/^tl_cr_\d+_[a-z0-9]{7}$/);
+          expect(id).toMatch(/^tl_cr_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
         }
       }),
       { numRuns: 50 },
