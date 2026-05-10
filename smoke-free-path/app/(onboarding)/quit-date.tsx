@@ -143,11 +143,7 @@ export default function QuitDateScreen() {
 
       let userId = existingProfile?.id;
       if (!userId) {
-        if (typeof Crypto.randomUUID === "function") {
-          userId = Crypto.randomUUID();
-        } else {
-          userId = Math.random().toString(36).substring(2, 15);
-        }
+        userId = Crypto.randomUUID();
       }
 
       const updatedProfile: UserProfile = {
