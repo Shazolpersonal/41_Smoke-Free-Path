@@ -76,10 +76,10 @@ export default function HomeScreen() {
 
   const isBookmarked = stepContent ? bookmarks.includes(stepContent.id) : false;
 
-  function handleBookmark() {
+  const handleBookmark = useCallback(() => {
     if (!stepContent) return;
     dispatch({ type: "TOGGLE_BOOKMARK", payload: stepContent.id });
-  }
+  }, [dispatch, stepContent]);
 
   function handleActivatePlan() {
     router.push("/(onboarding)/profile-setup");
