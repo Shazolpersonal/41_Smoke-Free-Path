@@ -166,6 +166,7 @@ export default function SettingsScreen() {
         ]}
         contentContainerStyle={{ padding: theme.spacing.md, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {profile && (
           <NotificationSettings

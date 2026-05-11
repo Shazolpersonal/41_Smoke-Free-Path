@@ -19,3 +19,7 @@
 ## 2024-05-19 - Form Input Screen Reader Hints
 **Learning:** In React Native, custom text input wrappers (like those containing validation errors or helper text) require an explicit `accessibilityHint` on the `TextInput` element so that screen readers correctly read out error states or instructions upon input focus.
 **Action:** When reviewing custom form components, check that visual `helperText` or `error` prompts are passed down as `accessibilityHint` to the underlying native element.
+
+## 2026-05-11 - ScrollView Keyboard Dismissal UX
+**Learning:** In React Native, tapping an interactive element inside a `ScrollView` when the software keyboard is open often requires two taps: one to dismiss the keyboard, and a second to trigger the element. Setting `keyboardShouldPersistTaps="handled"` on the `ScrollView` creates a massive UX win by allowing the first tap to immediately register the action.
+**Action:** Always check `ScrollView` containers in forms or settings pages and ensure `keyboardShouldPersistTaps="handled"` is present to reduce tap friction.
