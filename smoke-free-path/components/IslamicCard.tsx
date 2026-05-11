@@ -14,9 +14,9 @@ import type { IslamicContent, ContentType } from "@/types";
 
 interface IslamicCardProps {
   content: IslamicContent;
-  onBookmark?: () => void;
+  onBookmark?: (id: string) => void;
   isBookmarked?: boolean;
-  onPress?: () => void;
+  onPress?: (content: IslamicContent) => void;
 }
 
 const TYPE_LABELS: Record<ContentType, string> = {
@@ -87,7 +87,7 @@ export default React.memo(function IslamicCard({
           borderRadius: 12,
         },
       ]}
-      onPress={onPress}
+      onPress={onPress ? () => onPress(content) : undefined}
       activeOpacity={onPress ? 0.7 : 1}
       accessibilityRole={onPress ? "button" : "none"}
     >
@@ -171,7 +171,7 @@ export default React.memo(function IslamicCard({
               try {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               } catch {}
-              onBookmark();
+              onBookmark(content.id);
             }}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityRole="button"
