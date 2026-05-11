@@ -88,9 +88,10 @@ export default function StepPlanScreen() {
     [dispatch, stepNum],
   );
 
-  const handleBookmark = useCallback(() => {
-    if (!islamicContent) return;
-    dispatch({ type: "TOGGLE_BOOKMARK", payload: islamicContent.id });
+  const handleBookmark = useCallback((id?: string) => {
+    const payloadId = id || islamicContent?.id;
+    if (!payloadId) return;
+    dispatch({ type: "TOGGLE_BOOKMARK", payload: payloadId });
   }, [dispatch, islamicContent]);
 
   const animateCheckmark = useCallback(() => {

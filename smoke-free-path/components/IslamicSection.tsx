@@ -9,7 +9,7 @@ interface IslamicSectionProps {
   plan: StepPlan;
   islamicContent: IslamicContent | null;
   isBookmarked: boolean;
-  onBookmark: () => void;
+  onBookmark: (id?: string) => void;
 }
 
 export default function IslamicSection({

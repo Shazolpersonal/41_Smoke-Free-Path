@@ -76,9 +76,10 @@ export default function HomeScreen() {
 
   const isBookmarked = stepContent ? bookmarks.includes(stepContent.id) : false;
 
-  const handleBookmark = useCallback(() => {
-    if (!stepContent) return;
-    dispatch({ type: "TOGGLE_BOOKMARK", payload: stepContent.id });
+  const handleBookmark = useCallback((id?: string) => {
+    const payloadId = id || stepContent?.id;
+    if (!payloadId) return;
+    dispatch({ type: "TOGGLE_BOOKMARK", payload: payloadId });
   }, [dispatch, stepContent]);
 
   function handleActivatePlan() {

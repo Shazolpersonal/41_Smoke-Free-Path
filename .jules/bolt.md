@@ -7,3 +7,6 @@
 ## 2025-05-10 - Fix React.memo breaking on ChecklistItem
 **Learning:** Passing an inline arrow function (`() => onToggle(id)`) as a prop breaks `React.memo` by generating a new function reference on every render, causing unnecessary re-renders of list items.
 **Action:** Changed the `ChecklistItem` component to invoke `onToggle(item.id)` internally, allowing the parent (`ChecklistSection`) to pass down the stable callback reference directly.
+## 2026-05-11 - Stabilizing Inline Arrow Functions in FlatList rendering
+**Learning:** Components wrapped in `React.memo` (like `AnimatedLibraryItem` and `AnimatedDuaItem`) still re-render on every list update because their parent (`FlatList`) passes a new inline arrow function for the `onPress` and `onBookmark` props, circumventing the memoization. By moving the lambda inside the component and accepting `item` explicitly via props or ID lookups, the components fully respect `React.memo` and prevent list layout thrashing on fast updates.
+**Action:** When creating list items inside a `FlatList` `renderItem`, ensure parent callbacks are memoized (using `useCallback`) and do not wrap them in inline arrows. Update child components to handle argument bindings internally.

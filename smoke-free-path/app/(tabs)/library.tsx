@@ -86,8 +86,8 @@ const AnimatedLibraryItem = React.memo(function AnimatedLibraryItem({
       <IslamicCard
         content={item}
         isBookmarked={isBookmarked}
-        onBookmark={() => onBookmark(item.id)}
-        onPress={() => onPress(item)}
+        onBookmark={onBookmark}
+        onPress={onPress}
       />
     </Animated.View>
   );

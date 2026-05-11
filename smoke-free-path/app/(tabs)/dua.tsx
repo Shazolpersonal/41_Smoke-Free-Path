@@ -68,7 +68,7 @@ const AnimatedDuaItem = React.memo(function AnimatedDuaItem({
       accessible={true}
       accessibilityLabel={`${categoryLabel} — ${item.source}`}
     >
-      <IslamicCard content={item} onPress={() => onPress(item)} />
+      <IslamicCard content={item} onPress={onPress} />
     </Animated.View>
   );
 });
