@@ -9,6 +9,7 @@ import {
   AccessibilityInfo,
 } from "react-native";
 import Typography from "@/components/Typography";
+import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
@@ -361,7 +362,7 @@ export default function CravingScreen() {
         animationType="fade"
         onRequestClose={() => setShowOutcomeModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <BlurView intensity={80} tint="dark" style={styles.modalOverlay}>
           <View
             style={[
               styles.modalCard,
@@ -450,7 +451,7 @@ export default function CravingScreen() {
               </Typography>
             </TouchableOpacity>
           </View>
-        </View>
+        </BlurView>
       </Modal>
     </SafeAreaView>
   );
@@ -548,7 +549,6 @@ const styles = StyleSheet.create({
   // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
