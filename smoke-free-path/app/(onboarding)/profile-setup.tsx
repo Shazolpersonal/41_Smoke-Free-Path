@@ -202,6 +202,9 @@ export default function ProfileSetupScreen() {
               onPress={handleNext}
               activeOpacity={0.85}
               disabled={!isValid}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !isValid }}
+              accessibilityLabel={isValid ? "সামনে এগিয়ে যান" : "সামনে এগিয়ে যেতে সবগুলো তথ্য সঠিকভাবে পূরণ করুন"}
             >
               <GradientCard
                 colors={theme.colors.gradients.goldButton}

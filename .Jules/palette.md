@@ -23,3 +23,7 @@
 ## 2026-05-11 - ScrollView Keyboard Dismissal UX
 **Learning:** In React Native, tapping an interactive element inside a `ScrollView` when the software keyboard is open often requires two taps: one to dismiss the keyboard, and a second to trigger the element. Setting `keyboardShouldPersistTaps="handled"` on the `ScrollView` creates a massive UX win by allowing the first tap to immediately register the action.
 **Action:** Always check `ScrollView` containers in forms or settings pages and ensure `keyboardShouldPersistTaps="handled"` is present to reduce tap friction.
+
+## 2024-05-15 - Dynamic Disabled Labels
+**Learning:** Screen reader users rely heavily on `accessibilityLabel`. Simply adding `accessibilityState={{ disabled: true }}` to a button tells them the button is disabled, but it doesn't tell them *why*. Changing the label dynamically based on the disabled state (e.g., from "Next" to "Please fill out all fields to continue") provides significantly better UX context.
+**Action:** When disabling form submission CTA buttons, make sure the `accessibilityLabel` dynamically updates to guide the user on what to fix.
