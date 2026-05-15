@@ -25,6 +25,7 @@ import {
 } from "@/services/NotificationService";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
+import { BlurView } from "expo-blur";
 import GradientCard from "@/components/ui/GradientCard";
 import CrescentMoon from "@/components/illustrations/CrescentMoon";
 import DuaDecorator from "@/components/illustrations/DuaDecorator";
@@ -407,7 +408,7 @@ export default function QuitDateScreen() {
             animationType="fade"
             onRequestClose={() => setShowAndroidPicker(false)}
           >
-            <View style={styles.modalOverlay}>
+            <BlurView intensity={80} tint="dark" style={styles.modalOverlay}>
               <View
                 style={[
                   styles.modalContent,
@@ -444,7 +445,7 @@ export default function QuitDateScreen() {
                   </GradientCard>
                 </TouchableOpacity>
               </View>
-            </View>
+            </BlurView>
           </Modal>
 
           <TouchableOpacity
@@ -566,7 +567,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
