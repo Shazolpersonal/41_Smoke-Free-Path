@@ -57,6 +57,62 @@ const GROUNDING_STEPS = [
   { count: 1, label: "১টি ইতিবাচক চিন্তা বা স্বাদ অনুভব করুন।", icon: "🧠" },
 ];
 
+
+// ─── Animated Components ──────────────────────────────────────────────────────
+
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+
+interface AnimatedIntensityBtnProps {
+  n: number;
+  isActive: boolean;
+  onPress: () => void;
+  theme: any;
+}
+
+const AnimatedIntensityBtn = ({ n, isActive, onPress, theme }: AnimatedIntensityBtnProps) => {
+  const animStyle = useAnimatedStyle(() => ({
+    backgroundColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBackground, { duration: 150 }),
+    borderColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBorder, { duration: 150 }),
+  }));
+  return (
+    <AnimatedTouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.75}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={`তীব্রতা ${n}`}
+      style={[styles.intensityBtn, isActive && styles.intensityBtnActive, animStyle]}
+    >
+      <Typography variant="body" style={[styles.intensityText, isActive && styles.intensityTextActive, { color: isActive ? theme.colors.onPrimary : theme.colors.textSecondary }]}>{n}</Typography>
+    </AnimatedTouchableOpacity>
+  );
+};
+
+interface AnimatedTabProps {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+  theme: any;
+}
+
+const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
+  const animStyle = useAnimatedStyle(() => ({
+    backgroundColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBackground, { duration: 150 }),
+    borderColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBorder, { duration: 150 }),
+  }));
+  return (
+    <AnimatedTouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
+      style={[styles.tab, isActive && styles.tabActive, animStyle]}
+    >
+      <Typography variant="body" style={[styles.tabText, isActive && styles.tabTextActive, { color: isActive ? theme.colors.onPrimary : theme.colors.textSecondary }]}>{label}</Typography>
+    </AnimatedTouchableOpacity>
+  );
+};
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function CravingScreen() {
@@ -242,40 +298,13 @@ export default function CravingScreen() {
           </Typography>
           <View style={styles.intensityRow}>
             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-              <TouchableOpacity
+              <AnimatedIntensityBtn
                 key={n}
-                style={[
-                  styles.intensityBtn,
-                  {
-                    borderColor: theme.colors.chipBorder,
-                    backgroundColor: theme.colors.chipBackground,
-                  },
-                  intensity === n && {
-                    ...styles.intensityBtnActive,
-                    backgroundColor: theme.colors.primary,
-                    borderColor: theme.colors.primary,
-                  },
-                ]}
+                n={n}
+                isActive={intensity === n}
                 onPress={() => setIntensity(n)}
-                activeOpacity={0.75}
-                accessibilityLabel={`তীব্রতা ${n}`}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: intensity === n }}
-              >
-                <Typography
-                  variant="body"
-                  style={[
-                    styles.intensityText,
-                    { color: theme.colors.textSecondary },
-                    intensity === n && {
-                      ...styles.intensityTextActive,
-                      color: theme.colors.onPrimary,
-                    },
-                  ]}
-                >
-                  {n}
-                </Typography>
-              </TouchableOpacity>
+                theme={theme}
+              />
             ))}
           </View>
         </Card>
@@ -310,39 +339,13 @@ export default function CravingScreen() {
           </Typography>{" "}
           <View style={styles.tabRow}>
             {STRATEGY_TABS.map(({ key, label }) => (
-              <TouchableOpacity
+              <AnimatedTab
                 key={key}
-                style={[
-                  styles.tab,
-                  {
-                    borderColor: theme.colors.chipBorder,
-                    backgroundColor: theme.colors.chipBackground,
-                  },
-                  activeTab === key && {
-                    ...styles.tabActive,
-                    backgroundColor: theme.colors.primary,
-                    borderColor: theme.colors.primary,
-                  },
-                ]}
+                label={label}
+                isActive={activeTab === key}
                 onPress={() => markStrategyUsed(key)}
-                activeOpacity={0.8}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: activeTab === key }}
-              >
-                <Typography
-                  variant="body"
-                  style={[
-                    styles.tabText,
-                    { color: theme.colors.textSecondary },
-                    activeTab === key && {
-                      ...styles.tabTextActive,
-                      color: theme.colors.onPrimary,
-                    },
-                  ]}
-                >
-                  {label}
-                </Typography>
-              </TouchableOpacity>
+                theme={theme}
+              />
             ))}
           </View>
           {activeTab === "breathing" && <BreathingGuide />}

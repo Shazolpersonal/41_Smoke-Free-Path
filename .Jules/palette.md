@@ -1,3 +1,3 @@
-## 2024-05-13 - [Glassmorphism Modals]
-**Learning:** Replaced solid/rgba dark modal backgrounds with expo-blur BlurViews. It adds visual polish and removes hardcoded rgba values.
-**Action:** When adding modals or overlays, default to BlurView for consistent glassmorphism.
+## 2024-05-16 - [Smooth Transitions for Interactive Elements]
+**Learning:** Hard state changes (instant background color swaps) on interactive elements like strategy tabs and intensity selectors in the craving modal can feel jarring and less premium. The users perceive micro-interactions as significantly better when visual changes aren't instantaneous.
+**Action:** Always wrap interactive state-based UI changes in `react-native-reanimated` transitions (e.g., animating `backgroundColor` and `borderColor` with `useAnimatedStyle` and `withTiming(..., { duration: 150 })`) for a more fluid and delightful user experience.
