@@ -98,6 +98,14 @@ export default function DataManager({ state, onImport }: DataManagerProps) {
       if (result.canceled) return;
 
       const uri = result.assets[0].uri;
+
+      // Security Enhancement: Prevent DoS by restricting file size to 5MB
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (fileInfo.exists && fileInfo.size && fileInfo.size > 5 * 1024 * 1024) {
+        Alert.alert("ত্রুটি", "ফাইলটি অনেক বড়। সর্বোচ্চ ৫ মেগাবাইট অনুমোদিত।");
+        return;
+      }
+
       const content = await FileSystem.readAsStringAsync(uri);
       const parsed: unknown = JSON.parse(content);
 
