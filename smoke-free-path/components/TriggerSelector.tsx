@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { useTheme } from "../theme";
+import Typography from "./Typography";
 import type { TriggerType } from "@/types";
 
 interface TriggerSelectorProps {
@@ -23,6 +25,47 @@ const TRIGGERS: { type: TriggerType; label: string }[] = [
   { type: "habitual", label: "অভ্যাসগত" },
 ];
 
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+
+interface AnimatedTriggerChipProps {
+  type: TriggerType;
+  label: string;
+  isSelected: boolean;
+  onPress: () => void;
+  theme: any;
+}
+
+const AnimatedTriggerChip = ({ type, label, isSelected, onPress, theme }: AnimatedTriggerChipProps) => {
+  const animStyle = useAnimatedStyle(() => ({
+    backgroundColor: withTiming(
+      isSelected ? theme.colors.primary : theme.colors.chipBackground,
+      { duration: 150 }
+    ),
+    borderColor: withTiming(
+      isSelected ? theme.colors.primary : theme.colors.chipBorder,
+      { duration: 150 }
+    ),
+  }));
+
+  return (
+    <AnimatedTouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.75}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isSelected }}
+      accessibilityLabel={label}
+      style={[styles.chip, animStyle]}
+    >
+      <Typography
+        variant="body"
+        style={[styles.chipText, { color: isSelected ? theme.colors.onPrimary : theme.colors.chipBorder }]}
+      >
+        {label}
+      </Typography>
+    </AnimatedTouchableOpacity>
+  );
+};
+
 export default function TriggerSelector({
   selected,
   onSelect,
@@ -34,38 +77,18 @@ export default function TriggerSelector({
       {TRIGGERS.map(({ type, label }) => {
         const isSelected = selected === type;
         return (
-          <TouchableOpacity
+          <AnimatedTriggerChip
             key={type}
-            style={[
-              styles.chip,
-              {
-                backgroundColor: theme.colors.chipBackground,
-                borderColor: theme.colors.chipBorder,
-              },
-              isSelected && {
-                backgroundColor: theme.colors.primary,
-                borderColor: theme.colors.primary,
-              },
-            ]}
+            type={type}
+            label={label}
+            isSelected={isSelected}
             onPress={() =>
               onSelect(
                 computeNextSelection(selected, type) as TriggerType | null,
               )
             }
-            activeOpacity={0.75}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: isSelected }}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                { color: theme.colors.chipBorder },
-                isSelected && { color: theme.colors.onPrimary },
-              ]}
-            >
-              {label}
-            </Text>
-          </TouchableOpacity>
+            theme={theme}
+          />
         );
       })}
     </View>
