@@ -43,9 +43,7 @@ export default function ProfileSetupScreen() {
     name: userProfile?.name ?? "",
     cigarettesPerDay: userProfile?.cigarettesPerDay?.toString() ?? "",
     smokingYears: userProfile?.smokingYears?.toString() ?? "",
-    cigarettePricePerPack:
-      userProfile?.cigarettePricePerPack?.toString() ??
-      String(DEFAULT_CIGARETTE_PRICE_PER_PACK),
+    cigarettePricePerPack: userProfile?.cigarettePricePerPack?.toString() ?? "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
 

@@ -9,7 +9,13 @@ import * as Haptics from "expo-haptics";
 import ArabicText from "@/components/ArabicText";
 import Typography from "@/components/Typography";
 import { useTheme } from "@/hooks/useTheme";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+} from "react-native-reanimated";
 import type { IslamicContent, ContentType } from "@/types";
 
 interface IslamicCardProps {
@@ -67,130 +73,139 @@ export default React.memo(function IslamicCard({
       if (reduceMotion) return;
       bookmarkScale.value = withSequence(
         withSpring(1.2, { damping: 10, stiffness: 100, mass: 1 }),
-        withSpring(1, { damping: 12, stiffness: 100, mass: 1 })
+        withSpring(1, { damping: 12, stiffness: 100, mass: 1 }),
       );
     });
   }, [isBookmarked]);
 
   return (
     <Animated.View style={animatedCardStyle}>
-    <TouchableOpacity
-      onPressIn={() => { pressScale.value = withTiming(0.96, { duration: 150 }); }}
-      onPressOut={() => { pressScale.value = withSpring(1, { damping: 15, stiffness: 120, mass: 1 }); }}
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.surface,
-          padding: theme.spacing.md,
-          marginVertical: theme.spacing.sm,
-          ...theme.shadows.card,
-          borderRadius: 12,
-        },
-      ]}
-      onPress={onPress ? () => onPress(content) : undefined}
-      activeOpacity={onPress ? 0.7 : 1}
-      accessibilityRole={onPress ? "button" : "none"}
-    >
-      {/* Type badge */}
-      <View
+      <TouchableOpacity
+        onPressIn={() => {
+          pressScale.value = withTiming(0.96, { duration: 150 });
+        }}
+        onPressOut={() => {
+          pressScale.value = withSpring(1, {
+            damping: 15,
+            stiffness: 120,
+            mass: 1,
+          });
+        }}
         style={[
-          styles.badge,
+          styles.card,
           {
-            backgroundColor: TYPE_COLORS[content.type],
-            marginBottom: theme.spacing.sm,
-            alignSelf: "flex-start",
-            paddingHorizontal: 10,
-            paddingVertical: 3,
+            backgroundColor: theme.colors.surface,
+            padding: theme.spacing.md,
+            marginVertical: theme.spacing.sm,
+            ...theme.shadows.card,
             borderRadius: 12,
           },
         ]}
+        onPress={onPress ? () => onPress(content) : undefined}
+        activeOpacity={onPress ? 0.7 : 1}
+        accessibilityRole={onPress ? "button" : "none"}
       >
-        <Typography
-          variant="small"
-          color="onPrimary"
-          style={{ fontWeight: "600" }}
+        {/* Type badge */}
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor: TYPE_COLORS[content.type],
+              marginBottom: theme.spacing.sm,
+              alignSelf: "flex-start",
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+              borderRadius: 12,
+            },
+          ]}
         >
-          {TYPE_LABELS[content.type]}
-        </Typography>
-      </View>
-
-      {/* Arabic text */}
-      <ArabicText
-        text={content.arabicText}
-        fontSize={22}
-        style={{ marginBottom: theme.spacing.sm }}
-      />
-
-      {/* Bangla transliteration */}
-      <Typography
-        variant="body"
-        color="textSecondary"
-        style={{ fontStyle: "italic", marginBottom: theme.spacing.sm }}
-      >
-        {content.banglaTransliteration}
-      </Typography>
-
-      {/* Divider */}
-      <View
-        style={[
-          styles.divider,
-          {
-            backgroundColor: theme.colors.border,
-            marginVertical: theme.spacing.sm,
-            height: 1,
-          },
-        ]}
-      />
-
-      {/* Bangla translation */}
-      <Typography
-        variant="subheading"
-        color="text"
-        style={{ marginBottom: theme.spacing.md, fontWeight: "600" }}
-      >
-        {content.banglaTranslation}
-      </Typography>
-
-      {/* Source + bookmark row */}
-      <View
-        style={[
-          styles.footer,
-          {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          },
-        ]}
-      >
-        <Typography variant="small" color="textSecondary" style={{ flex: 1 }}>
-          {content.source}
-        </Typography>
-        {onBookmark && (
-          <TouchableOpacity
-            onPress={() => {
-              try {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              } catch {}
-              onBookmark(content.id);
-            }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isBookmarked ? "বুকমার্ক সরান" : "বুকমার্ক করুন"
-            }
+          <Typography
+            variant="small"
+            color="onPrimary"
+            style={{ fontWeight: "600" }}
           >
-            <Animated.Text
-              style={[
-                styles.bookmark,
-                animatedBookmarkStyle, { fontSize: 20 },
-              ]}
+            {TYPE_LABELS[content.type]}
+          </Typography>
+        </View>
+
+        {/* Arabic text */}
+        <ArabicText
+          text={content.arabicText}
+          fontSize={22}
+          style={{ marginBottom: theme.spacing.sm }}
+        />
+
+        {/* Bangla transliteration */}
+        <Typography
+          variant="body"
+          color="textSecondary"
+          style={{ fontStyle: "italic", marginBottom: theme.spacing.sm }}
+        >
+          {content.banglaTransliteration}
+        </Typography>
+
+        {/* Divider */}
+        <View
+          style={[
+            styles.divider,
+            {
+              backgroundColor: theme.colors.border,
+              marginVertical: theme.spacing.sm,
+              height: 1,
+            },
+          ]}
+        />
+
+        {/* Bangla translation */}
+        <Typography
+          variant="subheading"
+          color="text"
+          style={{ marginBottom: theme.spacing.md, fontWeight: "600" }}
+        >
+          {content.banglaTranslation}
+        </Typography>
+
+        {/* Source + bookmark row */}
+        <View
+          style={[
+            styles.footer,
+            {
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            },
+          ]}
+        >
+          <Typography variant="small" color="textSecondary" style={{ flex: 1 }}>
+            {content.source}
+          </Typography>
+          {onBookmark && (
+            <TouchableOpacity
+              onPress={() => {
+                try {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                } catch {}
+                onBookmark(content.id);
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isBookmarked ? "বুকমার্ক সরান" : "বুকমার্ক করুন"
+              }
             >
-              {isBookmarked ? "🔖" : "📄"}
-            </Animated.Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </TouchableOpacity>
+              <Animated.Text
+                style={[
+                  styles.bookmark,
+                  animatedBookmarkStyle,
+                  { fontSize: 20 },
+                ]}
+              >
+                {isBookmarked ? "🔖" : "📄"}
+              </Animated.Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 });

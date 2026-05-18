@@ -1,5 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -57,10 +61,10 @@ const GROUNDING_STEPS = [
   { count: 1, label: "১টি ইতিবাচক চিন্তা বা স্বাদ অনুভব করুন।", icon: "🧠" },
 ];
 
-
 // ─── Animated Components ──────────────────────────────────────────────────────
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
 
 interface AnimatedIntensityBtnProps {
   n: number;
@@ -69,10 +73,21 @@ interface AnimatedIntensityBtnProps {
   theme: any;
 }
 
-const AnimatedIntensityBtn = ({ n, isActive, onPress, theme }: AnimatedIntensityBtnProps) => {
+const AnimatedIntensityBtn = ({
+  n,
+  isActive,
+  onPress,
+  theme,
+}: AnimatedIntensityBtnProps) => {
   const animStyle = useAnimatedStyle(() => ({
-    backgroundColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBackground, { duration: 150 }),
-    borderColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBorder, { duration: 150 }),
+    backgroundColor: withTiming(
+      isActive ? theme.colors.primary : theme.colors.chipBackground,
+      { duration: 150 },
+    ),
+    borderColor: withTiming(
+      isActive ? theme.colors.primary : theme.colors.chipBorder,
+      { duration: 150 },
+    ),
   }));
   return (
     <AnimatedTouchableOpacity
@@ -81,9 +96,26 @@ const AnimatedIntensityBtn = ({ n, isActive, onPress, theme }: AnimatedIntensity
       accessibilityRole="radio"
       accessibilityState={{ selected: isActive }}
       accessibilityLabel={`তীব্রতা ${n}`}
-      style={[styles.intensityBtn, isActive && styles.intensityBtnActive, animStyle]}
+      style={[
+        styles.intensityBtn,
+        isActive && styles.intensityBtnActive,
+        animStyle,
+      ]}
     >
-      <Typography variant="body" style={[styles.intensityText, isActive && styles.intensityTextActive, { color: isActive ? theme.colors.onPrimary : theme.colors.textSecondary }]}>{n}</Typography>
+      <Typography
+        variant="body"
+        style={[
+          styles.intensityText,
+          isActive && styles.intensityTextActive,
+          {
+            color: isActive
+              ? theme.colors.onPrimary
+              : theme.colors.textSecondary,
+          },
+        ]}
+      >
+        {n}
+      </Typography>
     </AnimatedTouchableOpacity>
   );
 };
@@ -97,8 +129,14 @@ interface AnimatedTabProps {
 
 const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
   const animStyle = useAnimatedStyle(() => ({
-    backgroundColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBackground, { duration: 150 }),
-    borderColor: withTiming(isActive ? theme.colors.primary : theme.colors.chipBorder, { duration: 150 }),
+    backgroundColor: withTiming(
+      isActive ? theme.colors.primary : theme.colors.chipBackground,
+      { duration: 150 },
+    ),
+    borderColor: withTiming(
+      isActive ? theme.colors.primary : theme.colors.chipBorder,
+      { duration: 150 },
+    ),
   }));
   return (
     <AnimatedTouchableOpacity
@@ -108,7 +146,20 @@ const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
       accessibilityState={{ selected: isActive }}
       style={[styles.tab, isActive && styles.tabActive, animStyle]}
     >
-      <Typography variant="body" style={[styles.tabText, isActive && styles.tabTextActive, { color: isActive ? theme.colors.onPrimary : theme.colors.textSecondary }]}>{label}</Typography>
+      <Typography
+        variant="body"
+        style={[
+          styles.tabText,
+          isActive && styles.tabTextActive,
+          {
+            color: isActive
+              ? theme.colors.onPrimary
+              : theme.colors.textSecondary,
+          },
+        ]}
+      >
+        {label}
+      </Typography>
     </AnimatedTouchableOpacity>
   );
 };

@@ -38,7 +38,7 @@ export default function ProgressCalendar({
       // is always disabled in StepCard, but we keep it just in case.
       router.push(`/tracker/${step}`);
     },
-    [router]
+    [router],
   );
 
   // Compute statuses for all cells in one pass using a cached

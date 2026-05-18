@@ -208,16 +208,14 @@ test("Property 9: Milestone Detection Based on completedSteps", () => {
   fc.assert(
     fc.property(
       // Generate a completedSteps array of a specific length (0–41)
-      fc
-        .integer({ min: 0, max: 41 })
-        .chain((len) =>
-          fc
-            .uniqueArray(fc.integer({ min: 1, max: 41 }), {
-              minLength: len,
-              maxLength: len,
-            })
-            .map((arr) => arr.slice(0, len)),
-        ),
+      fc.integer({ min: 0, max: 41 }).chain((len) =>
+        fc
+          .uniqueArray(fc.integer({ min: 1, max: 41 }), {
+            minLength: len,
+            maxLength: len,
+          })
+          .map((arr) => arr.slice(0, len)),
+      ),
       // achievedMilestones: a subset of MILESTONE_STEPS that are already achieved
       fc.subarray([...MILESTONE_STEPS]),
       (completedSteps, alreadyAchieved) => {

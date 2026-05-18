@@ -1,5 +1,5 @@
-import React from 'react';
-import Svg, { Path } from 'react-native-svg';
+import React from "react";
+import Svg, { Path } from "react-native-svg";
 
 interface SmokeWaveProps {
   width?: number;
@@ -11,7 +11,7 @@ interface SmokeWaveProps {
 const SmokeWave: React.FC<SmokeWaveProps> = ({
   width = 280,
   height = 120,
-  color = '#3D5070',
+  color = "#3D5070",
   opacity = 0.5,
 }) => {
   const w = width;

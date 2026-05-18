@@ -196,57 +196,58 @@ export default function WelcomeScreen() {
   );
 }
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  topArea: {
-    height: "60%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  moonContainer: {
-    position: "absolute",
-    transform: [{ translateY: -20 }, { translateX: 10 }],
-  },
-  bottomArea: {
-    height: "40%",
-    paddingHorizontal: theme.spacing[6],
-    paddingBottom: theme.spacing[10],
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-end",
-  },
-  mainTitle: {
-    textAlign: "center",
-    marginBottom: theme.spacing[4],
-  },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: theme.spacing[8],
-  },
-  pillsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    gap: theme.spacing[2],
-    marginBottom: theme.spacing[10],
-  },
-  pill: {
-    paddingHorizontal: theme.spacing[3],
-    paddingVertical: theme.spacing[1] + 2,
-    borderRadius: theme.radius.full,
-    borderWidth: 1,
-  },
-  touchableTarget: {
-    minHeight: theme.spacing[12],
-    justifyContent: "center",
-  },
-  ctaButton: {
-    height: 56,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    topArea: {
+      height: "60%",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    moonContainer: {
+      position: "absolute",
+      transform: [{ translateY: -20 }, { translateX: 10 }],
+    },
+    bottomArea: {
+      height: "40%",
+      paddingHorizontal: theme.spacing[6],
+      paddingBottom: theme.spacing[10],
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: "flex-end",
+    },
+    mainTitle: {
+      textAlign: "center",
+      marginBottom: theme.spacing[4],
+    },
+    subtitle: {
+      textAlign: "center",
+      marginBottom: theme.spacing[8],
+    },
+    pillsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      gap: theme.spacing[2],
+      marginBottom: theme.spacing[10],
+    },
+    pill: {
+      paddingHorizontal: theme.spacing[3],
+      paddingVertical: theme.spacing[1] + 2,
+      borderRadius: theme.radius.full,
+      borderWidth: 1,
+    },
+    touchableTarget: {
+      minHeight: theme.spacing[12],
+      justifyContent: "center",
+    },
+    ctaButton: {
+      height: 56,
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+    },
+  });

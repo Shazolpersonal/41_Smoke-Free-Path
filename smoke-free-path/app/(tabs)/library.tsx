@@ -1,4 +1,8 @@
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import React, {
   useState,
   useMemo,
@@ -71,7 +75,6 @@ const AnimatedLibraryItem = React.memo(function AnimatedLibraryItem({
       opacity.value = withTiming(1, { duration: 400 });
     });
   }, []);
-
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -540,7 +543,10 @@ export default function LibraryScreen() {
                       </Typography>
                       <Typography
                         variant="small"
-                        style={{ color: theme.colors.textDisabled, marginTop: 4 }}
+                        style={{
+                          color: theme.colors.textDisabled,
+                          marginTop: 4,
+                        }}
                       >
                         {item.source}
                       </Typography>

@@ -152,16 +152,14 @@ describe("2.2 Milestone Display Preservation Tests", () => {
      */
     fc.assert(
       fc.property(
-        fc
-          .integer({ min: 0, max: 41 })
-          .chain((len) =>
-            fc
-              .uniqueArray(fc.integer({ min: 1, max: 41 }), {
-                minLength: len,
-                maxLength: len,
-              })
-              .map((arr) => arr.slice(0, len)),
-          ),
+        fc.integer({ min: 0, max: 41 }).chain((len) =>
+          fc
+            .uniqueArray(fc.integer({ min: 1, max: 41 }), {
+              minLength: len,
+              maxLength: len,
+            })
+            .map((arr) => arr.slice(0, len)),
+        ),
         fc.subarray([...MILESTONE_STEPS]),
         (completedSteps, alreadyAchieved) => {
           const achievedMilestones: Record<number, string> = Object.fromEntries(

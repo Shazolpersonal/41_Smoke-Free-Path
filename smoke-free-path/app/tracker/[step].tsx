@@ -1,5 +1,12 @@
 import React, { useMemo, useCallback, useRef, useEffect } from "react";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence, withDelay } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+  withDelay,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -69,7 +76,6 @@ export default function StepPlanScreen() {
     };
   });
 
-
   const progress = stepProgress[stepNum];
   const completedItems = progress?.completedItems ?? [];
   const isCurrentStep = planState.currentStep === stepNum;
@@ -88,11 +94,14 @@ export default function StepPlanScreen() {
     [dispatch, stepNum],
   );
 
-  const handleBookmark = useCallback((id?: string) => {
-    const payloadId = id || islamicContent?.id;
-    if (!payloadId) return;
-    dispatch({ type: "TOGGLE_BOOKMARK", payload: payloadId });
-  }, [dispatch, islamicContent]);
+  const handleBookmark = useCallback(
+    (id?: string) => {
+      const payloadId = id || islamicContent?.id;
+      if (!payloadId) return;
+      dispatch({ type: "TOGGLE_BOOKMARK", payload: payloadId });
+    },
+    [dispatch, islamicContent],
+  );
 
   const animateCheckmark = useCallback(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
@@ -102,7 +111,7 @@ export default function StepPlanScreen() {
 
       checkmarkScale.value = withSequence(
         withSpring(1.2, { damping: 12, stiffness: 100 }),
-        withSpring(1, { damping: 15, stiffness: 120 })
+        withSpring(1, { damping: 15, stiffness: 120 }),
       );
 
       checkmarkOpacity.value = withDelay(400, withTiming(0, { duration: 300 }));
@@ -185,9 +194,7 @@ export default function StepPlanScreen() {
         pointerEvents="none"
         style={[styles.checkmarkOverlay, checkmarkStyle]}
       >
-        <Animated.Text
-          style={[styles.checkmarkText, checkmarkTextStyle]}
-        >
+        <Animated.Text style={[styles.checkmarkText, checkmarkTextStyle]}>
           ✓
         </Animated.Text>
       </Animated.View>

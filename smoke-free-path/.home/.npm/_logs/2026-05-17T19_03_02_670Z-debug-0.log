@@ -1,0 +1,18 @@
+0 verbose cli /usr/bin/node /usr/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@10.9.7
+2 info using node@v22.22.2
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/shazol/antigravaty plus kiro/41 Smoke-free-path/smoke-free-path/.npmrc
+5 silly config load:file:/home/shazol/antigravaty plus kiro/41 Smoke-free-path/smoke-free-path/.home/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm exec expo export --platform web
+8 verbose argv "exec" "--" "expo" "export" "--platform" "web"
+9 verbose logfile logs-max:10 dir:/home/shazol/antigravaty plus kiro/41 Smoke-free-path/smoke-free-path/.home/.npm/_logs/2026-05-17T19_03_02_670Z-
+10 verbose logfile /home/shazol/antigravaty plus kiro/41 Smoke-free-path/smoke-free-path/.home/.npm/_logs/2026-05-17T19_03_02_670Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose cwd /home/shazol/antigravaty plus kiro/41 Smoke-free-path/smoke-free-path
+13 verbose os Linux 6.17.0-23-generic
+14 verbose node v22.22.2
+15 verbose npm  v10.9.7
+16 verbose exit 0
+17 info ok

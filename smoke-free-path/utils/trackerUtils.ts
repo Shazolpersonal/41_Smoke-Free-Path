@@ -37,7 +37,11 @@ export function createAccessContext(planState: PlanState): AccessContext {
   if (planState.activatedAt) {
     const actDate = new Date(planState.activatedAt);
     ctx.actDateTime = actDate.getTime();
-    ctx.actDateOnly = Date.UTC(actDate.getFullYear(), actDate.getMonth(), actDate.getDate());
+    ctx.actDateOnly = Date.UTC(
+      actDate.getFullYear(),
+      actDate.getMonth(),
+      actDate.getDate(),
+    );
   }
 
   if (planState.lastCompletedAt) {
@@ -62,7 +66,8 @@ export function isStepAccessible(
 
   // Cannot access new steps if the start date is in the future
   if (planState.activatedAt) {
-    const actDateTime = ctx?.actDateTime ?? new Date(planState.activatedAt).getTime();
+    const actDateTime =
+      ctx?.actDateTime ?? new Date(planState.activatedAt).getTime();
     const nowTime = ctx?.nowTime ?? Date.now();
     if (actDateTime > nowTime) {
       return false;
@@ -81,13 +86,21 @@ export function isStepAccessible(
     let actDateOnly = ctx?.actDateOnly;
     if (actDateOnly === undefined) {
       const actDate = new Date(planState.activatedAt);
-      actDateOnly = Date.UTC(actDate.getFullYear(), actDate.getMonth(), actDate.getDate());
+      actDateOnly = Date.UTC(
+        actDate.getFullYear(),
+        actDate.getMonth(),
+        actDate.getDate(),
+      );
     }
 
     let nowDateOnly = ctx?.nowDateOnly;
     if (nowDateOnly === undefined) {
       const nowD = new Date();
-      nowDateOnly = Date.UTC(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+      nowDateOnly = Date.UTC(
+        nowD.getFullYear(),
+        nowD.getMonth(),
+        nowD.getDate(),
+      );
     }
 
     const diffDays = Math.floor((nowDateOnly - actDateOnly) / MS_PER_DAY);

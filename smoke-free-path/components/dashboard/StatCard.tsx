@@ -2,14 +2,13 @@ import React from "react";
 import { View, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import GradientCard from "../ui/GradientCard";
 import Typography from "../Typography";
-import theme from "../../theme";
+import { useTheme } from "../../hooks/useTheme";
 import AnimatedCountUp from "../AnimatedCountUp";
 
 interface StatCardProps {
   label: string;
   value: number;
   prefix?: string;
-
   style?: StyleProp<ViewStyle>;
   islamicCardGradient?: boolean;
 }
@@ -21,6 +20,8 @@ export default function StatCard({
   style,
   islamicCardGradient = false,
 }: StatCardProps) {
+  const { theme } = useTheme();
+
   const gradientColors = islamicCardGradient
     ? theme.colors.gradients.islamicCard
     : theme.colors.gradients.cardSurface;
@@ -30,21 +31,30 @@ export default function StatCard({
       colors={gradientColors}
       hasShadow={true}
       shadowPreset="subtle"
-      style={[styles.container, style]}
+      style={[
+        {
+          flex: 1,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+        },
+        style,
+      ]}
     >
-      <View style={styles.content}>
+      <View style={{ alignItems: "center", justifyContent: "center" }}>
         <AnimatedCountUp
           value={value}
           variant={"numberSmall" as any}
           color="text"
           prefix={prefix}
-
         />
         <Typography
           variant="caption"
           color="textSecondary"
           align="center"
-          style={styles.label}
+          style={{
+            marginTop: theme.spacing.xs,
+            fontWeight: "500",
+          }}
           numberOfLines={2}
         >
           {label}
@@ -53,19 +63,3 @@ export default function StatCard({
     </GradientCard>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-  },
-  content: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  label: {
-    marginTop: theme.spacing.xs,
-    fontWeight: "500",
-  },
-});

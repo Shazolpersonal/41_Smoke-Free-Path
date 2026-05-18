@@ -41,6 +41,11 @@ import {
   safeModulo,
 } from "@/utils/trackerUtils";
 
+const engToBng = (num: number | string) => {
+  const bngDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(num).replace(/[0-9]/g, (d) => bngDigits[Number(d)]);
+};
+
 export default function HomeScreen() {
   const router = useRouter();
   const { state, dispatch, hydrated } = useAppContext();
@@ -76,11 +81,14 @@ export default function HomeScreen() {
 
   const isBookmarked = stepContent ? bookmarks.includes(stepContent.id) : false;
 
-  const handleBookmark = useCallback((id?: string) => {
-    const payloadId = id || stepContent?.id;
-    if (!payloadId) return;
-    dispatch({ type: "TOGGLE_BOOKMARK", payload: payloadId });
-  }, [dispatch, stepContent]);
+  const handleBookmark = useCallback(
+    (id?: string) => {
+      const payloadId = id || stepContent?.id;
+      if (!payloadId) return;
+      dispatch({ type: "TOGGLE_BOOKMARK", payload: payloadId });
+    },
+    [dispatch, stepContent],
+  );
 
   function handleActivatePlan() {
     router.push("/(onboarding)/profile-setup");
@@ -119,18 +127,6 @@ export default function HomeScreen() {
   const timeUntilStart = planState.activatedAt
     ? getTimeUntilStart(planState.activatedAt)
     : null;
-
-  // Calculate hours if activated (BUG-13: use safe modulo for non-negative hours)
-  const hoursSinceActivation =
-    planState.activatedAt && !isFutureQuitDate
-      ? safeModulo(
-          Math.floor(
-            (Date.now() - new Date(planState.activatedAt).getTime()) /
-              (1000 * 60 * 60),
-          ),
-          24,
-        )
-      : 0;
 
   if (!hydrated) {
     return (
@@ -261,8 +257,9 @@ export default function HomeScreen() {
                       marginBottom: theme.spacing.xs,
                     }}
                   >
-                    {timeUntilStart.days}দিন {timeUntilStart.hours}ঘণ্টা{" "}
-                    {timeUntilStart.minutes}মি.
+                    {engToBng(timeUntilStart.days)}দিন{" "}
+                    {engToBng(timeUntilStart.hours)}ঘণ্টা{" "}
+                    {engToBng(timeUntilStart.minutes)}মি.
                   </Typography>
                   <Typography
                     variant="small"
@@ -296,7 +293,7 @@ export default function HomeScreen() {
                     numberOfLines={1}
                     adjustsFontSizeToFit={true}
                   >
-                    {stats?.totalSmokeFreeDays || 0}
+                    {engToBng(stats?.totalSmokeFreeDays || 0)}
                   </Typography>
                   <Typography variant="body" color="textMuted" align="center">
                     দিন ধূমপানমুক্ত
@@ -310,7 +307,8 @@ export default function HomeScreen() {
                       color="primary"
                       style={{ marginTop: theme.spacing.md, fontWeight: "600" }}
                     >
-                      মাশাআল্লাহ! {stats?.totalSmokeFreeDays} দিন পূর্ণ হয়েছে!
+                      মাশাআল্লাহ! {engToBng(stats?.totalSmokeFreeDays || 0)} দিন
+                      পূর্ণ হয়েছে!
                     </Typography>
                   )}
                 </View>
@@ -396,7 +394,14 @@ export default function HomeScreen() {
                   </Typography>
 
                   <View style={{ marginBottom: theme.spacing.lg }}>
-                    <DayProgressBar progress={stepContent ? 0.3 : 0} />
+                    <DayProgressBar
+                      progress={
+                        stepContent && stepContent.checklist?.length
+                          ? (stepProgress[currentStep]?.completedItems
+                              ?.length || 0) / stepContent.checklist.length
+                          : 0
+                      }
+                    />
                   </View>
 
                   <Animated.View style={animatedButtonStyle}>
@@ -488,54 +493,6 @@ export default function HomeScreen() {
             </Animated.View>
           </View>
         </ScrollView>
-
-        {/* SECTION E — Floating Action Button (Craving help) */}
-        {planState.isActive && (
-          <Animated.View
-            entering={FadeInUp.delay(400).duration(400)}
-            style={{
-              position: "absolute",
-              bottom: theme.spacing.xl,
-              right: theme.spacing.lg,
-            }}
-          >
-            <TouchableOpacity
-              onPressIn={handleCravingPressIn}
-              onPressOut={handleCravingPressOut}
-              onPress={handleCravingPress}
-              activeOpacity={1}
-              accessibilityRole="button"
-            >
-              <Animated.View style={animatedButtonStyle}>
-                <LinearGradient
-                  colors={theme.colors.gradients.goldButton}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{
-                    paddingVertical: theme.spacing.md,
-                    paddingHorizontal: theme.spacing.lg,
-                    borderRadius: theme.radius.full,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    shadowColor: theme.colors.primary,
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 8,
-                    elevation: 5,
-                  }}
-                >
-                  <Typography
-                    variant="bodyLarge"
-                    color="onPrimary"
-                    style={{ fontWeight: "700" }}
-                  >
-                    সাহায্য দরকার?
-                  </Typography>
-                </LinearGradient>
-              </Animated.View>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
       </Animated.View>
     </SafeAreaView>
   );

@@ -1,11 +1,6 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
@@ -68,7 +63,10 @@ export default function PrivacyPolicyScreen() {
             ← ফিরে যান
           </Typography>
         </TouchableOpacity>
-        <Typography variant="title" style={[styles.headerTitle, { color: theme.colors.onPrimary }]}>
+        <Typography
+          variant="title"
+          style={[styles.headerTitle, { color: theme.colors.onPrimary }]}
+        >
           গোপনীয়তা নীতি
         </Typography>
       </View>
@@ -78,10 +76,16 @@ export default function PrivacyPolicyScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Typography variant="small" style={[styles.intro, { color: theme.colors.textSecondary }]}>
+        <Typography
+          variant="small"
+          style={[styles.intro, { color: theme.colors.textSecondary }]}
+        >
           সর্বশেষ আপডেট: এপ্রিল ২০২৬
         </Typography>
-        <Typography variant="body" style={[styles.introText, { color: theme.colors.text }]}>
+        <Typography
+          variant="body"
+          style={[styles.introText, { color: theme.colors.text }]}
+        >
           "ধোঁয়া-মুক্ত পথ" অ্যাপ আপনার গোপনীয়তাকে সর্বোচ্চ গুরুত্ব দেয়। এই
           নীতিটি ব্যাখ্যা করে যে আমরা কীভাবে আপনার তথ্য পরিচালনা করি।
         </Typography>
@@ -97,7 +101,10 @@ export default function PrivacyPolicyScreen() {
             >
               {section.title}
             </Typography>
-            <Typography variant="body" style={[styles.sectionContent, { color: theme.colors.text }]}>
+            <Typography
+              variant="body"
+              style={[styles.sectionContent, { color: theme.colors.text }]}
+            >
               {section.content}
             </Typography>
           </View>

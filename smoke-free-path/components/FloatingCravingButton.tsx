@@ -7,7 +7,14 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence, withRepeat } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+  withRepeat,
+} from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function FloatingCravingButton() {
@@ -23,7 +30,6 @@ export default function FloatingCravingButton() {
     };
   });
 
-
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
       setReduceMotion(enabled);
@@ -31,7 +37,6 @@ export default function FloatingCravingButton() {
   }, []);
 
   useEffect(() => {
-
     if (reduceMotion) {
       scaleAnim.value = 1;
       return;
@@ -42,13 +47,12 @@ export default function FloatingCravingButton() {
       withRepeat(
         withSequence(
           withTiming(1.05, { duration: 800 }),
-          withTiming(1.0, { duration: 800 })
+          withTiming(1.0, { duration: 800 }),
         ),
         3,
-        false
-      )
+        false,
+      ),
     );
-
   }, [reduceMotion]);
 
   return (
@@ -64,8 +68,16 @@ export default function FloatingCravingButton() {
     >
       <TouchableOpacity
         onPress={() => router.push("/craving")}
-        onPressIn={() => { pressScale.value = withTiming(0.96, { duration: 150 }); }}
-        onPressOut={() => { pressScale.value = withSpring(1, { damping: 15, stiffness: 120, mass: 1 }); }}
+        onPressIn={() => {
+          pressScale.value = withTiming(0.96, { duration: 150 });
+        }}
+        onPressOut={() => {
+          pressScale.value = withSpring(1, {
+            damping: 15,
+            stiffness: 120,
+            mass: 1,
+          });
+        }}
         style={styles.touchable}
         activeOpacity={0.8}
         accessibilityLabel="ক্র্যাভিং সহায়তা"
