@@ -102,10 +102,33 @@ const baseTypography = {
   bodyLarge: { fontSize: 16, lineHeight: 26, fontWeight: "400" as const },
   body: { fontSize: 14, lineHeight: 22, fontWeight: "400" as const },
   caption: { fontSize: 12, lineHeight: 18, fontWeight: "400" as const },
-  arabic: { fontSize: 26, lineHeight: 44, fontFamily: "Amiri", textAlign: "right" as const, writingDirection: "rtl" as const, color: "#F5C842" },
-  arabicSmall: { fontSize: 20, lineHeight: 34, fontFamily: "Amiri", textAlign: "right" as const, writingDirection: "rtl" as const },
-  transliteration: { fontSize: 13, lineHeight: 20, fontStyle: "italic" as const, color: "#94A3B8" },
-  numberDisplay: { fontSize: 52, lineHeight: 60, fontWeight: "800" as const, color: "#F5C842" },
+  arabic: {
+    fontSize: 26,
+    lineHeight: 44,
+    fontFamily: "Amiri",
+    textAlign: "right" as const,
+    writingDirection: "rtl" as const,
+    color: "#F5C842",
+  },
+  arabicSmall: {
+    fontSize: 20,
+    lineHeight: 34,
+    fontFamily: "Amiri",
+    textAlign: "right" as const,
+    writingDirection: "rtl" as const,
+  },
+  transliteration: {
+    fontSize: 13,
+    lineHeight: 20,
+    fontStyle: "italic" as const,
+    color: "#94A3B8",
+  },
+  numberDisplay: {
+    fontSize: 52,
+    lineHeight: 60,
+    fontWeight: "800" as const,
+    color: "#F5C842",
+  },
   numberSmall: { fontSize: 20, lineHeight: 28, fontWeight: "700" as const },
 };
 
@@ -127,7 +150,6 @@ export const typography = {
   ...baseTypography,
   ...legacyTypography,
 } as const;
-
 
 export const spacing = {
   1: 4,
@@ -152,7 +174,6 @@ export const spacing = {
   xxxxl: 64,
 } as const;
 
-
 export const radius = {
   xs: 6,
   sm: 10,
@@ -164,11 +185,41 @@ export const radius = {
 } as const;
 
 export const shadows = {
-  goldGlow: { shadowColor: "#F5C842", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10 },
-  cardDepth: { shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 8 },
-  subtle: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 4 },
-  card: { shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.45, shadowRadius: 12, elevation: 8 }, // alias
-  elevated: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 8 }, // alias
+  goldGlow: {
+    shadowColor: "#F5C842",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  cardDepth: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  subtle: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  card: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    elevation: 8,
+  }, // alias
+  elevated: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 8,
+  }, // alias
 } as const;
 
 export const animation = {

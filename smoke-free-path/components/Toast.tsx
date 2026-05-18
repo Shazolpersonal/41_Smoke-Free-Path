@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, AccessibilityInfo } from "react-native";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { useTheme } from "../theme";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,7 +39,6 @@ export default function Toast({
       opacity: opacity.value,
     };
   });
-
 
   // Detect reduce motion preference once on mount
   useEffect(() => {
@@ -77,10 +80,7 @@ export default function Toast({
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        { backgroundColor: bgColor }, animatedStyle,
-      ]}
+      style={[styles.container, { backgroundColor: bgColor }, animatedStyle]}
       accessibilityLiveRegion="polite"
       accessibilityLabel={message}
     >

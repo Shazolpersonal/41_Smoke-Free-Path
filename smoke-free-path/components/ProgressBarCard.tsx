@@ -14,6 +14,11 @@ interface ProgressBarCardProps {
   progressPercent: number;
 }
 
+const engToBng = (num: number | string) => {
+  const bngDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(num).replace(/[0-9]/g, (d) => bngDigits[Number(d)]);
+};
+
 export default function ProgressBarCard({
   completedCount,
   progressPercent,
@@ -36,14 +41,14 @@ export default function ProgressBarCard({
     <Card style={styles.progressBarCard}>
       <View style={styles.progressBarHeader}>
         <Typography variant="subheading" style={styles.boldText}>
-          {completedCount}/৪১ ধাপ সম্পূর্ণ
+          {engToBng(completedCount)}/৪১ ধাপ সম্পূর্ণ
         </Typography>
         <Typography
           variant="subheading"
           color="primary"
           style={styles.boldText}
         >
-          {progressPercent}%
+          {engToBng(progressPercent)}%
         </Typography>
       </View>
       <View

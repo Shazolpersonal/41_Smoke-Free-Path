@@ -52,7 +52,9 @@ export default function StepNavigationBar({
             !isNextAccessible && styles.navBtnDisabled,
           ]}
           onPress={isNextAccessible ? onNext : undefined}
-          accessibilityLabel={isNextAccessible ? "পরবর্তী ধাপ" : "পরবর্তী ধাপ (লক করা আছে)"}
+          accessibilityLabel={
+            isNextAccessible ? "পরবর্তী ধাপ" : "পরবর্তী ধাপ (লক করা আছে)"
+          }
           accessibilityRole="button"
           disabled={!isNextAccessible}
           accessibilityState={{ disabled: !isNextAccessible }}

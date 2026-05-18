@@ -9,7 +9,12 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../theme";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 
 interface CardProps {
   children: React.ReactNode;
@@ -32,7 +37,6 @@ export default function Card({
       transform: [{ scale: scale.value }],
     };
   });
-
 
   const handlePressIn = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});

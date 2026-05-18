@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, StyleSheet, Share } from "react-native";
+import { TouchableOpacity, StyleSheet, Share, Platform } from "react-native";
 import Typography from "@/components/Typography";
 import { useTheme } from "@/theme";
 import type { Milestone } from "@/types";
@@ -26,9 +26,18 @@ export default function MilestoneShareButton({
     if (!milestone) return;
     try {
       const message = composeShareMessage(milestone);
-      const result = await Share.share({ message });
-      if (result.action === Share.dismissedAction) {
-        // user cancelled — no error shown
+      if (Platform.OS === "web") {
+        if (navigator && navigator.clipboard) {
+          await navigator.clipboard.writeText(message);
+          alert("বার্তাটি কপি করা হয়েছে!");
+        } else {
+          alert(message);
+        }
+      } else {
+        const result = await Share.share({ message });
+        if (result.action === Share.dismissedAction) {
+          // user cancelled — no error shown
+        }
       }
     } catch {
       // failure — no error shown to user

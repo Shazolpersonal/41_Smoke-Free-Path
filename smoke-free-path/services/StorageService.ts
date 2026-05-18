@@ -1,6 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
-import type { AppState, CravingSession, TriggerLog, UserProfile } from "@/types";
+import type {
+  AppState,
+  CravingSession,
+  TriggerLog,
+  UserProfile,
+} from "@/types";
 
 const LEGACY_APP_STATE_KEY = "@smokefree_app_state";
 const APP_STATE_USER_KEY = "@smokefree_user_profile";
@@ -100,7 +105,10 @@ export async function saveAppState(state: AppState): Promise<boolean> {
     // Save rest to AsyncStorage
     const remainderSuccess = await (async () => {
       try {
-        await AsyncStorage.setItem(APP_STATE_REMAINDER_KEY, JSON.stringify(remainder));
+        await AsyncStorage.setItem(
+          APP_STATE_REMAINDER_KEY,
+          JSON.stringify(remainder),
+        );
         return true;
       } catch {
         return false;

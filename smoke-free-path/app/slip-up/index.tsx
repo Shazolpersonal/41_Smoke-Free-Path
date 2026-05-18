@@ -19,7 +19,11 @@ import CigarettesInputCard from "@/components/slip-up/CigarettesInputCard";
 import TriggerReasonCard from "@/components/slip-up/TriggerReasonCard";
 import DecisionCard from "@/components/slip-up/DecisionCard";
 import { getDuasByCategory } from "@/services/ContentService";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import type { TriggerType, SlipUpDecision } from "@/types";
 
 const MOTIVATIONAL_MESSAGE =

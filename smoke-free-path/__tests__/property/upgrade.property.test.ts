@@ -3014,7 +3014,9 @@ describe("Property 21: Collision-Resistant ID Uniqueness", () => {
       fc.property(fc.integer({ min: 1, max: 20 }), (n) => {
         for (let i = 0; i < n; i++) {
           const id = generateCravingSessionId();
-          expect(id).toMatch(/^cs_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+          expect(id).toMatch(
+            /^cs_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+          );
         }
       }),
       { numRuns: 50 },
@@ -3026,7 +3028,9 @@ describe("Property 21: Collision-Resistant ID Uniqueness", () => {
       fc.property(fc.integer({ min: 1, max: 20 }), (n) => {
         for (let i = 0; i < n; i++) {
           const id = generateTriggerLogId();
-          expect(id).toMatch(/^tl_cr_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+          expect(id).toMatch(
+            /^tl_cr_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+          );
         }
       }),
       { numRuns: 50 },

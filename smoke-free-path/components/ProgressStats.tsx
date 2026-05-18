@@ -11,6 +11,11 @@ interface ProgressStatsProps {
   };
 }
 
+const engToBng = (num: number | string) => {
+  const bngDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(num).replace(/[0-9]/g, (d) => bngDigits[Number(d)]);
+};
+
 export default function ProgressStats({ stats }: ProgressStatsProps) {
   const { theme } = useTheme();
 
@@ -22,7 +27,7 @@ export default function ProgressStats({ stats }: ProgressStatsProps) {
         accessibilityLabel={`ধূমপান-মুক্ত দিন: ${stats.smokeFreeDays}`}
       >
         <Typography variant="heading" color="primary">
-          {stats.smokeFreeDays}
+          {engToBng(stats.smokeFreeDays)}
         </Typography>
         <Typography variant="small" color="textSecondary">
           ধূমপান-মুক্ত দিন
@@ -34,7 +39,7 @@ export default function ProgressStats({ stats }: ProgressStatsProps) {
         accessibilityLabel={`বাঁচানো সিগারেট: ${stats.totalSavedCigarettes}`}
       >
         <Typography variant="heading" color="primary">
-          {stats.totalSavedCigarettes}
+          {engToBng(stats.totalSavedCigarettes)}
         </Typography>
         <Typography variant="small" color="textSecondary">
           বাঁচানো সিগারেট
@@ -46,7 +51,7 @@ export default function ProgressStats({ stats }: ProgressStatsProps) {
         accessibilityLabel={`সাশ্রয়কৃত অর্থ: ৳${Math.round(stats.totalSavedMoney)}`}
       >
         <Typography variant="heading" color="primary">
-          ৳{Math.round(stats.totalSavedMoney)}
+          ৳{engToBng(Math.round(stats.totalSavedMoney))}
         </Typography>
         <Typography variant="small" color="textSecondary">
           সাশ্রয়কৃত অর্থ

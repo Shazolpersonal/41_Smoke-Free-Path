@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, AccessibilityInfo, StyleSheet } from "react-native";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, cancelAnimation, runOnJS } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  cancelAnimation,
+  runOnJS,
+} from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import Typography from "@/components/Typography";
 
@@ -20,7 +26,6 @@ export default function BreathingGuide() {
   useEffect(() => {
     let active = true;
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
-
 
     const breatheCycle = () => {
       if (!active) return;
@@ -70,7 +75,8 @@ export default function BreathingGuide() {
           <Animated.View
             style={[
               styles.breathingCircle,
-              { backgroundColor: theme.colors.primary }, animatedStyle,
+              { backgroundColor: theme.colors.primary },
+              animatedStyle,
             ]}
           />
         ) : (

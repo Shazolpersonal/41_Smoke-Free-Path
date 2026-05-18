@@ -40,6 +40,10 @@ export default function CravingTimer({
     },
   );
 
+  React.useEffect(() => {
+    start();
+  }, [start]);
+
   const animatedProps = useAnimatedProps(() => {
     return {
       strokeDashoffset: computeStrokeDashoffset(progress.value),

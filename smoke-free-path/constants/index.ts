@@ -23,5 +23,5 @@ export const MILESTONE_BADGES: Record<number, string> = {
 // Re-export calculation constants for centralized access
 export * from "./calculations";
 
-export * from '../theme';
-export { default as theme } from '../theme';
+export * from "../theme";
+export { default as theme } from "../theme";

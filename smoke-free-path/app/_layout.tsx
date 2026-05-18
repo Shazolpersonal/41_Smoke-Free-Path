@@ -92,6 +92,7 @@ function RootLayoutInner() {
           options={{
             title: "ক্র্যাভিং টুল",
             presentation: "modal",
+            headerShown: false,
             animation: reduceMotion ? "none" : "slide_from_bottom",
           }}
         />
