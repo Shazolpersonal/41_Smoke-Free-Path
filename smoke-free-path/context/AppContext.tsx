@@ -450,7 +450,9 @@ export function AppProvider({ children }: AppProviderProps) {
   // Users may genuinely use low-cost products like bidi (10-20 BDT per pack)
   // The onboarding flow now collects the correct price from the user
 
-  // Persist state with debounce (1500ms) to avoid excessive AsyncStorage writes
+  // Persist state with debounce (1500ms) to avoid excessive AsyncStorage writes.
+  // NOTE: saveAppState() now returns false ONLY when the primary AsyncStorage
+  // write fails — SecureStore is optional and does not affect this flag.
   const saveFailureCountRef = useRef(0);
   useEffect(() => {
     if (state === INITIAL_APP_STATE) return;
@@ -461,7 +463,9 @@ export function AppProvider({ children }: AppProviderProps) {
         saveFailureCountRef.current = 0;
       } else {
         saveFailureCountRef.current += 1;
-        if (saveFailureCountRef.current >= 3) {
+        // Threshold of 5 avoids false alarms from transient I/O errors.
+        // This alert only fires when AsyncStorage (device storage) genuinely fails.
+        if (saveFailureCountRef.current >= 5) {
           if (RNAppState.currentState === "active") {
             const { Alert } = require("react-native");
             Alert.alert(
