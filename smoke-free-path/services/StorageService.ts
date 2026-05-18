@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
 import type {
   AppState,
   CravingSession,
@@ -7,128 +6,170 @@ import type {
   UserProfile,
 } from "@/types";
 
-const LEGACY_APP_STATE_KEY = "@smokefree_app_state";
-const APP_STATE_USER_KEY = "@smokefree_user_profile";
-const APP_STATE_REMAINDER_KEY = "@smokefree_app_state_remainder";
-const ONBOARDING_KEY = "@smokefree_onboarding";
+// ─── Storage Keys ──────────────────────────────────────────────────────────────
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const APP_STATE_KEY = "@smokefree_app_state_v3";
+const ONBOARDING_KEY = "@smokefree_onboarding_v3";
 
-async function safeReadSecure<T>(key: string, fallback: T): Promise<T> {
+// Legacy keys (v1 & v2) — for migration only
+const LEGACY_V1_KEY = "@smokefree_app_state";
+const LEGACY_V2_REMAINDER_KEY = "@smokefree_app_state_remainder";
+const LEGACY_V2_USER_KEY = "@smokefree_user_profile"; // was in SecureStore
+
+// ─── SecureStore (optional encrypted layer) ────────────────────────────────────
+// SecureStore is used as an OPTIONAL encrypted copy of UserProfile only.
+// If it is unavailable (e.g., excluded from build, device not supported),
+// the app silently falls back to AsyncStorage. Data is NEVER lost.
+
+async function trySecureRead(key: string): Promise<string | null> {
   try {
-    const value = await SecureStore.getItemAsync(key);
-    if (value) return JSON.parse(value) as T;
-
-    // Migration: Check AsyncStorage for existing data
-    const legacyValue = await AsyncStorage.getItem(key);
-    if (legacyValue) {
-      const parsed = JSON.parse(legacyValue) as T;
-      // Migrate to SecureStore
-      await safeWriteSecure(key, parsed);
-      // Clean up legacy
-      await AsyncStorage.removeItem(key);
-      return parsed;
-    }
-
-    return fallback;
+    const SecureStore = await import("expo-secure-store");
+    return await SecureStore.getItemAsync(key);
   } catch {
-    return fallback;
+    return null;
   }
 }
 
-async function safeWriteSecure(key: string, value: unknown): Promise<boolean> {
+async function trySecureWrite(key: string, value: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync(key, JSON.stringify(value));
-    return true;
+    const SecureStore = await import("expo-secure-store");
+    await SecureStore.setItemAsync(key, value);
   } catch {
-    return false;
+    // SecureStore unavailable — AsyncStorage is the authoritative store anyway
+  }
+}
+
+async function trySecureDelete(key: string): Promise<void> {
+  try {
+    const SecureStore = await import("expo-secure-store");
+    await SecureStore.deleteItemAsync(key);
+  } catch {
+    // ignore
   }
 }
 
 // ─── App State ────────────────────────────────────────────────────────────────
 
 /**
- * Loads the application state.
- * Implements a hybrid storage strategy:
- * 1. Sensitive PII (UserProfile) is stored in SecureStore.
- * 2. Remainder of the state (logs, sessions) is in AsyncStorage.
- * 3. Handles migration from legacy single-key AsyncStorage.
- */
-export async function loadAppState(): Promise<AppState | null> {
-  try {
-    // 1. Try to load from split storage (v2)
-    const userProfileJson = await SecureStore.getItemAsync(APP_STATE_USER_KEY);
-    const remainderJson = await AsyncStorage.getItem(APP_STATE_REMAINDER_KEY);
-
-    if (userProfileJson) {
-      const userProfile = JSON.parse(userProfileJson) as UserProfile;
-      const remainder = remainderJson ? JSON.parse(remainderJson) : {};
-      return {
-        ...remainder,
-        userProfile,
-      } as AppState;
-    }
-
-    // 2. Fallback: Check legacy storage (v1)
-    const legacyValue = await AsyncStorage.getItem(LEGACY_APP_STATE_KEY);
-    if (legacyValue) {
-      const legacyState = JSON.parse(legacyValue) as AppState;
-
-      // Migrate to split storage immediately
-      const migrationSuccess = await saveAppState(legacyState);
-
-      if (migrationSuccess) {
-        // Clean up legacy key ONLY on success to prevent data loss
-        await AsyncStorage.removeItem(LEGACY_APP_STATE_KEY);
-      }
-
-      return legacyState;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Saves the application state by splitting PII from activity data.
- * This bypasses the 2048-byte limit of SecureStore while ensuring PII is encrypted.
+ * Saves the entire application state to AsyncStorage (primary).
+ * Also attempts to write an encrypted copy of UserProfile to SecureStore
+ * as an optional backup — failure here does NOT affect the return value.
+ *
+ * @returns true if the primary AsyncStorage write succeeded, false otherwise.
  */
 export async function saveAppState(state: AppState): Promise<boolean> {
   try {
-    const { userProfile, ...remainder } = state;
+    const json = JSON.stringify(state);
+    await AsyncStorage.setItem(APP_STATE_KEY, json);
 
-    // Save PII to SecureStore
-    const userSuccess = await safeWriteSecure(APP_STATE_USER_KEY, userProfile);
+    // Optional: encrypted backup of UserProfile in SecureStore
+    if (state.userProfile) {
+      await trySecureWrite(
+        LEGACY_V2_USER_KEY,
+        JSON.stringify(state.userProfile),
+      );
+    }
 
-    // Save rest to AsyncStorage
-    const remainderSuccess = await (async () => {
-      try {
-        await AsyncStorage.setItem(
-          APP_STATE_REMAINDER_KEY,
-          JSON.stringify(remainder),
-        );
-        return true;
-      } catch {
-        return false;
-      }
-    })();
-
-    return userSuccess && remainderSuccess;
+    return true;
   } catch {
     return false;
   }
 }
 
+/**
+ * Loads the application state, with a migration chain:
+ *   1. v3 key in AsyncStorage (current format — fast path)
+ *   2. v2 split storage: SecureStore (userProfile) + AsyncStorage (remainder)
+ *   3. v1 single AsyncStorage key (legacy)
+ *
+ * Migrates old data to v3 on first load and cleans up legacy keys.
+ */
+export async function loadAppState(): Promise<AppState | null> {
+  try {
+    // ── Path 1: Current v3 format ──────────────────────────────────────────
+    const v3Json = await AsyncStorage.getItem(APP_STATE_KEY);
+    if (v3Json) {
+      return JSON.parse(v3Json) as AppState;
+    }
+
+    // ── Path 2: v2 split storage migration ────────────────────────────────
+    const v2RemainderJson = await AsyncStorage.getItem(LEGACY_V2_REMAINDER_KEY);
+    if (v2RemainderJson) {
+      const remainder = JSON.parse(v2RemainderJson);
+
+      // Try to recover userProfile from SecureStore backup
+      let userProfile: UserProfile | null = remainder.userProfile ?? null;
+      if (!userProfile) {
+        const secureUserJson = await trySecureRead(LEGACY_V2_USER_KEY);
+        if (secureUserJson) {
+          userProfile = JSON.parse(secureUserJson) as UserProfile;
+        }
+      }
+
+      const migratedState: AppState = {
+        ...remainder,
+        userProfile,
+      };
+
+      // Migrate to v3
+      const migrated = await saveAppState(migratedState);
+      if (migrated) {
+        await AsyncStorage.removeItem(LEGACY_V2_REMAINDER_KEY);
+        await trySecureDelete(LEGACY_V2_USER_KEY);
+      }
+
+      return migratedState;
+    }
+
+    // ── Path 3: v1 legacy single-key migration ─────────────────────────────
+    const v1Json = await AsyncStorage.getItem(LEGACY_V1_KEY);
+    if (v1Json) {
+      const legacyState = JSON.parse(v1Json) as AppState;
+
+      const migrated = await saveAppState(legacyState);
+      if (migrated) {
+        await AsyncStorage.removeItem(LEGACY_V1_KEY);
+      }
+
+      return legacyState;
+    }
+
+    // ── No stored state — new user ─────────────────────────────────────────
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Onboarding Step ──────────────────────────────────────────────────────────
+// Uses AsyncStorage directly — reliable across all APK builds.
 
 export async function loadOnboardingStep(): Promise<number> {
-  return safeReadSecure<number>(ONBOARDING_KEY, 0);
+  try {
+    const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+    if (value !== null) return JSON.parse(value) as number;
+
+    // Migration: check old SecureStore location
+    const legacyValue = await trySecureRead("@smokefree_onboarding");
+    if (legacyValue !== null) {
+      const parsed = JSON.parse(legacyValue) as number;
+      await AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(parsed));
+      await trySecureDelete("@smokefree_onboarding");
+      return parsed;
+    }
+
+    return 0;
+  } catch {
+    return 0;
+  }
 }
 
 export async function saveOnboardingStep(step: number): Promise<void> {
-  await safeWriteSecure(ONBOARDING_KEY, step);
+  try {
+    await AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(step));
+  } catch {
+    // non-critical — worst case user sees onboarding again
+  }
 }
 
 // ─── Maintenance ──────────────────────────────────────────────────────────────
