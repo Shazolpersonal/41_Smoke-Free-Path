@@ -4,3 +4,6 @@
 ## 2026-05-18 - [Animated Checkbox Chips]
 **Learning:** Hard toggles on filter/selection chips (like TriggerSelector) without visual feedback feel abrupt.
 **Action:** Use `react-native-reanimated`'s `useAnimatedStyle` and `withTiming` to smoothly animate `backgroundColor` and `borderColor` on state changes, and explicitly apply `accessibilityLabel` to interactive chips.
+## 2024-05-19 - [Standardized Press Animations on CTA Links]
+**Learning:** Call-to-action (CTA) links nested inside strategy content cards (like the link to the Dua section in the craving modal) can feel disconnected and flat if they lack the standard project press animations. Consistently applying the project's standard 0.96 scale-down micro-interaction and proper accessibility attributes makes them feel more native and accessible.
+**Action:** Always wrap `TouchableOpacity` CTA buttons inside strategy cards with an `Animated.View`, implement the `onPressIn` (scale 0.96 withTiming) and `onPressOut` (scale 1 withSpring) handlers using `react-native-reanimated`, and replace raw `Text` with `Typography`. Ensure `accessibilityRole="button"` and `accessibilityLabel` are explicitly set.

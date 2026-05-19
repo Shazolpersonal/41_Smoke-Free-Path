@@ -28,6 +28,7 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-notifications": "~0.32.16",
     "expo-router": "~6.0.23",
+    "expo-secure-store": "~14.0.1",
     "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
@@ -37,11 +38,13 @@
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-svg": "15.12.1",
-    "react-native-web": "^0.21.0",
-    "expo-secure-store": "~14.0.1"
+    "react-native-web": "^0.21.0"
   },
   "devDependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "@jest/globals": "^30.4.1",
     "@types/jest": "^29.5.14",
+    "@types/node": "^25.9.0",
     "@types/react": "~19.1.0",
     "fast-check": "^4.6.0",
     "jest-expo": "~54.0.17",
