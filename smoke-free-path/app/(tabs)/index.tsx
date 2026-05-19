@@ -50,7 +50,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { state, dispatch, hydrated } = useAppContext();
   const { theme } = useTheme();
-  const { userProfile, planState, bookmarks } = state;
+  const { userProfile, planState, bookmarks, stepProgress } = state;
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -396,9 +396,8 @@ export default function HomeScreen() {
                   <View style={{ marginBottom: theme.spacing.lg }}>
                     <DayProgressBar
                       progress={
-                        stepContent && stepContent.checklist?.length
-                          ? (stepProgress[currentStep]?.completedItems
-                              ?.length || 0) / stepContent.checklist.length
+                        stepPlan && stepPlan.checklistItems?.length
+                          ? (stepProgress[currentStep]?.completedItems?.length || 0) / stepPlan.checklistItems.length
                           : 0
                       }
                     />
