@@ -66,6 +66,7 @@ export default function ChecklistSection({
           accessibilityRole="button"
           disabled={!allComplete}
           accessibilityState={{ disabled: !allComplete }}
+          accessibilityHint={!allComplete ? "এগিয়ে যেতে সবগুলো কাজ সম্পূর্ণ করুন" : ""}
         >
           <Typography
             variant="subheading"
