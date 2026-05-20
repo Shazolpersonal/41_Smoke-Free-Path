@@ -7,3 +7,6 @@
 ## 2024-05-19 - [Standardized Press Animations on CTA Links]
 **Learning:** Call-to-action (CTA) links nested inside strategy content cards (like the link to the Dua section in the craving modal) can feel disconnected and flat if they lack the standard project press animations. Consistently applying the project's standard 0.96 scale-down micro-interaction and proper accessibility attributes makes them feel more native and accessible.
 **Action:** Always wrap `TouchableOpacity` CTA buttons inside strategy cards with an `Animated.View`, implement the `onPressIn` (scale 0.96 withTiming) and `onPressOut` (scale 1 withSpring) handlers using `react-native-reanimated`, and replace raw `Text` with `Typography`. Ensure `accessibilityRole="button"` and `accessibilityLabel` are explicitly set.
+## 2026-05-20 - [Accessible Disabled States on Form Buttons]
+**Learning:** React Native buttons (like `TouchableOpacity`) that are visually disabled (e.g., using opacity) often lack proper accessibility traits, leaving screen reader users confused about why they cannot proceed.
+**Action:** Always ensure disabled form or step completion buttons have `accessibilityRole="button"`, `accessibilityState={{ disabled: true }}`, and importantly, an `accessibilityHint` that explains *what* the user needs to do to enable the button (e.g., 'এগিয়ে যেতে সবগুলো কাজ সম্পূর্ণ করুন').
