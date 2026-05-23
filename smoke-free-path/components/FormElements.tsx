@@ -21,6 +21,7 @@ export const FormInput = ({
   error,
   helperText,
   style,
+  maxLength = 255,
   ...props
 }: FormInputProps) => {
   const { theme } = useTheme();
@@ -73,6 +74,7 @@ export const FormInput = ({
           placeholderTextColor={theme.colors.textDisabled}
           accessibilityLabel={props.accessibilityLabel || label}
           accessibilityHint={error || helperText}
+          maxLength={maxLength}
           {...props}
         />
       </View>
