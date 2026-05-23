@@ -458,6 +458,7 @@ export default function QuitDateScreen() {
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityState={{ disabled: isLoading }}
+            accessibilityHint={isLoading ? 'প্রক্রিয়া চলছে, অনুগ্রহ করে অপেক্ষা করুন' : ''}
             accessibilityLabel={
               isLoading ? "সেটআপ হচ্ছে..." : "আল্লাহর উপর ভরসা রেখে শুরু করি"
             }
