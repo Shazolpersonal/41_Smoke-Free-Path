@@ -205,6 +205,8 @@ export default function SettingsScreen() {
           onPress={handleSave}
           activeOpacity={0.85}
           disabled={isSaving}
+          accessibilityState={{ disabled: isSaving }}
+          accessibilityHint={isSaving ? 'সংরক্ষণ করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন' : ''}
           accessibilityLabel="সেটিংস সংরক্ষণ করুন"
           accessibilityRole="button"
         >

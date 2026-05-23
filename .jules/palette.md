@@ -1,3 +1,6 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+## 2024-05-23 - Added accessibility hints and roles for disabled buttons
+**Learning:** Found that some buttons disable logic uses generic visual styles and only sets disabled={true}, leaving screen readers with no explanation on how to unlock the action or enable the button. Also missing accessibilityRole="button" on some.
+**Action:** Always add accessibilityHint to disabled interactive elements explaining the requirement, and ensure accessibilityState={{ disabled: true }} is set for disabled buttons. Ensure all buttons use accessibilityRole="button".

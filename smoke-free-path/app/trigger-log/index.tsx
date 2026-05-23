@@ -456,6 +456,8 @@ export default function TriggerLogScreen() {
           onPress={handleSubmit}
           disabled={!selectedTrigger}
           accessibilityState={{ disabled: !selectedTrigger }}
+          accessibilityHint={!selectedTrigger ? 'প্রথমে একটি ট্রিগার নির্বাচন করুন' : ''}
+          accessibilityRole="button"
           activeOpacity={0.85}
         >
           <Typography
