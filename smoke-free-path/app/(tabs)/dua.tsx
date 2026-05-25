@@ -210,6 +210,8 @@ export default function DuaScreen() {
 
       <FlatList
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           styles.scrollContent,
           { padding: theme.spacing.md, paddingBottom: 40 },
