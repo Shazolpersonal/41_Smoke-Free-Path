@@ -1,3 +1,6 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+## 2024-05-25 - Missing Keyboard Dismissal on Main Search Lists
+**Learning:** In `dua.tsx` and `library.tsx`, the search inputs lacked smooth UX because the underlying `FlatList` components did not have `keyboardDismissMode="on-drag"` and `keyboardShouldPersistTaps="handled"`. This forced users to manually dismiss the keyboard with a discrete tap outside or an extra tap to select an item.
+**Action:** Always add `keyboardDismissMode="on-drag"` and `keyboardShouldPersistTaps="handled"` to any main `FlatList` or `ScrollView` that renders content beneath a `TextInput` search bar in React Native to provide a fluid, native-feeling search experience.
