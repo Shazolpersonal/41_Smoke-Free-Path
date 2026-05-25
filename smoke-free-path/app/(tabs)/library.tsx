@@ -278,6 +278,7 @@ export default function LibraryScreen() {
           onChangeText={setSearchQuery}
           returnKeyType="search"
           clearButtonMode="while-editing"
+          maxLength={100} // Added maxLength to prevent DoS via massive string allocation
           accessibilityLabel="ইসলামিক কন্টেন্ট খুঁজুন"
           accessibilityRole="search"
         />

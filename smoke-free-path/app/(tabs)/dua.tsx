@@ -203,6 +203,7 @@ export default function DuaScreen() {
           onChangeText={setSearchQuery}
           returnKeyType="search"
           clearButtonMode="while-editing"
+          maxLength={100} // Added maxLength to prevent DoS via massive string allocation
           accessibilityLabel="দোয়া খুঁজুন"
           accessibilityRole="search"
         />
