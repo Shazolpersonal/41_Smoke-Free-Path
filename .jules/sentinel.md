@@ -14,3 +14,8 @@
 **Vulnerability:** The application was vulnerable to memory exhaustion/DoS via the data import functionality. `handleImportData` read arbitrary user-provided files entirely into memory and parsed them as JSON without any prior size validation.
 **Learning:** React Native's `FileSystem.readAsStringAsync` loads the entire file into the JavaScript thread's memory. When coupled with synchronous `JSON.parse`, importing a massive file (e.g., hundreds of megabytes) will block the thread and likely cause an Out-Of-Memory (OOM) crash, effectively allowing a DoS attack.
 **Prevention:** To prevent DoS and memory exhaustion vulnerabilities when importing backup or data files, always enforce a strict file size limit (e.g., 5MB) using `FileSystem.getInfoAsync().size` before reading the file contents into memory.
+
+## 2026-05-26 - Prevent Denial of Service and Memory Exhaustion via TextInput Inputs
+**Vulnerability:** Unbounded TextInput components could allow users to paste or enter massive amounts of text, potentially causing the app to crash due to memory exhaustion or leading to uncontrolled state growth.
+**Learning:** To mitigate DoS and memory exhaustion risks, always enforce input validation by explicitly setting `maxLength` attributes on all `TextInput` components (e.g., in forms, custom input wrappers like `FloatingLabelInput`, and log entry fields) throughout the application. This ensures limits are enforced at the UI layer.
+**Prevention:** Review all `TextInput` instances to ensure they include an appropriate `maxLength` prop.
