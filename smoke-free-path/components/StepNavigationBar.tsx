@@ -58,6 +58,7 @@ export default function StepNavigationBar({
           accessibilityRole="button"
           disabled={!isNextAccessible}
           accessibilityState={{ disabled: !isNextAccessible }}
+          accessibilityHint={!isNextAccessible ? "পরবর্তী ধাপে যেতে বর্তমান ধাপের সমস্ত কাজ সম্পন্ন করুন" : undefined}
         >
           <Typography
             variant="body"
