@@ -397,7 +397,8 @@ export default function HomeScreen() {
                     <DayProgressBar
                       progress={
                         stepPlan && stepPlan.checklistItems?.length
-                          ? (stepProgress[currentStep]?.completedItems?.length || 0) / stepPlan.checklistItems.length
+                          ? (stepProgress[currentStep]?.completedItems
+                              ?.length || 0) / stepPlan.checklistItems.length
                           : 0
                       }
                     />
