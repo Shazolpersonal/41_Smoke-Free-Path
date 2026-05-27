@@ -158,6 +158,7 @@ export default function ProfileSetupScreen() {
               },
             ]}
             showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
             keyboardShouldPersistTaps="handled"
           >
             <StepProgress currentStep={2} totalSteps={3} />
