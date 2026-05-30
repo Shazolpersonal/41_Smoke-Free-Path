@@ -73,6 +73,7 @@ export const FormInput = ({
           placeholderTextColor={theme.colors.textDisabled}
           accessibilityLabel={props.accessibilityLabel || label}
           accessibilityHint={error || helperText}
+          maxLength={props.maxLength ?? 255} // Security Enhancement: Prevent DoS by restricting input length
           {...props}
         />
       </View>
