@@ -1,3 +1,6 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+## 2024-05-30 - Keyboard Dismissal in Scrollable Content
+**Learning:** Found a recurring UX anti-pattern where search results in vertical `FlatList` components lack `keyboardDismissMode="on-drag"` and `keyboardShouldPersistTaps="handled"`. This prevents users from easily dismissing the mobile keyboard by scrolling or tapping items, creating a frustrating experience, especially when navigating search lists.
+**Action:** When adding or reviewing `FlatList` or `ScrollView` components that contain or interact with `TextInput` search bars, always add these properties to ensure smooth keyboard interactions and better mobile usability.
