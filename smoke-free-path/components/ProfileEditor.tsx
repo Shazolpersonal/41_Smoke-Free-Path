@@ -153,6 +153,7 @@ function ProfileForm({
         onChangeText={(text) => handleChange("name", text)}
         placeholder="আপনার নাম"
         autoCapitalize="words"
+        maxLength={50}
       />
 
       {INPUT_ROWS.map((row, idx) => (
@@ -165,6 +166,7 @@ function ProfileForm({
                 handleChange(row[0].key as keyof typeof formData, text)
               }
               keyboardType="numeric"
+              maxLength={row[0].key === "cigarettesPerDay" ? 3 : 4}
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -175,6 +177,7 @@ function ProfileForm({
                 handleChange(row[1].key as keyof typeof formData, text)
               }
               keyboardType="numeric"
+              maxLength={row[1].key === "smokingYears" ? 2 : 3}
             />
           </View>
         </View>
