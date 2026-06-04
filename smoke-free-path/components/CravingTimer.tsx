@@ -137,6 +137,11 @@ export default function CravingTimer({
                 ? "টাইমার শুরু করুন"
                 : "টাইমার চালিয়ে যান"
             }
+            accessibilityHint={
+              remaining === TOTAL_SECONDS
+                ? "ক্র্যাভিং কমানোর জন্য টাইমার শুরু করুন"
+                : "স্থগিত টাইমারটি আবার চালু করুন"
+            }
           >
             <Typography variant="title" color="onPrimary">
               {remaining === TOTAL_SECONDS ? "▶ শুরু করুন" : "▶ চালিয়ে যান"}
@@ -149,6 +154,7 @@ export default function CravingTimer({
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel="টাইমার বিরতি"
+            accessibilityHint="বর্তমান টাইমারটি সাময়িকভাবে স্থগিত করুন"
           >
             <Typography variant="title" color="onPrimary">
               ⏸ বিরতি
@@ -169,6 +175,7 @@ export default function CravingTimer({
           activeOpacity={0.85}
           accessibilityRole="button"
           accessibilityLabel="টাইমার রিসেট"
+          accessibilityHint="টাইমারটি প্রথম থেকে পুনরায় শুরু করুন"
         >
           <Typography
             variant="body"
@@ -192,6 +199,7 @@ export default function CravingTimer({
           activeOpacity={0.85}
           accessibilityRole="button"
           accessibilityLabel="টাইমার বাতিল করুন"
+          accessibilityHint="বর্তমান টাইমার সেশনটি বন্ধ করুন"
         >
           <Typography
             variant="body"

@@ -32,6 +32,7 @@ export default function StepNavigationBar({
           onPress={onPrev}
           accessibilityLabel="পূর্ববর্তী ধাপ"
           accessibilityRole="button"
+          accessibilityHint="আগের ধাপে ফিরে যান"
         >
           <Typography
             variant="body"
@@ -58,6 +59,11 @@ export default function StepNavigationBar({
           accessibilityRole="button"
           disabled={!isNextAccessible}
           accessibilityState={{ disabled: !isNextAccessible }}
+          accessibilityHint={
+            isNextAccessible
+              ? "পরবর্তী ধাপে যান"
+              : "পরবর্তী ধাপে যেতে বর্তমান ধাপটি সম্পন্ন করুন"
+          }
         >
           <Typography
             variant="body"

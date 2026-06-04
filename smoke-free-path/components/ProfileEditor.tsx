@@ -190,6 +190,7 @@ function ProfileForm({
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel="প্রোফাইল সংরক্ষণ করুন"
+          accessibilityHint="পরিবর্তিত তথ্যগুলো সংরক্ষণ করুন"
         >
           <Typography
             variant="body"
@@ -204,6 +205,7 @@ function ProfileForm({
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel="সম্পাদনা বাতিল করুন"
+          accessibilityHint="কোনো পরিবর্তন না করেই ফিরে যান"
         >
           <Typography
             variant="body"
@@ -267,6 +269,7 @@ export default function ProfileEditor({
             onPress={() => setEditingProfile(true)}
             accessibilityRole="button"
             accessibilityLabel="প্রোফাইল সম্পাদনা করুন"
+            accessibilityHint="আপনার তথ্য পরিবর্তন করতে এখানে চাপুন"
           >
             <Typography
               variant="body"

@@ -28,6 +28,7 @@ export default function DecisionCard({ onDecision }: DecisionCardProps) {
         activeOpacity={0.85}
         accessibilityRole="button"
         accessibilityLabel="বর্তমান ধাপ থেকে চালিয়ে যান"
+        accessibilityHint="বর্তমান ধাপ থেকেই পুনরায় শুরু করুন"
       >
         <Typography
           variant="subheading"
@@ -72,6 +73,7 @@ export default function DecisionCard({ onDecision }: DecisionCardProps) {
         activeOpacity={0.85}
         accessibilityRole="button"
         accessibilityLabel="প্ল্যান রিসেট করুন"
+        accessibilityHint="পুনরায় প্রথম ধাপ থেকে যাত্রা শুরু করুন"
       >
         <Typography
           variant="subheading"
