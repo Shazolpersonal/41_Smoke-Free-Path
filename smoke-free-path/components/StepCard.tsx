@@ -119,6 +119,13 @@ export default React.memo(function StepCard({
       onPressOut={handlePressOut}
       disabled={status === "future"}
       accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: status === "future" }}
+      accessibilityHint={
+        status === "future"
+          ? "এই ধাপটি এখনো আনলক হয়নি"
+          : "এই ধাপের বিস্তারিত দেখুন"
+      }
       style={{ margin: GAP / 2 }}
     >
       <Animated.View
