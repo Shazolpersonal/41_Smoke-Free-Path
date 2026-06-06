@@ -290,6 +290,8 @@ export default function LibraryScreen() {
           { padding: theme.spacing.md, paddingBottom: theme.spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         data={items}
         keyExtractor={(item) => item.id}
         initialNumToRender={10}
