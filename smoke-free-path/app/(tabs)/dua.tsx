@@ -203,6 +203,7 @@ export default function DuaScreen() {
           onChangeText={setSearchQuery}
           returnKeyType="search"
           clearButtonMode="while-editing"
+          maxLength={100}
           accessibilityLabel="দোয়া খুঁজুন"
           accessibilityRole="search"
         />
