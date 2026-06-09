@@ -276,6 +276,7 @@ export default function LibraryScreen() {
           placeholderTextColor={theme.colors.textDisabled}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          maxLength={100}
           returnKeyType="search"
           clearButtonMode="while-editing"
           accessibilityLabel="ইসলামিক কন্টেন্ট খুঁজুন"
