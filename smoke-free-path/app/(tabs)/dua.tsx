@@ -201,6 +201,7 @@ export default function DuaScreen() {
           placeholderTextColor={theme.colors.textDisabled}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          maxLength={100}
           returnKeyType="search"
           clearButtonMode="while-editing"
           accessibilityLabel="দোয়া খুঁজুন"
