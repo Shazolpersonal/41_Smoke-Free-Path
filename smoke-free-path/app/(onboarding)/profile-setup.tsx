@@ -159,6 +159,7 @@ export default function ProfileSetupScreen() {
             ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
           >
             <StepProgress currentStep={2} totalSteps={3} />
             <View style={{ height: theme.spacing.md }} />
