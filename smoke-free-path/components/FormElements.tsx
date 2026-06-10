@@ -58,7 +58,9 @@ export const FormInput = ({
           },
         ]}
       >
+        {/* Security: Prevent memory exhaustion DoS via oversized input */}
         <TextInput
+          maxLength={250}
           style={[
             styles.input,
             {
