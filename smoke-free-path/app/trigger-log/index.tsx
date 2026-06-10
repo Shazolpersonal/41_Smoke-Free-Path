@@ -421,7 +421,9 @@ export default function TriggerLogScreen() {
           >
             নোট (ঐচ্ছিক)
           </Typography>
+          {/* Security: Prevent memory exhaustion DoS via oversized input */}
           <TextInput
+            maxLength={500}
             style={[
               styles.noteInput,
               {

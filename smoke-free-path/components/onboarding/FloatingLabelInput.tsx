@@ -99,7 +99,9 @@ export default function FloatingLabelInput({
         >
           {label}
         </Animated.Text>
+        {/* Security: Prevent memory exhaustion DoS via oversized input */}
         <TextInput
+          maxLength={250}
           style={[styles.input, { color: theme.colors.text }]}
           value={value}
           onChangeText={onChangeText}

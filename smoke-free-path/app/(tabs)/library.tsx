@@ -262,7 +262,9 @@ export default function LibraryScreen() {
           },
         ]}
       >
+        {/* Security: Prevent memory exhaustion DoS via oversized input */}
         <TextInput
+          maxLength={100}
           style={[
             styles.searchInput,
             {
