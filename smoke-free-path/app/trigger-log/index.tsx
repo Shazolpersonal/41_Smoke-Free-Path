@@ -422,6 +422,7 @@ export default function TriggerLogScreen() {
             নোট (ঐচ্ছিক)
           </Typography>
           <TextInput
+            maxLength={500}
             style={[
               styles.noteInput,
               {
