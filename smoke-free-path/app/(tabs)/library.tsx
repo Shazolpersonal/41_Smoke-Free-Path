@@ -274,6 +274,7 @@ export default function LibraryScreen() {
           ]}
           placeholder="অনুবাদ বা উৎস দিয়ে খুঁজুন..."
           placeholderTextColor={theme.colors.textDisabled}
+          maxLength={100}
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"

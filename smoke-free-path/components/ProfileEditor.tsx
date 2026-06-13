@@ -136,12 +136,12 @@ function ProfileForm({
 
   const INPUT_ROWS = [
     [
-      { key: "cigarettesPerDay", label: "দৈনিক সিগারেট" },
-      { key: "smokingYears", label: "ধূমপানের বছর" },
+      { key: "cigarettesPerDay", label: "দৈনিক সিগারেট", maxLength: 3 },
+      { key: "smokingYears", label: "ধূমপানের বছর", maxLength: 3 },
     ],
     [
-      { key: "cigarettePricePerPack", label: "প্যাকের মূল্য (৳)" },
-      { key: "cigarettesPerPack", label: "প্যাকে সংখ্যা" },
+      { key: "cigarettePricePerPack", label: "প্যাকের মূল্য (৳)", maxLength: 5 },
+      { key: "cigarettesPerPack", label: "প্যাকে সংখ্যা", maxLength: 3 },
     ],
   ] as const;
 
@@ -153,6 +153,7 @@ function ProfileForm({
         onChangeText={(text) => handleChange("name", text)}
         placeholder="আপনার নাম"
         autoCapitalize="words"
+        maxLength={50}
       />
 
       {INPUT_ROWS.map((row, idx) => (
@@ -165,6 +166,7 @@ function ProfileForm({
                 handleChange(row[0].key as keyof typeof formData, text)
               }
               keyboardType="numeric"
+              maxLength={row[0].maxLength}
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -175,6 +177,7 @@ function ProfileForm({
                 handleChange(row[1].key as keyof typeof formData, text)
               }
               keyboardType="numeric"
+              maxLength={row[1].maxLength}
             />
           </View>
         </View>

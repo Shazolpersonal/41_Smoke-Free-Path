@@ -46,6 +46,7 @@ export default function ProfileForm({
           if (errors.name) onClearError?.("name");
         }}
         error={errors.name}
+        maxLength={50}
       />
 
       <FloatingLabelInput
@@ -58,6 +59,7 @@ export default function ProfileForm({
         }}
         error={errors.cigarettesPerDay}
         keyboardType="numeric"
+        maxLength={3}
       />
 
       <FloatingLabelInput
@@ -70,6 +72,7 @@ export default function ProfileForm({
         }}
         error={errors.smokingYears}
         keyboardType="numeric"
+        maxLength={3}
       />
 
       <FloatingLabelInput
@@ -83,6 +86,7 @@ export default function ProfileForm({
         }}
         error={errors.cigarettePricePerPack}
         keyboardType="numeric"
+        maxLength={5}
       />
 
       <View
