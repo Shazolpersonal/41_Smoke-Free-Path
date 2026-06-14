@@ -55,6 +55,11 @@ export default function StepNavigationBar({
           accessibilityLabel={
             isNextAccessible ? "পরবর্তী ধাপ" : "পরবর্তী ধাপ (লক করা আছে)"
           }
+          accessibilityHint={
+            !isNextAccessible
+              ? "বর্তমান ধাপ সম্পন্ন হলে এই বাটনটি সক্রিয় হবে।"
+              : undefined
+          }
           accessibilityRole="button"
           disabled={!isNextAccessible}
           accessibilityState={{ disabled: !isNextAccessible }}

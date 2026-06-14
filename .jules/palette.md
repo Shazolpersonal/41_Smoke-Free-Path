@@ -1,3 +1,7 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+
+## 2024-05-18 - Missing Accessibility Hints for Disabled Buttons
+**Learning:** Found an accessibility issue pattern where disabled interactive components like `StepCard`s, "Complete Step" buttons, and "Next Step" buttons were visually disabled with opacity or color changes, but lacked an `accessibilityHint`. Screen readers would announce them as disabled, but users were left confused about what actions were required to unlock them.
+**Action:** When creating or reviewing components that enter a disabled state based on app logic (like future dates or incomplete checklists), always explicitly include `accessibilityRole="button"`, `accessibilityState={{ disabled: true }}`, and crucially, an `accessibilityHint` that explains to the user exactly how to enable the component.
