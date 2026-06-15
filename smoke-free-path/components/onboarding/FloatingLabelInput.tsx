@@ -109,6 +109,7 @@ export default function FloatingLabelInput({
           placeholderTextColor={theme.colors.textMuted}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
+          maxLength={100}
           accessibilityLabel={label}
           accessibilityHint={error || ""}
         />
