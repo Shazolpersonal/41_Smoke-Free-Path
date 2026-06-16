@@ -60,9 +60,8 @@ export default function ChecklistSection({
           ]}
           onPress={allComplete ? onComplete : undefined}
           activeOpacity={allComplete ? 0.8 : 1}
-          accessibilityLabel={
-            allComplete ? "ধাপ সম্পূর্ণ করুন" : "প্রথমে সব কাজ সম্পন্ন করুন"
-          }
+          accessibilityLabel="ধাপ সম্পূর্ণ করুন"
+          accessibilityHint={!allComplete ? "বাটনটি সক্রিয় করতে উপরের সব কাজ সম্পন্ন করুন" : undefined}
           accessibilityRole="button"
           disabled={!allComplete}
           accessibilityState={{ disabled: !allComplete }}
