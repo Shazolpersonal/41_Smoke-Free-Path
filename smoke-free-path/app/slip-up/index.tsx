@@ -140,6 +140,8 @@ export default function SlipUpScreen() {
       </View>
 
       <Animated.ScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         style={[
           styles.scroll,
           { backgroundColor: theme.colors.background },
