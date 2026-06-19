@@ -205,6 +205,8 @@ export default function DuaScreen() {
           clearButtonMode="while-editing"
           accessibilityLabel="দোয়া খুঁজুন"
           accessibilityRole="search"
+          // Security: Prevent DoS by limiting search input length
+          maxLength={100}
         />
       </View>
 

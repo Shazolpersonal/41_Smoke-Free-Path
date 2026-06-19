@@ -440,6 +440,8 @@ export default function TriggerLogScreen() {
             textAlignVertical="top"
             accessibilityLabel="নোট (ঐচ্ছিক)"
             accessibilityHint="কী ঘটেছিল তা সংক্ষেপে লিখুন"
+            // Security: Prevent DoS by limiting input length
+            maxLength={1000}
           />
         </Card>
 

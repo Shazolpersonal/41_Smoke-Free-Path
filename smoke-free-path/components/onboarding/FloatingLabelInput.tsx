@@ -23,6 +23,7 @@ interface FloatingLabelInputProps {
   keyboardType?: KeyboardTypeOptions;
   error?: string;
   secureTextEntry?: boolean;
+  maxLength?: number;
 }
 
 export default function FloatingLabelInput({
@@ -33,6 +34,7 @@ export default function FloatingLabelInput({
   keyboardType,
   error,
   secureTextEntry,
+  maxLength,
 }: FloatingLabelInputProps) {
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -109,6 +111,8 @@ export default function FloatingLabelInput({
           placeholderTextColor={theme.colors.textMuted}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
+          // Security: Prevent DoS by limiting input length
+          maxLength={maxLength || 1000}
           accessibilityLabel={label}
           accessibilityHint={error || ""}
         />
