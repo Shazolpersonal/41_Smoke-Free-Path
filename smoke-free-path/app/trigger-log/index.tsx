@@ -435,6 +435,7 @@ export default function TriggerLogScreen() {
             placeholderTextColor={theme.colors.textDisabled}
             value={note}
             onChangeText={setNote}
+            maxLength={1000}
             multiline
             numberOfLines={3}
             textAlignVertical="top"
