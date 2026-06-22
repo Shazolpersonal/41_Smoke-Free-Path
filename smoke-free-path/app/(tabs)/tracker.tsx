@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useRef, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
@@ -51,13 +51,21 @@ export default function TrackerScreen() {
     return result;
   }, []);
 
+  // ⚡ Bolt Optimization: Latest Ref Pattern
+  // Using a ref to store planState allows handleStepPress to remain stable,
+  // preventing layout thrashing and unnecessary re-renders of the 41 React.memo StepCard items.
+  const planStateRef = useRef(planState);
+  useEffect(() => {
+    planStateRef.current = planState;
+  }, [planState]);
+
   const handleStepPress = useCallback(
     (step: number) => {
-      if (isStepAccessible(step, planState)) {
+      if (isStepAccessible(step, planStateRef.current)) {
         router.push(`/tracker/${step}`);
       }
     },
-    [router, planState],
+    [router],
   );
 
   // Cache step statuses to prevent redundant Date instantiations
