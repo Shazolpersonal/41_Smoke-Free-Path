@@ -1,12 +1,8 @@
-1. **Add `accessibilityRole="button"` and `accessibilityLabel` to buttons in `ProfileEditor.tsx`.**
-   - The "সম্পাদনা" (Edit) button
-   - The "সংরক্ষণ করুন" (Save) button
-   - The "বাতিল" (Cancel) button
-2. **Add `accessibilityRole="button"` and `accessibilityLabel` to buttons in `NotificationSettings.tsx`.**
-   - The Morning Time picker button
-   - The Evening Time picker button
-3. **Verify the code using typecheck, test, and lint if possible.**
-4. **Complete pre commit steps**
-   - Complete pre commit steps to make sure proper testing, verifications, reviews and reflections are done.
-5. **Submit the change.**
-   - Create a PR for the UX/Accessibility improvement with title `🎨 Palette: [UX improvement]`.
+1. Add keyboard dismissal properties to lists in `smoke-free-path/app/(tabs)/library.tsx`
+    - Update `FlatList` component displaying library content to include `keyboardDismissMode="on-drag"` and `keyboardShouldPersistTaps="handled"`. This ensures the keyboard is dismissed easily on scroll.
+2. Add keyboard dismissal properties to lists in `smoke-free-path/app/(tabs)/dua.tsx`
+    - Update `FlatList` component displaying duas to include `keyboardDismissMode="on-drag"` and `keyboardShouldPersistTaps="handled"`. This ensures the keyboard is dismissed easily on scroll.
+3. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+    - Run the `pre_commit_instructions` tool and execute all validation steps required.
+4. Submit code.
+    - Create a pull request using the `submit` tool.
