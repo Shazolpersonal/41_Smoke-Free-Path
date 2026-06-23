@@ -205,10 +205,13 @@ export default function DuaScreen() {
           clearButtonMode="while-editing"
           accessibilityLabel="দোয়া খুঁজুন"
           accessibilityRole="search"
+          accessibilityHint="দোয়া খুঁজতে এখানে টাইপ করুন"
         />
       </View>
 
       <FlatList
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={[
           styles.scrollContent,

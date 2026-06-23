@@ -1,6 +1,9 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { useTheme } from "../theme";
 import Typography from "./Typography";
 import type { TriggerType } from "@/types";
@@ -25,7 +28,8 @@ const TRIGGERS: { type: TriggerType; label: string }[] = [
   { type: "habitual", label: "অভ্যাসগত" },
 ];
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
 
 interface AnimatedTriggerChipProps {
   type: TriggerType;
@@ -35,15 +39,21 @@ interface AnimatedTriggerChipProps {
   theme: any;
 }
 
-const AnimatedTriggerChip = ({ type, label, isSelected, onPress, theme }: AnimatedTriggerChipProps) => {
+const AnimatedTriggerChip = ({
+  type,
+  label,
+  isSelected,
+  onPress,
+  theme,
+}: AnimatedTriggerChipProps) => {
   const animStyle = useAnimatedStyle(() => ({
     backgroundColor: withTiming(
       isSelected ? theme.colors.primary : theme.colors.chipBackground,
-      { duration: 150 }
+      { duration: 150 },
     ),
     borderColor: withTiming(
       isSelected ? theme.colors.primary : theme.colors.chipBorder,
-      { duration: 150 }
+      { duration: 150 },
     ),
   }));
 
@@ -58,7 +68,14 @@ const AnimatedTriggerChip = ({ type, label, isSelected, onPress, theme }: Animat
     >
       <Typography
         variant="body"
-        style={[styles.chipText, { color: isSelected ? theme.colors.onPrimary : theme.colors.chipBorder }]}
+        style={[
+          styles.chipText,
+          {
+            color: isSelected
+              ? theme.colors.onPrimary
+              : theme.colors.chipBorder,
+          },
+        ]}
       >
         {label}
       </Typography>

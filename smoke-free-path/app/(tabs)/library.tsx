@@ -280,10 +280,13 @@ export default function LibraryScreen() {
           clearButtonMode="while-editing"
           accessibilityLabel="ইসলামিক কন্টেন্ট খুঁজুন"
           accessibilityRole="search"
+          accessibilityHint="কন্টেন্ট খুঁজতে এখানে টাইপ করুন"
         />
       </View>
 
       <FlatList
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={[
           styles.scrollContent,
