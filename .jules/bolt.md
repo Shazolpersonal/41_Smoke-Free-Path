@@ -10,3 +10,6 @@
 ## 2026-05-11 - Stabilizing Inline Arrow Functions in FlatList rendering
 **Learning:** Components wrapped in `React.memo` (like `AnimatedLibraryItem` and `AnimatedDuaItem`) still re-render on every list update because their parent (`FlatList`) passes a new inline arrow function for the `onPress` and `onBookmark` props, circumventing the memoization. By moving the lambda inside the component and accepting `item` explicitly via props or ID lookups, the components fully respect `React.memo` and prevent list layout thrashing on fast updates.
 **Action:** When creating list items inside a `FlatList` `renderItem`, ensure parent callbacks are memoized (using `useCallback`) and do not wrap them in inline arrows. Update child components to handle argument bindings internally.
+## 2026-06-23 - Stabilize TrackerScreen handleStepPress Callback
+**Learning:** Passing a callback that depends on frequently updating state (like `planState`) defeats `React.memo` on list/grid items. The "latest ref" pattern ensures callback reference stability while accessing fresh state.
+**Action:** Store the dynamic state in a `useRef` updated via `useEffect` and remove it from the `useCallback` dependency array for list items.
