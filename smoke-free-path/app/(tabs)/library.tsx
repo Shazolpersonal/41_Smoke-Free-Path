@@ -289,6 +289,8 @@ export default function LibraryScreen() {
           styles.scrollContent,
           { padding: theme.spacing.md, paddingBottom: theme.spacing.xl },
         ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
         data={items}
         keyExtractor={(item) => item.id}

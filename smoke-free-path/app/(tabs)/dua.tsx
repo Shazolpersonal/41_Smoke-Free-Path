@@ -214,6 +214,8 @@ export default function DuaScreen() {
           styles.scrollContent,
           { padding: theme.spacing.md, paddingBottom: 40 },
         ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
         data={duas}
         keyExtractor={(item) => item.id}
