@@ -188,6 +188,7 @@ export default function DuaScreen() {
         ]}
       >
         <TextInput
+          maxLength={1000}
           style={[
             styles.searchInput,
             {
