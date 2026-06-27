@@ -263,6 +263,7 @@ export default function LibraryScreen() {
         ]}
       >
         <TextInput
+          maxLength={1000}
           style={[
             styles.searchInput,
             {
