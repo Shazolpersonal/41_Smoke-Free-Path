@@ -1,0 +1,4 @@
+## 2026-05-25 - Missing Input Length Limits
+**Vulnerability:** Found multiple `TextInput` components lacking `maxLength` constraints (e.g., in trigger logs and search bars), posing a risk of memory exhaustion or Denial of Service (DoS) if excessively large strings are pasted.
+**Learning:** React Native's `TextInput` can handle a large amount of text, but unrestricted inputs combined with state updates (especially in search filters or logs) can lead to performance degradation or OOM crashes on low-end devices.
+**Prevention:** To mitigate Denial of Service (DoS) and memory exhaustion risks, always enforce input validation by explicitly setting `maxLength` attributes on all `TextInput` components. For generic/reusable UI input components (like `FloatingLabelInput` or `FormInput`), accept `maxLength` as a prop and use a generous fallback (e.g., `props.maxLength || 1000`) rather than hardcoding small limits.
