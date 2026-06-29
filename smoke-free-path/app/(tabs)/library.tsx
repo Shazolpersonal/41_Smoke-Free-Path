@@ -273,6 +273,7 @@ export default function LibraryScreen() {
             },
           ]}
           placeholder="অনুবাদ বা উৎস দিয়ে খুঁজুন..."
+          maxLength={100}
           placeholderTextColor={theme.colors.textDisabled}
           value={searchQuery}
           onChangeText={setSearchQuery}
