@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { computeProgressStats } from "@/utils/trackerUtils";
 import { STATS_REFRESH_INTERVAL_MS } from "@/constants/calculations";
@@ -33,8 +33,27 @@ export function useProgressStats(): ProgressStats {
     return () => clearInterval(interval);
   }, []);
 
+  const prevStats = useRef<ProgressStats>(ZERO_STATS);
+
   return useMemo(() => {
     if (!userProfile || !planState.activatedAt) return ZERO_STATS;
-    return computeProgressStats(userProfile, planState, slipUps);
+    const newStats = computeProgressStats(userProfile, planState, slipUps);
+
+    let hasChanged = false;
+    for (const key in newStats) {
+      if (
+        newStats[key as keyof ProgressStats] !==
+        prevStats.current[key as keyof ProgressStats]
+      ) {
+        hasChanged = true;
+        break;
+      }
+    }
+
+    if (hasChanged) {
+      prevStats.current = newStats;
+    }
+
+    return prevStats.current;
   }, [userProfile, planState, slipUps, tick]);
 }
