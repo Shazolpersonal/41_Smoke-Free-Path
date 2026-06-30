@@ -1,3 +1,6 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+## 2024-06-30 - Missing Accessibility Hints on Disabled Buttons
+**Learning:** In React Native, conditionally disabling buttons (using styling/opacity and `disabled={true}`) sets `accessibilityState={{ disabled: true }}`. However, screen readers simply announce the button as 'disabled', leaving users confused as to *why* it is disabled or *how* to enable it.
+**Action:** When creating conditionally disabled interactive elements (like the 'Complete Step' or 'Next Step' buttons), always include an `accessibilityHint` that explicitly tells the user what action is required to enable the button (e.g., 'সবগুলো কাজ সম্পন্ন করলে বোতামটি সক্রিয় হবে').
