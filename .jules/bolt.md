@@ -10,3 +10,7 @@
 ## 2026-05-11 - Stabilizing Inline Arrow Functions in FlatList rendering
 **Learning:** Components wrapped in `React.memo` (like `AnimatedLibraryItem` and `AnimatedDuaItem`) still re-render on every list update because their parent (`FlatList`) passes a new inline arrow function for the `onPress` and `onBookmark` props, circumventing the memoization. By moving the lambda inside the component and accepting `item` explicitly via props or ID lookups, the components fully respect `React.memo` and prevent list layout thrashing on fast updates.
 **Action:** When creating list items inside a `FlatList` `renderItem`, ensure parent callbacks are memoized (using `useCallback`) and do not wrap them in inline arrows. Update child components to handle argument bindings internally.
+
+## 2026-05-11 - Stabilizing Object References in Polling Hooks
+**Learning:** The `useProgressStats` hook triggers a re-render every 60 seconds via a `tick` state to keep UI updated. Previously, the `useMemo` block recalculated and returned a brand new `ProgressStats` object reference every minute, even if the underlying numeric values hadn't changed. This caused unnecessary cascading re-renders in all child components that consume the stats.
+**Action:** When a hook involves polling and returning objects, use a `useRef` to store the previous result. Perform a shallow comparison between the newly computed object and the ref; only update and return the new reference if the actual values have changed. This preserves object stability and prevents layout thrashing.
