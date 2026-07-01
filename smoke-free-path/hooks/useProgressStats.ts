@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { computeProgressStats } from "@/utils/trackerUtils";
 import { STATS_REFRESH_INTERVAL_MS } from "@/constants/calculations";
@@ -12,6 +12,18 @@ const ZERO_STATS: ProgressStats = {
   totalSavedCigarettes: 0,
   totalSavedMoney: 0,
 };
+
+function shallowEqual(objA: any, objB: any) {
+  if (Object.is(objA, objB)) return true;
+  if (!objA || !objB || typeof objA !== "object" || typeof objB !== "object") return false;
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+  if (keysA.length !== keysB.length) return false;
+  for (let i = 0; i < keysA.length; i++) {
+    if (objA[keysA[i]] !== objB[keysA[i]]) return false;
+  }
+  return true;
+}
 
 /**
  * Computes smoke-free progress stats from the current app state.
@@ -33,8 +45,20 @@ export function useProgressStats(): ProgressStats {
     return () => clearInterval(interval);
   }, []);
 
-  return useMemo(() => {
+  const rawStats = useMemo(() => {
     if (!userProfile || !planState.activatedAt) return ZERO_STATS;
     return computeProgressStats(userProfile, planState, slipUps);
   }, [userProfile, planState, slipUps, tick]);
+
+  const prevStatsRef = useRef<ProgressStats>(rawStats);
+
+  // OPTIMIZATION: Maintain stable object reference when stats do not change.
+  // The 'tick' state updates every 60 seconds. However, if the computed stats
+  // are identical, returning the cached reference prevents consuming components
+  // from re-rendering unnecessarily.
+  if (!shallowEqual(rawStats, prevStatsRef.current)) {
+    prevStatsRef.current = rawStats;
+  }
+
+  return prevStatsRef.current;
 }
