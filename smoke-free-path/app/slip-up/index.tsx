@@ -147,6 +147,7 @@ export default function SlipUpScreen() {
         ]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       >
         {firstDua && (
