@@ -58,7 +58,7 @@ export const FormInput = ({
           },
         ]}
       >
-        <TextInput
+        <TextInput maxLength={props.maxLength || 1000}
           style={[
             styles.input,
             {
