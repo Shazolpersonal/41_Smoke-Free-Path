@@ -23,6 +23,7 @@ interface FloatingLabelInputProps {
   keyboardType?: KeyboardTypeOptions;
   error?: string;
   secureTextEntry?: boolean;
+  maxLength?: number;
 }
 
 export default function FloatingLabelInput({
@@ -33,6 +34,7 @@ export default function FloatingLabelInput({
   keyboardType,
   error,
   secureTextEntry,
+  maxLength,
 }: FloatingLabelInputProps) {
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -99,7 +101,7 @@ export default function FloatingLabelInput({
         >
           {label}
         </Animated.Text>
-        <TextInput
+        <TextInput maxLength={maxLength || 1000}
           style={[styles.input, { color: theme.colors.text }]}
           value={value}
           onChangeText={onChangeText}
