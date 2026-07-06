@@ -205,6 +205,7 @@ export default function DuaScreen() {
           clearButtonMode="while-editing"
           accessibilityLabel="দোয়া খুঁজুন"
           accessibilityRole="search"
+          maxLength={1000}
         />
       </View>
 

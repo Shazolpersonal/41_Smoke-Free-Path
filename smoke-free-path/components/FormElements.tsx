@@ -74,6 +74,7 @@ export const FormInput = ({
           accessibilityLabel={props.accessibilityLabel || label}
           accessibilityHint={error || helperText}
           {...props}
+          maxLength={props.maxLength || 1000}
         />
       </View>
       {error ? (
