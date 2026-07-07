@@ -285,6 +285,8 @@ export default function LibraryScreen() {
 
       <FlatList
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={[
           styles.scrollContent,
           { padding: theme.spacing.md, paddingBottom: theme.spacing.xl },
