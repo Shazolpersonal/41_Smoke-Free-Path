@@ -69,11 +69,11 @@ const AnimatedTouchableOpacity =
 interface AnimatedIntensityBtnProps {
   n: number;
   isActive: boolean;
-  onPress: () => void;
+  onPress: (n: number) => void;
   theme: any;
 }
 
-const AnimatedIntensityBtn = ({
+const AnimatedIntensityBtn = React.memo(({
   n,
   isActive,
   onPress,
@@ -91,7 +91,7 @@ const AnimatedIntensityBtn = ({
   }));
   return (
     <AnimatedTouchableOpacity
-      onPress={onPress}
+      onPress={() => onPress(n)}
       activeOpacity={0.75}
       accessibilityRole="radio"
       accessibilityState={{ selected: isActive }}
@@ -118,16 +118,17 @@ const AnimatedIntensityBtn = ({
       </Typography>
     </AnimatedTouchableOpacity>
   );
-};
+});
 
 interface AnimatedTabProps {
+  tabKey: StrategyTab;
   label: string;
   isActive: boolean;
-  onPress: () => void;
+  onPress: (key: StrategyTab) => void;
   theme: any;
 }
 
-const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
+const AnimatedTab = React.memo(({ tabKey, label, isActive, onPress, theme }: AnimatedTabProps) => {
   const animStyle = useAnimatedStyle(() => ({
     backgroundColor: withTiming(
       isActive ? theme.colors.primary : theme.colors.chipBackground,
@@ -140,7 +141,7 @@ const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
   }));
   return (
     <AnimatedTouchableOpacity
-      onPress={onPress}
+      onPress={() => onPress(tabKey)}
       activeOpacity={0.8}
       accessibilityRole="tab"
       accessibilityState={{ selected: isActive }}
@@ -162,7 +163,7 @@ const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
       </Typography>
     </AnimatedTouchableOpacity>
   );
-};
+});
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
@@ -353,7 +354,7 @@ export default function CravingScreen() {
                 key={n}
                 n={n}
                 isActive={intensity === n}
-                onPress={() => setIntensity(n)}
+                onPress={setIntensity}
                 theme={theme}
               />
             ))}
@@ -392,9 +393,10 @@ export default function CravingScreen() {
             {STRATEGY_TABS.map(({ key, label }) => (
               <AnimatedTab
                 key={key}
+                tabKey={key}
                 label={label}
                 isActive={activeTab === key}
-                onPress={() => markStrategyUsed(key)}
+                onPress={markStrategyUsed}
                 theme={theme}
               />
             ))}
