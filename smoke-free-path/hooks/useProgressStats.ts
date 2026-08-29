@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { computeProgressStats } from "@/utils/trackerUtils";
 import { STATS_REFRESH_INTERVAL_MS } from "@/constants/calculations";
@@ -23,18 +23,37 @@ const ZERO_STATS: ProgressStats = {
 export function useProgressStats(): ProgressStats {
   const { state } = useAppContext();
   const { userProfile, planState, slipUps } = state;
+
   const [tick, setTick] = useState(0);
 
+  // Compute stats during render so it's always perfectly synced with context
+  const currentStats = useMemo(() => {
+    if (!userProfile || !planState.activatedAt) return ZERO_STATS;
+    return computeProgressStats(userProfile, planState, slipUps);
+    // tick is a dependency so the interval can force a re-render when time-based logic changes
+  }, [userProfile, planState, slipUps, tick]);
+
+  // Keep a ref to the latest dependencies to read inside the interval without re-binding
+  const depsRef = useRef({ userProfile, planState, slipUps, currentStats });
   useEffect(() => {
-    const interval = setInterval(
-      () => setTick((t) => t + 1),
-      STATS_REFRESH_INTERVAL_MS,
-    );
+    depsRef.current = { userProfile, planState, slipUps, currentStats };
+  }, [userProfile, planState, slipUps, currentStats]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const { userProfile: up, planState: ps, slipUps: su, currentStats: prevStats } = depsRef.current;
+      if (!up || !ps.activatedAt) return;
+
+      const newStats = computeProgressStats(up, ps, su);
+
+      // Stringify to handle future changes to ProgressStats safely
+      if (JSON.stringify(newStats) !== JSON.stringify(prevStats)) {
+        setTick((t) => t + 1);
+      }
+    }, STATS_REFRESH_INTERVAL_MS);
+
     return () => clearInterval(interval);
   }, []);
 
-  return useMemo(() => {
-    if (!userProfile || !planState.activatedAt) return ZERO_STATS;
-    return computeProgressStats(userProfile, planState, slipUps);
-  }, [userProfile, planState, slipUps, tick]);
+  return currentStats;
 }
