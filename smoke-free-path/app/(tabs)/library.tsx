@@ -279,6 +279,7 @@ export default function LibraryScreen() {
           returnKeyType="search"
           clearButtonMode="while-editing"
           accessibilityLabel="ইসলামিক কন্টেন্ট খুঁজুন"
+          maxLength={100}
           accessibilityRole="search"
         />
       </View>
