@@ -204,6 +204,7 @@ export default function DuaScreen() {
           returnKeyType="search"
           clearButtonMode="while-editing"
           accessibilityLabel="দোয়া খুঁজুন"
+          maxLength={100}
           accessibilityRole="search"
         />
       </View>
