@@ -1,3 +1,6 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+## 2024-05-18 - Improved Keyboard UX on Lists
+**Learning:** Found that long scrollable lists (like search results in Library and Dua screens) lacked `keyboardDismissMode="on-drag"` and `keyboardShouldPersistTaps="handled"`. This led to a frustrating experience where users couldn't easily dismiss the keyboard while scrolling, and tapping list items required two taps (one to dismiss, one to select).
+**Action:** Always add these two props to `ScrollView` and `FlatList` components, especially those containing or interacting with `TextInput` elements, to ensure smooth mobile interactions.
