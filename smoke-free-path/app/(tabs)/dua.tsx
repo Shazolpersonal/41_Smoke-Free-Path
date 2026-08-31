@@ -215,6 +215,8 @@ export default function DuaScreen() {
           { padding: theme.spacing.md, paddingBottom: 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         data={duas}
         keyExtractor={(item) => item.id}
         initialNumToRender={10}
@@ -309,6 +311,8 @@ export default function DuaScreen() {
                 },
               ]}
               showsVerticalScrollIndicator={false}
+              keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
               data={[selectedDua]}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
