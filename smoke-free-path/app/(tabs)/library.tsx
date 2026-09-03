@@ -199,6 +199,7 @@ export default function LibraryScreen() {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={[
             styles.tabsContent,
             { paddingHorizontal: theme.spacing.md, gap: theme.spacing.sm },
@@ -285,6 +286,8 @@ export default function LibraryScreen() {
 
       <FlatList
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={[
           styles.scrollContent,
           { padding: theme.spacing.md, paddingBottom: theme.spacing.xl },
