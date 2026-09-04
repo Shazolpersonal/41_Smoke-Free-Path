@@ -127,6 +127,7 @@ export default function DuaScreen() {
         ]}
       >
         <FlatList
+          keyboardShouldPersistTaps="handled"
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
@@ -209,6 +210,8 @@ export default function DuaScreen() {
       </View>
 
       <FlatList
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={[
           styles.scrollContent,

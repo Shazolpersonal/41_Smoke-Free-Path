@@ -249,6 +249,7 @@ export default function TriggerLogScreen() {
         ]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
         {weeklySummary && (
           <View
