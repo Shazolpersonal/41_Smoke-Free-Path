@@ -433,6 +433,7 @@ export default function TriggerLogScreen() {
             ]}
             placeholder="কী ঘটেছিল সংক্ষেপে লিখুন..."
             placeholderTextColor={theme.colors.textDisabled}
+            maxLength={1000}
             value={note}
             onChangeText={setNote}
             multiline

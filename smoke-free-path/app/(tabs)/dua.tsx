@@ -199,6 +199,7 @@ export default function DuaScreen() {
           ]}
           placeholder="অনুবাদ, উচ্চারণ বা উৎস দিয়ে খুঁজুন..."
           placeholderTextColor={theme.colors.textDisabled}
+          maxLength={100}
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
