@@ -203,6 +203,7 @@ export default function LibraryScreen() {
             styles.tabsContent,
             { paddingHorizontal: theme.spacing.md, gap: theme.spacing.sm },
           ]}
+          keyboardShouldPersistTaps="handled"
           data={tabsData}
           keyExtractor={(item) => item.key}
           renderItem={({ item: topic }) => (
@@ -290,6 +291,8 @@ export default function LibraryScreen() {
           { padding: theme.spacing.md, paddingBottom: theme.spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         data={items}
         keyExtractor={(item) => item.id}
         initialNumToRender={10}

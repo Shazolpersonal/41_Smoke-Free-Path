@@ -133,6 +133,7 @@ export default function DuaScreen() {
             styles.tabsContent,
             { paddingHorizontal: theme.spacing.md, gap: theme.spacing.sm },
           ]}
+          keyboardShouldPersistTaps="handled"
           data={CATEGORIES}
           keyExtractor={(item) => item.key}
           renderItem={({ item: cat }) => (
@@ -215,6 +216,8 @@ export default function DuaScreen() {
           { padding: theme.spacing.md, paddingBottom: 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         data={duas}
         keyExtractor={(item) => item.id}
         initialNumToRender={10}
