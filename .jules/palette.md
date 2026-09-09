@@ -1,3 +1,7 @@
 ## 2024-05-06 - Missing Keyboard Dismissal and Input Accessibility
 **Learning:** Found a recurring UX/accessibility anti-pattern where text inputs lack `accessibilityLabel`/`accessibilityHint` and are housed inside `ScrollView`s without `keyboardShouldPersistTaps="handled"`. This leaves screen readers silent on bare inputs and frustrates users who cannot easily dismiss the mobile keyboard by tapping outside.
 **Action:** When adding or reviewing `TextInput`s, especially outside of generic `FormInput` wrappers, always verify they have explicit accessibility labels and ensure parent scroll views handle taps to dismiss the keyboard properly.
+
+## 2024-05-17 - Scrolling and Keyboard Interactivity with Search Inputs
+**Learning:** Found that when screens contain search inputs alongside horizontally scrolling category tabs or main search result lists (like in `dua.tsx` and `library.tsx`), users often cannot quickly select a category or scroll the list directly because the keyboard intercepts the first tap. Additionally, long result lists did not automatically dismiss the keyboard when users started scrolling.
+**Action:** Always add `keyboardShouldPersistTaps="handled"` to any list (like `FlatList` or `ScrollView`) adjacent to text inputs to ensure taps register immediately without requiring a preliminary tap just to close the keyboard. For vertical search results, apply `keyboardDismissMode="on-drag"` to hide the keyboard automatically when users begin exploring the results.
