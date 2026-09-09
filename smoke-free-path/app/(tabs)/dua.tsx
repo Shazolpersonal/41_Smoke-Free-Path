@@ -129,6 +129,7 @@ export default function DuaScreen() {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={[
             styles.tabsContent,
             { paddingHorizontal: theme.spacing.md, gap: theme.spacing.sm },
@@ -209,6 +210,8 @@ export default function DuaScreen() {
       </View>
 
       <FlatList
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={[
           styles.scrollContent,
