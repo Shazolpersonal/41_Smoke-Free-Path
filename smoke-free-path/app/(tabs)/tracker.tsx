@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useRef, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
@@ -27,6 +27,11 @@ export default function TrackerScreen() {
   const router = useRouter();
   const { state, dispatch } = useAppContext();
   const { planState, stepProgress, userProfile } = state;
+
+  const planStateRef = useRef(planState);
+  useEffect(() => {
+    planStateRef.current = planState;
+  }, [planState]);
   const stats = useProgressStats();
   const { theme } = useTheme();
 
@@ -53,11 +58,11 @@ export default function TrackerScreen() {
 
   const handleStepPress = useCallback(
     (step: number) => {
-      if (isStepAccessible(step, planState)) {
+      if (isStepAccessible(step, planStateRef.current)) {
         router.push(`/tracker/${step}`);
       }
     },
-    [router, planState],
+    [router],
   );
 
   // Cache step statuses to prevent redundant Date instantiations
