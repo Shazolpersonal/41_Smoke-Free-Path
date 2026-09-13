@@ -197,6 +197,7 @@ export default function LibraryScreen() {
         ]}
       >
         <FlatList
+          keyboardShouldPersistTaps="handled"
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={[
@@ -284,6 +285,8 @@ export default function LibraryScreen() {
       </View>
 
       <FlatList
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         style={[styles.scroll, { backgroundColor: theme.colors.background }]}
         contentContainerStyle={[
           styles.scrollContent,
