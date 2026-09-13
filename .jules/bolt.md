@@ -10,3 +10,6 @@
 ## 2026-05-11 - Stabilizing Inline Arrow Functions in FlatList rendering
 **Learning:** Components wrapped in `React.memo` (like `AnimatedLibraryItem` and `AnimatedDuaItem`) still re-render on every list update because their parent (`FlatList`) passes a new inline arrow function for the `onPress` and `onBookmark` props, circumventing the memoization. By moving the lambda inside the component and accepting `item` explicitly via props or ID lookups, the components fully respect `React.memo` and prevent list layout thrashing on fast updates.
 **Action:** When creating list items inside a `FlatList` `renderItem`, ensure parent callbacks are memoized (using `useCallback`) and do not wrap them in inline arrows. Update child components to handle argument bindings internally.
+## 2026-09-13 - Stabilizing callbacks in craving screen maps
+**Learning:** Local array `.map()` loops for interactive elements (like intensity buttons or strategy tabs) using inline arrow functions cause all items to re-render when the parent's state changes. This defeated any potential memoization and caused unnecessary UI thrashing.
+**Action:** Wrapped mapped components (`AnimatedIntensityBtn`, `AnimatedTab`) in `React.memo` and removed parent inline arrow functions by binding `setIntensity` and `markStrategyUsed` directly as props, allowing the child to pass its own identifier internally.
