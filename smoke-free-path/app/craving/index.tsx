@@ -69,100 +69,100 @@ const AnimatedTouchableOpacity =
 interface AnimatedIntensityBtnProps {
   n: number;
   isActive: boolean;
-  onPress: () => void;
+  onPress: (n: number) => void;
   theme: any;
 }
 
-const AnimatedIntensityBtn = ({
-  n,
-  isActive,
-  onPress,
-  theme,
-}: AnimatedIntensityBtnProps) => {
-  const animStyle = useAnimatedStyle(() => ({
-    backgroundColor: withTiming(
-      isActive ? theme.colors.primary : theme.colors.chipBackground,
-      { duration: 150 },
-    ),
-    borderColor: withTiming(
-      isActive ? theme.colors.primary : theme.colors.chipBorder,
-      { duration: 150 },
-    ),
-  }));
-  return (
-    <AnimatedTouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.75}
-      accessibilityRole="radio"
-      accessibilityState={{ selected: isActive }}
-      accessibilityLabel={`তীব্রতা ${n}`}
-      style={[
-        styles.intensityBtn,
-        isActive && styles.intensityBtnActive,
-        animStyle,
-      ]}
-    >
-      <Typography
-        variant="body"
+const AnimatedIntensityBtn = React.memo(
+  ({ n, isActive, onPress, theme }: AnimatedIntensityBtnProps) => {
+    const animStyle = useAnimatedStyle(() => ({
+      backgroundColor: withTiming(
+        isActive ? theme.colors.primary : theme.colors.chipBackground,
+        { duration: 150 },
+      ),
+      borderColor: withTiming(
+        isActive ? theme.colors.primary : theme.colors.chipBorder,
+        { duration: 150 },
+      ),
+    }));
+    return (
+      <AnimatedTouchableOpacity
+        onPress={() => onPress(n)}
+        activeOpacity={0.75}
+        accessibilityRole="radio"
+        accessibilityState={{ selected: isActive }}
+        accessibilityLabel={`তীব্রতা ${n}`}
         style={[
-          styles.intensityText,
-          isActive && styles.intensityTextActive,
-          {
-            color: isActive
-              ? theme.colors.onPrimary
-              : theme.colors.textSecondary,
-          },
+          styles.intensityBtn,
+          isActive && styles.intensityBtnActive,
+          animStyle,
         ]}
       >
-        {n}
-      </Typography>
-    </AnimatedTouchableOpacity>
-  );
-};
+        <Typography
+          variant="body"
+          style={[
+            styles.intensityText,
+            isActive && styles.intensityTextActive,
+            {
+              color: isActive
+                ? theme.colors.onPrimary
+                : theme.colors.textSecondary,
+            },
+          ]}
+        >
+          {n}
+        </Typography>
+      </AnimatedTouchableOpacity>
+    );
+  },
+);
 
 interface AnimatedTabProps {
+  tabKey: StrategyTab;
   label: string;
   isActive: boolean;
-  onPress: () => void;
+  onPress: (key: StrategyTab) => void;
   theme: any;
 }
 
-const AnimatedTab = ({ label, isActive, onPress, theme }: AnimatedTabProps) => {
-  const animStyle = useAnimatedStyle(() => ({
-    backgroundColor: withTiming(
-      isActive ? theme.colors.primary : theme.colors.chipBackground,
-      { duration: 150 },
-    ),
-    borderColor: withTiming(
-      isActive ? theme.colors.primary : theme.colors.chipBorder,
-      { duration: 150 },
-    ),
-  }));
-  return (
-    <AnimatedTouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: isActive }}
-      style={[styles.tab, isActive && styles.tabActive, animStyle]}
-    >
-      <Typography
-        variant="body"
-        style={[
-          styles.tabText,
-          isActive && styles.tabTextActive,
-          {
-            color: isActive
-              ? theme.colors.onPrimary
-              : theme.colors.textSecondary,
-          },
-        ]}
+const AnimatedTab = React.memo(
+  ({ tabKey, label, isActive, onPress, theme }: AnimatedTabProps) => {
+    const animStyle = useAnimatedStyle(() => ({
+      backgroundColor: withTiming(
+        isActive ? theme.colors.primary : theme.colors.chipBackground,
+        { duration: 150 },
+      ),
+      borderColor: withTiming(
+        isActive ? theme.colors.primary : theme.colors.chipBorder,
+        { duration: 150 },
+      ),
+    }));
+    return (
+      <AnimatedTouchableOpacity
+        onPress={() => onPress(tabKey)}
+        activeOpacity={0.8}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: isActive }}
+        style={[styles.tab, isActive && styles.tabActive, animStyle]}
       >
-        {label}
-      </Typography>
-    </AnimatedTouchableOpacity>
-  );
-};
+        <Typography
+          variant="body"
+          style={[
+            styles.tabText,
+            isActive && styles.tabTextActive,
+            {
+              color: isActive
+                ? theme.colors.onPrimary
+                : theme.colors.textSecondary,
+            },
+          ]}
+        >
+          {label}
+        </Typography>
+      </AnimatedTouchableOpacity>
+    );
+  },
+);
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
@@ -353,7 +353,7 @@ export default function CravingScreen() {
                 key={n}
                 n={n}
                 isActive={intensity === n}
-                onPress={() => setIntensity(n)}
+                onPress={setIntensity}
                 theme={theme}
               />
             ))}
@@ -392,9 +392,10 @@ export default function CravingScreen() {
             {STRATEGY_TABS.map(({ key, label }) => (
               <AnimatedTab
                 key={key}
+                tabKey={key}
                 label={label}
                 isActive={activeTab === key}
-                onPress={() => markStrategyUsed(key)}
+                onPress={markStrategyUsed}
                 theme={theme}
               />
             ))}
