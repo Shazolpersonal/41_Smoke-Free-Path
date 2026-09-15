@@ -129,6 +129,7 @@ export default function DuaScreen() {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={[
             styles.tabsContent,
             { paddingHorizontal: theme.spacing.md, gap: theme.spacing.sm },
@@ -215,6 +216,8 @@ export default function DuaScreen() {
           { padding: theme.spacing.md, paddingBottom: 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         data={duas}
         keyExtractor={(item) => item.id}
         initialNumToRender={10}
