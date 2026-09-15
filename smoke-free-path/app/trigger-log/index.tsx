@@ -248,6 +248,7 @@ export default function TriggerLogScreen() {
           { padding: theme.spacing.md, paddingBottom: 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       >
         {weeklySummary && (

@@ -199,6 +199,7 @@ export default function LibraryScreen() {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={[
             styles.tabsContent,
             { paddingHorizontal: theme.spacing.md, gap: theme.spacing.sm },
@@ -290,6 +291,8 @@ export default function LibraryScreen() {
           { padding: theme.spacing.md, paddingBottom: theme.spacing.xl },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         data={items}
         keyExtractor={(item) => item.id}
         initialNumToRender={10}
