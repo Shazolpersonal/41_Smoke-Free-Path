@@ -440,6 +440,7 @@ export default function TriggerLogScreen() {
             textAlignVertical="top"
             accessibilityLabel="নোট (ঐচ্ছিক)"
             accessibilityHint="কী ঘটেছিল তা সংক্ষেপে লিখুন"
+            maxLength={500}
           />
         </Card>
 
